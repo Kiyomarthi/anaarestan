@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     full_name: (v) => validate(v).min(3).max(100).run(),
   });
 
-  const query = buildUpdateQuery(
+  const query = await buildUpdateQuery(
     "users",
     body,
     "id",

@@ -7,3 +7,10 @@ export const userFields: string[] = [
   "role",
   "phone",
 ];
+
+export const userAdminFields: string[] = [
+  "full_name",
+  "phone",
+  "role",
+  "password",
+];

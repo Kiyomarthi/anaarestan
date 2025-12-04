@@ -8,8 +8,6 @@ export default defineEventHandler(async (event) => {
 
   const db = (await getDB()) as any;
 
-  if (!user?.id) return { success: false, message: "User not authenticated" };
-
   const [rows] = await db.execute(
     `SELECT ${userFields.join(", ")}, password FROM users WHERE id = ?`,
     [user?.id]

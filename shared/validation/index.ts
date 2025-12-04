@@ -33,9 +33,37 @@ export function validate(value: any) {
     },
 
     phone(message = "شماره تلفن معتبر نیست") {
-      // شماره ایران: 11 رقم، شروع 09 یا 98
       const regex = /^(09|98)\d{9}$/;
-      rules.push((v) => (!regex.test(String(v)) ? message : true));
+      rules.push((v) => {
+        if (!v) return true;
+        return !regex.test(String(v)) ? message : true;
+      });
+      return this;
+    },
+
+    checkRule(allowed: string | string[], message = "نقش نامعتبر است") {
+      rules.push((v) => {
+        if (!v) return true;
+        if (typeof allowed === "string") {
+          return v === allowed ? true : message;
+        } else if (Array.isArray(allowed)) {
+          return allowed.includes(v) ? true : message;
+        }
+        return message;
+      });
+      return this;
+    },
+
+    password(
+      messageMin = "پسورد باید حداقل ۶ کاراکتر باشد",
+      messageMax = "پسورد باید حداکثر ۵۰ کاراکتر باشد"
+    ) {
+      rules.push((v) => {
+        const str = String(v);
+        if (str.length < 6) return messageMin;
+        if (str.length > 50) return messageMax;
+        return true;
+      });
       return this;
     },
 
