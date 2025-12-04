@@ -7,7 +7,7 @@ interface UserPayload {
 
 export const generateAccessToken = (user: UserPayload) => {
   return jwt.sign({ id: user.id, phone: user.phone }, process.env.JWT_SECRET!, {
-    expiresIn: "8h",
+    expiresIn: "48h",
   });
 };
 

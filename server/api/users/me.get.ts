@@ -1,8 +1,10 @@
+import { JwtPayload } from "jsonwebtoken";
 import { getDB } from "~~/server/db";
+import { requireAuth } from "~~/server/utils/auth";
 import { userFields } from "~~/server/utils/user";
 
 export default defineEventHandler(async (event) => {
-  const user = event.context.user;
+  const user = requireAuth(event) as JwtPayload;
 
   const db = (await getDB()) as any;
 
@@ -16,8 +18,6 @@ export default defineEventHandler(async (event) => {
   const userData = rows[0];
 
   const hasPassword = !!rows[0]?.password;
-
-  delete userData.password;
 
   return { success: true, user: { ...userData, hasPassword } };
 });

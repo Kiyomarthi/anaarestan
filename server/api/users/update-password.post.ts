@@ -1,9 +1,10 @@
 import { getDB } from "~~/server/db";
-
 import bcrypt from "bcrypt";
+import { JwtPayload } from "jsonwebtoken";
+import { requireAuth } from "~~/server/utils/auth";
 
 export default defineEventHandler(async (event) => {
-  const user = event.context.user;
+  const user = requireAuth(event) as JwtPayload;
   const body = await readBody(event);
 
   const oldPassword = body?.oldPassword;
@@ -25,7 +26,7 @@ export default defineEventHandler(async (event) => {
     if (!newPassword) {
       throw createError({
         statusCode: 400,
-        statusMessage: "passwords are required",
+        statusMessage: "new password are required",
       });
     }
   }

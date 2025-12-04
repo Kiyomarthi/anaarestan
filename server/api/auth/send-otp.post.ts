@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
 
   const phone = body.phone;
 
-  const code = String(randomInt(100000, 999999));
+  const code = String(randomInt(1000, 9999));
   const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
 
   // const response: any = await $fetch("https://api.sms.ir/v1/send/verify", {

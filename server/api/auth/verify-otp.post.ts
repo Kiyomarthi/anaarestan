@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 
   validateBody(body, {
     phone: (v) => validate(v).required().phone().run(),
-    code: (v) => validate(v).required().equal(6).run(),
+    code: (v) => validate(v).required().equal(4).run(),
   });
 
   const db = (await getDB()) as any;
@@ -36,7 +36,15 @@ export default defineEventHandler(async (event) => {
     const [result] = await db.execute("INSERT INTO users (phone) VALUES (?)", [
       phone,
     ]);
-    user = { id: (result as any).insertId, phone };
+
+    const newUserId = (result as any).insertId;
+
+    const [newUserRows] = await db.execute(
+      `SELECT ${userFields.join(", ")} FROM users WHERE id=?`,  
+      [newUserId]
+    );
+
+    user = (newUserRows as any[])[0];
   }
 
   const token = generateAccessToken(user);
