@@ -1,6 +1,6 @@
 // server/api/categories/post.ts
 import { getDB } from "~~/server/db";
-import { createSlug } from "~~/server/utils/format";
+import { createSlug, generateCode } from "~~/server/utils/format";
 import { validate } from "~~/shared/validation";
 
 export default defineEventHandler(async (event) => {
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   validateBody(body, {
     name: (v) => validate(v).required().min(2).max(50).run(),
     image: (v) => validate(v).required().max(100).run(),
-    status: (v) => validate(v).checkRule([0, 1]).run(),
+    status: (v) => validate(v).checkMatch([0, 1]).run(),
   });
 
   let baseSlug = createSlug(name);
@@ -26,13 +26,14 @@ export default defineEventHandler(async (event) => {
   )) as any;
 
   if (existing.length) {
-    console.log("-----------------------", existing);
     slug = `${baseSlug}-${Date.now()}`;
   }
 
+  const code = generateCode();
+
   const [insertResult] = (await db.query(
-    "INSERT INTO categories (name, slug, parent_id, status, image) VALUES (?, ?, ?, ?, ?)",
-    [name, slug, parent_id || null, status, image || null]
+    "INSERT INTO categories (name, slug, parent_id, status, image, code) VALUES (?, ?, ?, ?, ?, ?)",
+    [name, slug, parent_id || null, status, image || null, code]
   )) as any;
 
   const [newCategoryRows] = (await db.query(

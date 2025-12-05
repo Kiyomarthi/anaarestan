@@ -53,7 +53,7 @@ export function validate(value: any) {
       return this;
     },
 
-    checkRule(
+    checkMatch(
       allowed: string | string[] | number[],
       message = "نقش نامعتبر است"
     ) {

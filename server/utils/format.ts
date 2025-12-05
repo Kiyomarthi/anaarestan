@@ -16,3 +16,9 @@ export function createSlug(text: string) {
 
   return slug;
 }
+
+export const generateCode = () => {
+  const now = Date.now().toString().slice(-3);
+  const rnd = Math.floor(100 + Math.random() * 900).toString();
+  return now + rnd;
+};

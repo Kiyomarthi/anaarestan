@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   validateBody(body, {
     full_name: (v) => validate(v).min(3).max(100).run(),
     phone: (v) => validate(v).phone().run(),
-    role: (v) => validate(v).checkRule(["admin", "user"]).run(),
+    role: (v) => validate(v).checkMatch(["admin", "user"]).run(),
     password: (v) => validate(v).password().run(),
   });
 
