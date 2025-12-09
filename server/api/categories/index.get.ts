@@ -1,9 +1,26 @@
 import { getDB } from "~~/server/db";
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
   const db = await getDB();
+  const redis = useStorage("redis");
 
-  const [rows] = await db.query("SELECT * FROM categories ORDER BY id ASC");
+  const cacheKeyHeader = getHeader(event, "cache-key");
+  const cacheKey = cacheKeyHeader ? CACHE_KEY.category(cacheKeyHeader) : null;
+
+  if (cacheKey) {
+    const cached = await redis.getItem(cacheKey);
+    if (cached) {
+      return {
+        success: true,
+        data: cached,
+        cache: true,
+      };
+    }
+  }
+
+  const [rows] = (await db.query(
+    "SELECT * FROM categories ORDER BY id ASC"
+  )) as any[];
 
   const map = new Map<number, any>();
 
@@ -20,6 +37,10 @@ export default defineEventHandler(async () => {
       tree.push(cat);
     }
   });
+
+  if (cacheKey) {
+    await redis.setItem(cacheKey, tree);
+  }
 
   return {
     success: true,
