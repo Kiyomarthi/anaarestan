@@ -83,14 +83,22 @@ export function validate(value: any) {
       return this;
     },
     slug(
-      message = "اسلاگ معتبر نیست. فقط حروف فارسی و انگلیسی، عدد و خط تیره مجاز است"
+      message = "اسلاگ معتبر نیست. فقط حروف انگلیسی، عدد و خط تیره مجاز است"
     ) {
-      const regex =
-        /^[a-zA-Z0-9\u0600-\u06FF]+(?:-[a-zA-Z0-9\u0600-\u06FF]+)*$/;
+      const regex = /^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/;
       rules.push((v) => {
         if (!v) return true;
         const str = String(v).trim();
         return regex.test(str) ? true : message;
+      });
+      return this;
+    },
+
+    array(message = "مقادیر الزامی است و باید آرایه‌ای غیر خالی باشد") {
+      rules.push((v) => {
+        if (!v) return message;
+        if (!Array.isArray(v) || v.length === 0) return message;
+        return true;
       });
       return this;
     },

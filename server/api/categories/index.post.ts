@@ -9,25 +9,14 @@ export default defineEventHandler(async (event) => {
   const user = requireRole(event, "admin");
 
   const body = await readBody(event);
-  const { name, parent_id, status = 1, image } = body;
+  const { name, parent_id, status = 1, image, slug } = body;
 
   validateBody(body, {
     name: (v) => validate(v).required().min(2).max(50).run(),
     image: (v) => validate(v).required().max(100).run(),
     status: (v) => validate(v).checkMatch([0, 1]).run(),
+    slug: (v) => validate(v).required().slug().run(),
   });
-
-  let baseSlug = createSlug(name);
-  let slug = baseSlug;
-
-  const [existing] = (await db.query(
-    "SELECT id FROM categories WHERE slug = ?",
-    [slug]
-  )) as any;
-
-  if (existing.length) {
-    slug = `${baseSlug}-${Date.now()}`;
-  }
 
   const code = generateCode();
 
