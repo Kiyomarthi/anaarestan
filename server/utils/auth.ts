@@ -17,7 +17,7 @@ export function requireAuth(event: H3Event) {
 
   let payload;
   try {
-    payload = verifyToken(token); 
+    payload = verifyToken(token);
   } catch (err) {
     throw createError({
       statusCode: 401,
