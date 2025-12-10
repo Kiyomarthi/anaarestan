@@ -1,6 +1,5 @@
 import { getDB } from "~~/server/db";
 import { requireRole } from "~~/server/utils/permissions";
-import { createSlug, generateCode } from "~~/server/utils/format";
 import { validate } from "~~/shared/validation";
 import { validateBody } from "~~/server/utils/validate";
 
@@ -8,14 +7,21 @@ export default defineEventHandler(async (event) => {
   const db = await getDB();
   const user = requireRole(event, "admin");
 
+  const code = getRouterParam(event, "code");
+
+  if (!code) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "کد محصول ارسال نشده است",
+    });
+  }
+
   const body = await readBody(event);
   const {
     category_id,
     title,
-    slug,
     short_description,
     description,
-    code,
     status = 1,
     variants,
     product_attributes,
@@ -23,14 +29,12 @@ export default defineEventHandler(async (event) => {
     images,
   } = body;
 
-  // Validation
+  // Validation (excluding code and slug)
   validateBody(body, {
     category_id: (v) => validate(v).required().run(),
     title: (v) => validate(v).required().min(2).max(150).run(),
-    slug: (v) => validate(v).required().slug().run(),
     short_description: (v) => validate(v).max(300).run(),
     description: (v) => validate(v).run(),
-    code: (v) => validate(v).max(20).run(),
     status: (v) => validate(v).checkMatch([0, 1]).run(),
     variants: (v) => validate(v).required().array().run(),
     images: (v) => validate(v).required().array().run(),
@@ -80,6 +84,23 @@ export default defineEventHandler(async (event) => {
   await connection.beginTransaction();
 
   try {
+    // Check if product exists
+    const [existingProductRows] = (await connection.query(
+      `SELECT id FROM products WHERE code = ?`,
+      [code]
+    )) as any[];
+
+    if (!existingProductRows || existingProductRows.length === 0) {
+      await connection.rollback();
+      connection.release();
+      throw createError({
+        statusCode: 404,
+        statusMessage: "محصول مورد نظر پیدا نشد",
+      });
+    }
+
+    const productId = existingProductRows[0].id;
+
     // Calculate main price and find cheapest variant
     let cheapestVariantIndex = -1;
     let cheapestPrice = Infinity;
@@ -100,46 +121,79 @@ export default defineEventHandler(async (event) => {
     }
 
     if (!cheapestVariant || cheapestVariantIndex === -1) {
+      await connection.rollback();
+      connection.release();
       throw createError({
         statusCode: 400,
         statusMessage: "خطا در محاسبه قیمت",
       });
     }
 
-    // Generate code if not provided
-    const productCode = generateCode();
-
     // Calculate total stock from all variants
     const totalStock = variants.reduce((sum: number, variant: any) => {
       return sum + (parseInt(variant.stock) || 0);
     }, 0);
 
-    // Insert product
-    const [productResult] = (await connection.query(
-      `INSERT INTO products (
-        category_id, title, slug, short_description, description,
-        price, discount_price, image, code, main_variant_id, status, stock,
-        created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+    // Update product (excluding code and slug)
+    await connection.query(
+      `UPDATE products SET
+        category_id = ?,
+        title = ?,
+        short_description = ?,
+        description = ?,
+        price = ?,
+        discount_price = ?,
+        image = ?,
+        status = ?,
+        stock = ?,
+        updated_at = NOW()
+      WHERE id = ?`,
       [
         category_id,
         title,
-        slug,
         short_description || null,
         description || null,
         cheapestVariant.price,
         cheapestVariant.discount_price || null,
         mainImage.url,
-        productCode,
-        null, // Will update after variant is created
         status,
         totalStock,
+        productId,
       ]
-    )) as any;
+    );
 
-    const productId = productResult.insertId;
+    // Delete old variants and their attributes
+    const [oldVariantRows] = (await connection.query(
+      `SELECT id FROM product_variants WHERE product_id = ?`,
+      [productId]
+    )) as any[];
 
-    // Insert variants
+    for (const oldVariant of oldVariantRows) {
+      // Delete variant attributes
+      await connection.query(
+        `DELETE FROM variant_attribute_values WHERE variant_id = ?`,
+        [oldVariant.id]
+      );
+    }
+
+    // Delete old variants
+    await connection.query(
+      `DELETE FROM product_variants WHERE product_id = ?`,
+      [productId]
+    );
+
+    // Delete old product attributes
+    await connection.query(
+      `DELETE FROM product_attribute_values WHERE product_id = ?`,
+      [productId]
+    );
+
+    // Delete old images
+    await connection.query(`DELETE FROM product_images WHERE product_id = ?`, [
+      productId,
+    ]);
+
+    // Insert new variants
     let mainVariantId: number | null = null;
 
     for (let i = 0; i < variants.length; i++) {
@@ -262,7 +316,7 @@ export default defineEventHandler(async (event) => {
 
     // Fetch variants with their attributes
     const [variantRows] = (await connection.query(
-      `SELECT * FROM product_variants WHERE product_id = ?`,
+      `SELECT * FROM product_variants WHERE product_id = ? ORDER BY id ASC`,
       [productId]
     )) as any[];
 
@@ -303,7 +357,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      message: "محصول با موفقیت ایجاد شد",
+      message: "محصول با موفقیت بروزرسانی شد",
       data: {
         ...product,
         category: category,
@@ -321,9 +375,167 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     await connection.rollback();
     connection.release();
+
+    // If it's already a createError, re-throw it
+    if (error.statusCode) {
+      throw error;
+    }
+
     throw createError({
       statusCode: 500,
-      statusMessage: error.message || "خطا در ایجاد محصول",
+      statusMessage: error.message || "خطا در بروزرسانی محصول",
     });
   }
 });
+
+/*
+ * API Documentation for Update Product by Code (PATCH /api/products/[code])
+ *
+ * Description:
+ * این endpoint محصول را بر اساس کد محصول (code) بروزرسانی می‌کند.
+ * فقط کاربران با نقش admin می‌توانند از این endpoint استفاده کنند.
+ * فیلدهای code و slug قابل تغییر نیستند.
+ *
+ * Authentication:
+ * - نیاز به احراز هویت دارد
+ * - نیاز به نقش admin دارد
+ *
+ * Route Parameters:
+ * - code (string): کد یکتای محصول (مثال: PROD001)
+ *
+ * Request Body:
+ * همان ساختار body در index.post.ts است با این تفاوت که:
+ * - code: ارسال نمی‌شود (از route parameter استفاده می‌شود)
+ * - slug: ارسال نمی‌شود (تغییر نمی‌کند)
+ *
+ * {
+ *   "category_id": 1,
+ *   "title": "نام محصول",
+ *   "short_description": "توضیحات کوتاه",
+ *   "description": "توضیحات کامل",
+ *   "status": 1,
+ *   "variants": [
+ *     {
+ *       "sku": "PROD001-RED-128",
+ *       "price": "100000.00",
+ *       "discount_price": "90000.00",
+ *       "stock": 25,
+ *       "status": 1
+ *     },
+ *     {
+ *       "sku": "PROD001-BLUE-256",
+ *       "price": "120000.00",
+ *       "discount_price": null,
+ *       "stock": 25,
+ *       "status": 1
+ *     }
+ *   ],
+ *   "product_attributes": [1, 2, 3],
+ *   "variant_attributes": [
+ *     [3, 4],  // attributes for first variant
+ *     [5, 6]   // attributes for second variant
+ *   ],
+ *   "images": [
+ *     {
+ *       "url": "image1-url.jpg",
+ *       "alt_text": "عکس اول",
+ *       "position": 1
+ *     },
+ *     {
+ *       "url": "image2-url.jpg",
+ *       "alt_text": "عکس دوم",
+ *       "position": 2
+ *     }
+ *   ]
+ * }
+ *
+ * Validation Rules:
+ * - category_id: الزامی
+ * - title: الزامی، حداقل 2 کاراکتر، حداکثر 150 کاراکتر
+ * - short_description: حداکثر 300 کاراکتر
+ * - status: باید 0 یا 1 باشد
+ * - variants: الزامی، باید آرایه‌ای از variantها باشد
+ * - images: الزامی، باید آرایه‌ای از عکس‌ها باشد
+ * - حداقل یک variant الزامی است
+ * - حداقل یک عکس الزامی است
+ * - عکس با position برابر 1 الزامی است
+ * - هر variant باید دارای price، stock و sku باشد
+ *
+ * Response Format:
+ * همان ساختار response در index.post.ts است:
+ * {
+ *   "success": true,
+ *   "message": "محصول با موفقیت بروزرسانی شد",
+ *   "data": {
+ *     "id": 1,
+ *     "title": "نام محصول",
+ *     "slug": "product-slug",  // تغییر نمی‌کند
+ *     "code": "PROD001",        // تغییر نمی‌کند
+ *     "short_description": "توضیحات کوتاه",
+ *     "description": "توضیحات کامل",
+ *     "price": "100000.00",
+ *     "discount_price": "90000.00",
+ *     "image": "image-url.jpg",
+ *     "stock": 50,
+ *     "main_variant_id": 1,
+ *     "status": 1,
+ *     "created_at": "2024-01-01T00:00:00.000Z",
+ *     "updated_at": "2024-01-01T00:00:00.000Z",
+ *     "category": {
+ *       "id": 1,
+ *       "name": "نام دسته‌بندی",
+ *       "slug": "category-slug"
+ *     },
+ *     "products_attribute": [...],
+ *     "variant_attribute": [...],
+ *     "image": "main-image-url.jpg",
+ *     "gallery": [...]
+ *   }
+ * }
+ *
+ * Error Responses:
+ *
+ * 400 Bad Request:
+ * - "کد محصول ارسال نشده است"
+ * - "حداقل یک variant الزامی است"
+ * - "حداقل یک عکس الزامی است"
+ * - "عکس با position برابر 1 الزامی است"
+ * - "هر variant باید دارای price، stock و sku باشد"
+ * - "خطا در محاسبه قیمت"
+ *
+ * 401 Unauthorized:
+ * - "Unauthorized: user not logged in"
+ *
+ * 403 Forbidden:
+ * - "Forbidden: requires admin role"
+ *
+ * 404 Not Found:
+ * - "محصول مورد نظر پیدا نشد"
+ *
+ * 500 Internal Server Error:
+ * - "خطا در بروزرسانی محصول"
+ *
+ * Important Notes:
+ * - فیلدهای code و slug تغییر نمی‌کنند
+ * - تمام variantهای قدیمی حذف می‌شوند و variantهای جدید اضافه می‌شوند
+ * - تمام ویژگی‌های قدیمی (product و variant) حذف می‌شوند و جدیدها اضافه می‌شوند
+ * - تمام عکس‌های قدیمی حذف می‌شوند و عکس‌های جدید اضافه می‌شوند
+ * - main_variant_id بر اساس ارزان‌ترین variant محاسبه می‌شود
+ * - stock کل محصول از مجموع stock تمام variantها محاسبه می‌شود
+ * - price و discount_price محصول از ارزان‌ترین variant گرفته می‌شود
+ * - image اصلی محصول از عکس با position 1 گرفته می‌شود
+ *
+ * Examples for Postman:
+ *
+ * 1. بروزرسانی محصول با کد PROD001:
+ *    PATCH /api/products/PROD001
+ *    Headers:
+ *      Authorization: Bearer <admin_token>
+ *    Body: (همان body در index.post.ts بدون code و slug)
+ *
+ * 2. بروزرسانی محصول با کد ABC123:
+ *    PATCH /api/products/ABC123
+ *    Headers:
+ *      Authorization: Bearer <admin_token>
+ *    Body: (همان body در index.post.ts بدون code و slug)
+ */
