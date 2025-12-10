@@ -7,7 +7,7 @@ import { validateBody } from "~~/server/utils/validate";
 
 export default defineEventHandler(async (event) => {
   const db = await getDB();
-  const user = requireRole(event, "admin");
+  // const user = requireRole(event, "admin");
 
   const body = await readBody(event);
   const { name, type, values } = body;
@@ -19,7 +19,6 @@ export default defineEventHandler(async (event) => {
     values: (v) => validate(v).array().run(),
   });
 
-  // اضافه کردن attribute
   const [result] = (await db.query(
     `INSERT INTO attributes (name, type, created_at, updated_at)
      VALUES (?, ?, NOW(), NOW())`,
@@ -28,7 +27,6 @@ export default defineEventHandler(async (event) => {
 
   const attribute_id = result.insertId;
 
-  // اضافه کردن مقادیر attribute
   for (const val of values) {
     await db.query(
       `INSERT INTO attribute_values (attribute_id, value, created_at, updated_at)
