@@ -210,13 +210,35 @@ export default defineEventHandler(async (event) => {
     // Commit transaction
     await connection.commit();
 
-    // Fetch complete product data
+    // Fetch complete product data with category info
     const [productRows] = (await connection.query(
-      `SELECT * FROM products WHERE id = ?`,
+      `SELECT 
+         p.*,
+         c.id AS category_id_full,
+         c.name AS category_name,
+         c.slug AS category_slug
+       FROM products p
+       LEFT JOIN categories c ON c.id = p.category_id
+       WHERE p.id = ?`,
       [productId]
     )) as any[];
 
     const product = productRows[0];
+
+    // Extract category info
+    const category = product.category_id_full
+      ? {
+          id: product.category_id_full,
+          name: product.category_name,
+          slug: product.category_slug,
+        }
+      : null;
+
+    // Remove category fields from product object
+    delete product.category_id_full;
+    delete product.category_name;
+    delete product.category_slug;
+    delete product.category_id;
 
     // Fetch product attributes
     const [productAttrRows] = (await connection.query(
@@ -278,6 +300,7 @@ export default defineEventHandler(async (event) => {
       message: "محصول با موفقیت ایجاد شد",
       data: {
         ...product,
+        category: category,
         products_attribute: productAttrRows.map((row: any) => ({
           id: row.id,
           attribute_id: row.attribute_id,

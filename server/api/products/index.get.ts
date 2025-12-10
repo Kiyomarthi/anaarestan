@@ -23,9 +23,16 @@ export default defineEventHandler(async (event) => {
     params.push(category_id);
   }
 
-  // Get products with pagination
+  // Get products with pagination and category info
   const [productRows] = (await db.query(
-    `SELECT * FROM products WHERE ${whereClause} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
+    `SELECT 
+       p.*,
+       c.id AS category_id_full,
+       c.name AS category_name,
+       c.slug AS category_slug
+     FROM products p
+     LEFT JOIN categories c ON c.id = p.category_id
+     WHERE ${whereClause} ORDER BY p.created_at DESC LIMIT ${limit} OFFSET ${offset}`
   )) as any[];
 
   // Get total count
@@ -38,6 +45,21 @@ export default defineEventHandler(async (event) => {
   // Fetch related data for each product
   const productsWithDetails = await Promise.all(
     productRows.map(async (product: any) => {
+      // Extract category info
+      const category = product.category_id_full
+        ? {
+            id: product.category_id_full,
+            name: product.category_name,
+            slug: product.category_slug,
+          }
+        : null;
+
+      // Remove category fields from product object
+      delete product.category_id_full;
+      delete product.category_name;
+      delete product.category_slug;
+      delete product.category_id;
+
       // Get product attributes
       const [productAttrRows] = (await db.query(
         `SELECT 
@@ -93,6 +115,7 @@ export default defineEventHandler(async (event) => {
 
       return {
         ...product,
+        category: category,
         products_attribute: productAttrRows.map((row: any) => ({
           id: row.id,
           attribute_id: row.attribute_id,
