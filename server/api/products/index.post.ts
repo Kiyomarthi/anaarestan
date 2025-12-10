@@ -109,13 +109,18 @@ export default defineEventHandler(async (event) => {
     // Generate code if not provided
     const productCode = code || generateCode();
 
+    // Calculate total stock from all variants
+    const totalStock = variants.reduce((sum: number, variant: any) => {
+      return sum + (parseInt(variant.stock) || 0);
+    }, 0);
+
     // Insert product
     const [productResult] = (await connection.query(
       `INSERT INTO products (
         category_id, title, slug, short_description, description,
-        price, discount_price, image, code, main_variant_id, status,
+        price, discount_price, image, code, main_variant_id, status, stock,
         created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         category_id,
         title,
@@ -128,6 +133,7 @@ export default defineEventHandler(async (event) => {
         productCode,
         null, // Will update after variant is created
         status,
+        totalStock,
       ]
     )) as any;
 
