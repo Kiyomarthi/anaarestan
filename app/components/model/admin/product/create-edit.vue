@@ -278,8 +278,8 @@ function validateForm(state: FormState) {
     const hasMain = state.images.some((img: any) => img.position === 1);
     if (!hasMain) {
       errors.push({
-        name: "images",
-        message: "عکس با position=1 الزامی است",
+        name: `image-0-position`,
+        message: "عکس با اولویت=1 الزامی است",
       });
     }
   }
@@ -291,7 +291,6 @@ function validateForm(state: FormState) {
     validate(variant.stock).required().pushError(`${base}-stock`, errors);
   });
 
-  console.log("error", errors);
   return errors;
 }
 
@@ -340,6 +339,10 @@ const uploadImage = async (idx: number, file: File) => {
       color: "error",
     });
   }
+};
+
+const error = (errors) => {
+  toast.add({ title: "تمامی فیلد ها را پر کنید", color: "error" });
 };
 
 const onSubmit = async (event: FormSubmitEvent<FormState>) => {
@@ -421,7 +424,12 @@ const isSlugDisabled = computed(() => props.mode === "edit");
         />
 
         <UCard v-else>
-          <UForm :state="formState" :validate="validateForm" @submit="onSubmit">
+          <UForm
+            :state="formState"
+            :validate="validateForm"
+            @submit="onSubmit"
+            @error="error"
+          >
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div class="space-y-4">
                 <UFormField label="دسته‌بندی" name="category_id" required>
@@ -698,6 +706,7 @@ const isSlugDisabled = computed(() => props.mode === "edit");
                     <UFormField
                       :name="`image-${idx}-position`"
                       label="اولویت (position)"
+                      hint="الزما باید اولویت یکی از عکس ها 1 باشد."
                       required
                     >
                       <UInput

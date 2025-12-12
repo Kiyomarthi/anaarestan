@@ -24,13 +24,32 @@ const items: NavigationMenuItem[][] = [
       to: "/admin/contacts",
     },
     {
-      label: "محصولات",
+      label: "داده‌ها",
       icon: "i-lucide-box",
       defaultOpen: true,
       children: [
         {
-          label: "تمامی محصولات",
+          label: "محصولات",
           to: "/admin/products",
+        },
+        {
+          label: "دسته بندی‌ها",
+          to: "/admin/categories",
+        },
+        {
+          label: "ویژگی‌ها",
+          to: "/admin/attributes",
+        },
+      ],
+    },
+    {
+      label: "محتوا",
+      icon: "i-lucide-box",
+      defaultOpen: true,
+      children: [
+        {
+          label: "صفحه خانه",
+          to: "/admin/seo/home",
         },
       ],
     },
