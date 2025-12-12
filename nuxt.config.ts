@@ -16,11 +16,51 @@ export default defineNuxtConfig({
     "nuxt-schema-org",
   ],
 
+  app: {
+    layoutTransition: { name: "layout", mode: "out-in" },
+    head: {
+      title: "انارستان",
+      meta: [
+        {
+          name: "viewport",
+          content: "width=device-width, initial-scale=1,  maximum-scale=5",
+        },
+        {
+          name: "google",
+          content: "notranslate",
+        },
+        {
+          name: "robots",
+          content: "noindex,nofollow",
+        },
+        {
+          name: "application-name",
+          content: "انارستان",
+        },
+      ],
+      link: [
+        {
+          rel: "icon",
+          type: "image/png",
+          href: "images/favicon.png",
+        },
+      ],
+      htmlAttrs: {
+        dir: "rtl",
+        lang: "fa",
+      },
+    },
+    rootAttrs: {
+      "data-vaul-drawer-wrapper": "",
+      class: "bg-default",
+    },
+  },
+
   ui: {
     fonts: true,
     colorMode: false,
     theme: {
-      colors: ["primary"],
+      colors: ["primary", "white", "info", "success", "warning", "error"],
     },
   },
 
@@ -63,5 +103,42 @@ export default defineNuxtConfig({
         db: 0,
       },
     },
+  },
+
+  fonts: {
+    provider: "local",
+    families: [
+      {
+        name: "YekanBakh",
+        src: ["/fonts/yekan-bakh-normal.woff2"],
+        weight: "400",
+        style: "normal",
+        global: true,
+        display: "swap",
+      },
+      {
+        name: "YekanBakh",
+        src: ["/fonts/yekan-bakh-light.woff2"],
+        weight: "300",
+        style: "normal",
+        global: true,
+      },
+      {
+        name: "YekanBakh",
+        src: ["/fonts/yekan-bakh-semibold.woff2"],
+        weight: "500",
+        style: "normal",
+        global: true,
+        display: "swap",
+      },
+      {
+        name: "YekanBakh",
+        src: ["/fonts/yekan-bakh-bold.woff2"],
+        weight: "700",
+        style: "normal",
+        global: true,
+        display: "swap",
+      },
+    ],
   },
 });

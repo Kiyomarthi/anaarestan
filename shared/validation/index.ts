@@ -110,5 +110,16 @@ export function validate(value: any) {
       }
       return true;
     },
+
+    pushError(fieldName: string, errors: { name: string; message: string }[]) {
+      for (const rule of rules) {
+        const result = rule(value);
+        if (result !== true) {
+          errors.push({ name: fieldName, message: result });
+          return false;
+        }
+      }
+      return true;
+    },
   };
 }

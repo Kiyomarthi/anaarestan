@@ -59,3 +59,32 @@ export async function buildInsertQuery(
 
   return { sql, values };
 }
+
+const ABSOLUTE_URL_REGEX = /^(https?:)?\/\//i;
+
+/**
+ * Prefix a relative path with the provided site URL.
+ * - Leaves absolute URLs unchanged
+ * - Adds http:// when the site URL has no protocol
+ * - Trims duplicate slashes between host and path
+ */
+export function buildAbsoluteUrl(
+  path: string | null | undefined,
+  siteUrl?: string
+) {
+  if (!path) return path;
+
+  if (ABSOLUTE_URL_REGEX.test(path)) return path;
+
+  const rawSite = (siteUrl || "").trim();
+  if (!rawSite) return path;
+
+  const normalizedSite = rawSite.match(/^https?:\/\//i)
+    ? rawSite
+    : `http://${rawSite}`;
+
+  const host = normalizedSite.replace(/\/+$/, "");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  return `${host}${normalizedPath}`;
+}

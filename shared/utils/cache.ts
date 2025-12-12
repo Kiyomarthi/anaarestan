@@ -10,3 +10,17 @@ export const CACHE_KEY = {
   //   CITY: (service: string) => `${BASE}:city:${service}`,
   SETTINGS: `${BASE}:settings`,
 } as const;
+
+export const makeCache = (eightHours: number = 30 * 60) => {
+  const now = Math.floor(Date.now() / 1000);
+  return now + eightHours;
+};
+
+export const isCacheValid = (cacheTime: number | null): boolean => {
+  if (!cacheTime) return false;
+
+  const now = Math.floor(Date.now() / 1000);
+  return cacheTime > now;
+};
+
+export const CACHE_TIME = {};

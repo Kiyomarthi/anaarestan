@@ -1,18 +1,30 @@
 import { getDB } from "~~/server/db";
+import { buildAbsoluteUrl } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
   const db = await getDB();
   const redis = useStorage("redis");
+  const {
+    public: { siteUrl },
+  } = useRuntimeConfig();
 
   const cacheKeyHeader = getHeader(event, "cache-key");
   const cacheKey = cacheKeyHeader ? CACHE_KEY.category(cacheKeyHeader) : null;
+
+  const addSiteUrl = (category: any): any => ({
+    ...category,
+    image: buildAbsoluteUrl(category.image, siteUrl),
+    children: Array.isArray(category.children)
+      ? category.children.map((child: any) => addSiteUrl(child))
+      : [],
+  });
 
   if (cacheKey) {
     const cached = await redis.getItem(cacheKey);
     if (cached) {
       return {
         success: true,
-        data: cached,
+        data: cached.map((cat: any) => addSiteUrl(cat)),
         cache: true,
       };
     }
@@ -38,12 +50,14 @@ export default defineEventHandler(async (event) => {
     }
   });
 
+  const responseData = tree.map((cat) => addSiteUrl(cat));
+
   if (cacheKey) {
     await redis.setItem(cacheKey, tree);
   }
 
   return {
     success: true,
-    data: tree,
+    data: responseData,
   };
 });

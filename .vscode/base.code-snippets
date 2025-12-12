@@ -1,0 +1,35 @@
+{
+  "Vue Template Base": {
+    "scope": "vue",
+    "prefix": "base",
+    "body": [
+      "<script setup lang=\"ts\">",
+      "  ///// imports /////",
+      "",
+      "  ///// page meta /////",
+      "",
+      "  ///// props/emits /////",
+      "",
+      "  ///// refs /////",
+      "",
+      "  ///// composables/stores /////",
+      "",
+      "  ///// computed /////",
+      "",
+      "  ///// watchers /////",
+      "",
+      "  ///// functions /////",
+      "",
+      "  ///// lifecycle /////",
+      "</script>",
+      "",
+      "<template>",
+      "  <div>",
+      "    <!--  -->",
+      "  </div>",
+      "</template>",
+      ""
+    ],
+    "description": "Base structure for Vue 3 with Composition API"
+  }
+}

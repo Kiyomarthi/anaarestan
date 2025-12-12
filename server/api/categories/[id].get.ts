@@ -1,6 +1,10 @@
 import { getDB } from "~~/server/db";
+import { buildAbsoluteUrl } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
+  const {
+    public: { siteUrl },
+  } = useRuntimeConfig();
   const id = getRouterParam(event, "id");
 
   if (!id) {
@@ -15,12 +19,20 @@ export default defineEventHandler(async (event) => {
 
   const cacheKey = CACHE_KEY.category(`id:${id}`);
 
+  const addSiteUrl = (category: any): any => ({
+    ...category,
+    image: buildAbsoluteUrl(category.image, siteUrl),
+    children: Array.isArray(category.children)
+      ? category.children.map((child: any) => addSiteUrl(child))
+      : [],
+  });
+
   // Check cache first
   const cached = await redis.getItem(cacheKey);
   if (cached) {
     return {
       success: true,
-      data: cached,
+      data: addSiteUrl(cached),
       cache: true,
     };
   }
@@ -58,6 +70,6 @@ export default defineEventHandler(async (event) => {
 
   return {
     success: true,
-    data: category,
+    data: addSiteUrl(category),
   };
 });

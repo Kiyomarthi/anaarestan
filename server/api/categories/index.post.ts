@@ -2,9 +2,13 @@
 import { getDB } from "~~/server/db";
 import { createSlug, generateCode } from "~~/server/utils/format";
 import { validate } from "~~/shared/validation";
+import { buildAbsoluteUrl } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
   const db = await getDB();
+  const {
+    public: { siteUrl },
+  } = useRuntimeConfig();
 
   const user = requireRole(event, "admin");
 
@@ -35,6 +39,9 @@ export default defineEventHandler(async (event) => {
   return {
     success: true,
     message: "Category created successfully",
-    data: newCategory,
+    data: {
+      ...newCategory,
+      image: buildAbsoluteUrl(newCategory.image, siteUrl),
+    },
   };
 });

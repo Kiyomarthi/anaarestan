@@ -2,6 +2,7 @@ import { getDB } from "~~/server/db";
 import bcrypt from "bcrypt";
 import { JwtPayload } from "jsonwebtoken";
 import { requireAuth } from "~~/server/utils/auth";
+import { validate } from "~~/shared/validation";
 
 export default defineEventHandler(async (event) => {
   const user = requireAuth(event) as JwtPayload;
@@ -9,11 +10,20 @@ export default defineEventHandler(async (event) => {
 
   const oldPassword = body?.oldPassword;
   const newPassword = body?.newPassword;
+  const userId = body?.id;
+
+  validateBody(body, {
+    id: (v) => validate(v).required().run(),
+  });
+
+  if (user.id != userId) {
+    requireRole(event, "admin");
+  }
 
   const db = (await getDB()) as any;
 
   const [rows] = await db.execute("SELECT password FROM users WHERE id = ?", [
-    user.id,
+    userId,
   ]);
 
   if (rows[0].password) {
@@ -51,7 +61,7 @@ export default defineEventHandler(async (event) => {
 
   await db.execute("UPDATE users SET password = ? WHERE id = ?", [
     hash,
-    user.id,
+    userId,
   ]);
 
   return { success: true };

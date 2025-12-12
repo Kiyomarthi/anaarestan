@@ -1,7 +1,11 @@
 import { getDB } from "~~/server/db";
+import { buildAbsoluteUrl } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
   const db = await getDB();
+  const {
+    public: { siteUrl },
+  } = useRuntimeConfig();
   const query = getQuery(event);
 
   // Pagination parameters
@@ -10,6 +14,7 @@ export default defineEventHandler(async (event) => {
   const limit =
     parseInt(query.limit as string) || parseInt(query.per as string) || 20;
   const offset = noPaginate ? 0 : (page - 1) * limit;
+  const search = query.search ? String(query.search).trim() : null;
 
   // Filtering parameters
   const stockStatus = query.stock_status as string; // 'available' or 'unavailable'
@@ -41,6 +46,11 @@ export default defineEventHandler(async (event) => {
   if (maxPrice !== null && !isNaN(maxPrice)) {
     whereClause += " AND COALESCE(discount_price, price) <= ?";
     params.push(maxPrice);
+  }
+
+  if (search) {
+    whereClause += " AND title LIKE ?";
+    params.push(`%${search}%`);
   }
 
   // Build ORDER BY clause
@@ -108,10 +118,15 @@ export default defineEventHandler(async (event) => {
     total = rows?.length || 0;
   }
 
+  const dataWithAbsoluteImage = (rows || []).map((row: any) => ({
+    ...row,
+    image: buildAbsoluteUrl(row.image, siteUrl),
+  }));
+
   // Format response
   const response: any = {
     success: true,
-    data: rows || [],
+    data: dataWithAbsoluteImage,
   };
 
   if (!noPaginate) {

@@ -1,6 +1,10 @@
 import { getDB } from "~~/server/db";
+import { buildAbsoluteUrl } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
+  const {
+    public: { siteUrl },
+  } = useRuntimeConfig();
   const code = getRouterParam(event, "code");
 
   if (!code) {
@@ -104,6 +108,11 @@ export default defineEventHandler(async (event) => {
       [productId]
     )) as any[];
 
+    const mappedGallery = imageRows.map((img: any) => ({
+      ...img,
+      url: buildAbsoluteUrl(img.url, siteUrl),
+    }));
+
     return {
       success: true,
       data: {
@@ -116,8 +125,8 @@ export default defineEventHandler(async (event) => {
           value: row.value,
         })),
         variant_attribute: variantsWithAttrs,
-        image: product.image,
-        gallery: imageRows,
+        image: buildAbsoluteUrl(product.image, siteUrl),
+        gallery: mappedGallery,
       },
     };
   } catch (error: any) {

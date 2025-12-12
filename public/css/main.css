@@ -2,4 +2,18 @@
 @import "@nuxt/ui";
 
 @theme {
+  --font-sans: YekanBakh, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans Arabic", "Noto Sans", sans-serif;
+
+  --color-red-50: #fff5f5;
+  --color-red-100: #ffeaea;
+  --color-red-200: #ffd4d6;
+  --color-red-300: #ffb3b7;
+  --color-red-400: #ff8c91;
+  --color-red-500: #f26b70;
+  --color-red-600: #e24349;
+  --color-red-700: #cc2d33;
+  --color-red-800: #b31925;
+  --color-red-900: #8c0f1a;
+  --color-red-950: #56090f;
 }

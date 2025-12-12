@@ -3,9 +3,13 @@ import { requireRole } from "~~/server/utils/permissions";
 import { createSlug, generateCode } from "~~/server/utils/format";
 import { validate } from "~~/shared/validation";
 import { validateBody } from "~~/server/utils/validate";
+import { buildAbsoluteUrl } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
   const db = await getDB();
+  const {
+    public: { siteUrl },
+  } = useRuntimeConfig();
   const user = requireRole(event, "admin");
 
   const body = await readBody(event);
@@ -301,6 +305,11 @@ export default defineEventHandler(async (event) => {
 
     connection.release();
 
+    const mappedGallery = imageRows.map((img: any) => ({
+      ...img,
+      url: buildAbsoluteUrl(img.url, siteUrl),
+    }));
+
     return {
       success: true,
       message: "محصول با موفقیت ایجاد شد",
@@ -314,8 +323,8 @@ export default defineEventHandler(async (event) => {
           value: row.value,
         })),
         variant_attribute: variantsWithAttrs,
-        image: product.image,
-        gallery: imageRows,
+        image: buildAbsoluteUrl(product.image, siteUrl),
+        gallery: mappedGallery,
       },
     };
   } catch (error: any) {

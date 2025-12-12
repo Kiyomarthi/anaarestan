@@ -5,7 +5,7 @@ export default defineAppConfig({
     },
 
     colors: {
-      // primary: "primary",
+      primary: "red",
     },
   },
 });

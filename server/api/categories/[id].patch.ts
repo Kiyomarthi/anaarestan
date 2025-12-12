@@ -2,10 +2,14 @@ import { getDB } from "~~/server/db";
 import { createSlug } from "~~/server/utils/format";
 import { validate } from "~~/shared/validation";
 import { buildUpdateQuery } from "~~/server/utils/common";
+import { buildAbsoluteUrl } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
   const user = requireRole(event, "admin");
   const id = getRouterParam(event, "id");
+  const {
+    public: { siteUrl },
+  } = useRuntimeConfig();
 
   if (!id) {
     throw createError({
@@ -105,6 +109,9 @@ export default defineEventHandler(async (event) => {
   return {
     success: true,
     message: "Category updated successfully",
-    data: updatedCategory,
+    data: {
+      ...updatedCategory,
+      image: buildAbsoluteUrl(updatedCategory.image, siteUrl),
+    },
   };
 });

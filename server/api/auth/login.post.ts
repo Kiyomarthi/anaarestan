@@ -5,9 +5,8 @@ import { validate } from "~~/shared/validation";
 import bcrypt from "bcrypt";
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event) as Record<string, any>;
-  const phone = query.phone;
-  const password = query.password;
+  const body = (await readBody(event)) as { phone: string; password: string };
+  const { phone, password } = body;
 
   validateBody(
     { phone, password },
