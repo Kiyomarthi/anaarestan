@@ -1,0 +1,324 @@
+<script setup lang="ts">
+// @ts-nocheck
+import { computed, ref, watch } from "vue";
+import { useApiFetch } from "~/composables/useApiFetch";
+import { useApiRequest } from "~/composables/useApiRequest";
+
+definePageMeta({
+  layout: "admin",
+  middleware: "admin",
+});
+
+type User = {
+  id: number;
+  full_name: string;
+  phone: string;
+  role: "admin" | "user";
+  created_at?: string;
+  updated_at?: string;
+};
+
+type UserListResponse = {
+  success: boolean;
+  data: User[];
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+const router = useRouter();
+const toast = useToast();
+const globalFilter = ref("");
+const page = ref(1);
+const perPage = ref(10);
+const openModal = ref<boolean>(false);
+const itemClicked = ref<number | null>(null);
+const userStore = useUserStore();
+const token = userStore.token;
+
+const { loading, fetch } = useApiRequest();
+
+const { data, pending, error, refresh } = useApiFetch<UserListResponse>(
+  "/api/users",
+  {
+    headers: {
+      Authorization: token,
+    },
+    query: computed(() => ({
+      search: globalFilter.value || undefined,
+      page: page.value,
+      perPage: perPage.value,
+    })),
+  }
+);
+
+const rows = computed<User[]>(() => (data.value?.data as any) || []);
+
+const columns = [
+  {
+    accessorKey: "full_name",
+    header: "نام و نام خانوادگی",
+  },
+  {
+    accessorKey: "phone",
+    header: "شماره تلفن",
+  },
+  {
+    accessorKey: "role",
+    header: "نقش",
+  },
+  {
+    accessorKey: "created_at",
+    header: "تاریخ ایجاد",
+    cell: ({ row }) => {
+      const value = row.getValue("created_at");
+      if (!value) return "-";
+      return new Date(value).toLocaleDateString("fa-IR", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    },
+  },
+  {
+    accessorKey: "actions",
+    header: "مشاهده",
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "delete",
+    header: "حذف",
+    enableSorting: false,
+    enableHiding: false,
+  },
+];
+
+const goCreate = async () => {
+  await router.push("/admin/users/create");
+};
+
+watch(
+  () => globalFilter.value,
+  () => {
+    page.value = 1;
+  }
+);
+
+watch(
+  () => perPage.value,
+  () => {
+    page.value = 1;
+  }
+);
+
+const goEdit = async (id: number) => {
+  await router.push(`/admin/users/${id}`);
+};
+
+const handleRefresh = async () => {
+  await refresh();
+  toast.add({ title: "لیست کاربران بروزرسانی شد", color: "success" });
+};
+
+const confirmDelete = (id: number) => {
+  openModal.value = true;
+  itemClicked.value = id;
+};
+
+const deleteItem = async () => {
+  const res = await fetch(`/api/users/${itemClicked.value}`, {
+    method: "delete",
+    headers: {
+      Authorization: token,
+    },
+  });
+  if (!res.success) {
+    toast.add({ title: res.message ?? "خطا", color: "error" });
+
+    return;
+  }
+  toast.add({ title: res.message ?? "کاربر حذف شد", color: "success" });
+  openModal.value = false;
+  handleRefresh();
+};
+</script>
+
+<template>
+  <div class="md:p-4">
+    <UPage>
+      <UPageHeader
+        title="کاربران"
+        description="مدیریت و مشاهده کاربران"
+        :ui="{
+          root: 'pt-0 pb-4',
+        }"
+      >
+        <template #links>
+          <UButton
+            icon="i-lucide-plus"
+            color="primary"
+            variant="solid"
+            label="ایجاد کاربر"
+            @click="goCreate"
+          />
+          <UButton
+            icon="i-lucide-refresh-cw"
+            color="neutral"
+            variant="outline"
+            label="تازه سازی"
+            :loading="pending"
+            @click="handleRefresh"
+          />
+        </template>
+      </UPageHeader>
+
+      <UPageBody>
+        <UAlert
+          v-if="error"
+          icon="i-lucide-alert-triangle"
+          color="error"
+          variant="subtle"
+          :title="error?.statusMessage || 'خطا در دریافت کاربران'"
+          class="mb-4"
+        />
+
+        <UCard>
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-500">تعداد در صفحه</span>
+              <USelectMenu
+                v-model="perPage"
+                :items="[
+                  { label: '10', value: 10 },
+                  { label: '20', value: 20 },
+                  { label: '50', value: 50 },
+                  { label: '100', value: 100 },
+                ]"
+                value-key="value"
+                class="w-24"
+              />
+            </div>
+            <div class="flex px-4">
+              <UInput
+                v-model.lazy="globalFilter"
+                class="max-w-sm"
+                placeholder="جستجو"
+              />
+            </div>
+            <div class="ms-auto text-sm text-gray-500">
+              {{
+                data?.meta?.total ? `تعداد: ${data.meta.total}` : "بدون داده"
+              }}
+            </div>
+          </div>
+
+          <UTable
+            :data="rows as any"
+            :columns="columns as any"
+            :loading="pending"
+            empty-state-icon="i-lucide-users"
+            empty-state-title="کاربری یافت نشد"
+            empty-state-description="کاربر جدیدی ثبت کنید یا فیلترها را بررسی کنید."
+          >
+            <template #full_name-cell="{ row }: { row: any }">
+              <span class="text-sm font-medium text-gray-900">
+                {{ row?.original?.full_name }}
+              </span>
+            </template>
+
+            <template #phone-cell="{ row }: { row: any }">
+              <span class="text-sm text-gray-700">
+                {{ row?.original?.phone }}
+              </span>
+            </template>
+
+            <template #role-cell="{ row }: { row: any }">
+              <UBadge
+                :color="row?.original?.role === 'admin' ? 'primary' : 'gray'"
+                :label="row?.original?.role === 'admin' ? 'مدیر' : 'کاربر'"
+                variant="soft"
+              />
+            </template>
+
+            <template #created_at-cell="{ row }: { row: any }">
+              <span class="text-xs text-gray-600">
+                {{
+                  row?.original?.created_at
+                    ? new Date(row?.original?.created_at).toLocaleDateString(
+                        "fa-IR"
+                      )
+                    : "-"
+                }}
+              </span>
+            </template>
+
+            <template #actions-cell="{ row }: { row: any }">
+              <div class="flex items-center gap-2">
+                <UButton
+                  color="warning"
+                  variant="ghost"
+                  icon="i-lucide-pencil"
+                  size="xs"
+                  @click="goEdit(row?.original?.id)"
+                >
+                  ویرایش
+                </UButton>
+              </div>
+            </template>
+            <template #delete-cell="{ row }: { row: any }">
+              <div class="flex items-center gap-2">
+                <UButton
+                  color="primary"
+                  variant="ghost"
+                  icon="i-lucide-trash"
+                  size="xs"
+                  @click="confirmDelete(row?.original?.id)"
+                >
+                  حذف
+                </UButton>
+              </div>
+            </template>
+          </UTable>
+          <div
+            v-if="data?.meta && data.meta.total > 0"
+            class="mt-6 flex items-center justify-center"
+          >
+            <UPagination
+              v-model:page="page"
+              :items-per-page="perPage"
+              :total="data.meta.total"
+              :disabled="pending"
+            />
+          </div>
+        </UCard>
+      </UPageBody>
+    </UPage>
+
+    <UModal
+      v-model:open="openModal"
+      title="تایید عملیات"
+      description="آیا از حذف کاربر مطمئن هستید؟"
+      :ui="{ footer: 'justify-end' }"
+    >
+      <template #footer>
+        <UButton
+          color="primary"
+          variant="subtle"
+          label="تایید حذف"
+          :loading="loading"
+          @click="deleteItem"
+        />
+        <UButton
+          label="انصراف"
+          color="neutral"
+          variant="outline"
+          @click="openModal = false"
+        />
+      </template>
+    </UModal>
+  </div>
+</template>

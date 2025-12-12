@@ -8,7 +8,8 @@ export default defineEventHandler(async (event) => {
 
   const query = getQuery(event);
   const page = parseInt(query.page as string) || 1;
-  const limit = parseInt(query.limit as string) || 10;
+  const limit =
+    parseInt(query.limit as string) || parseInt(query.perPage as string) || 10;
   const offset = (page - 1) * limit;
   const search = query.search as string;
 

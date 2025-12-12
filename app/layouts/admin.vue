@@ -21,7 +21,7 @@ const items: NavigationMenuItem[][] = [
     {
       label: "کاربران",
       icon: "i-lucide-users",
-      to: "/admin/contacts",
+      to: "/admin/users",
     },
     {
       label: "داده‌ها",
