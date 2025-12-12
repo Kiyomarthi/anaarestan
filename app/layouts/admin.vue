@@ -1,9 +1,16 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
+import { routerKey } from "vue-router";
 import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 
 const { mdAndDown } = useBreakpoints();
 const userStore = useUserStore();
+const router = useRouter();
+
+const logout = () => {
+  userStore.logOut();
+  router.replace("/");
+};
 
 const items: NavigationMenuItem[][] = [
   [
@@ -65,16 +72,9 @@ const items: NavigationMenuItem[][] = [
   ],
   [
     {
-      label: "Feedback",
-      icon: "i-lucide-message-circle",
-      to: "https://github.com/nuxt-ui-templates/dashboard",
-      target: "_blank",
-    },
-    {
-      label: "Help & Support",
-      icon: "i-lucide-info",
-      to: "https://github.com/nuxt/ui",
-      target: "_blank",
+      label: "خروج از حساب کاربری",
+      icon: "i-lucide-log-out",
+      slot: "logout",
     },
   ],
 ];
@@ -124,7 +124,16 @@ const items: NavigationMenuItem[][] = [
               :items="items[1]"
               orientation="vertical"
               class="mt-auto"
-            />
+            >
+              <template #logout>
+                <UButton
+                  icon="i-lucide-log-out"
+                  label="خروج از حساب کاربری"
+                  variant="ghost"
+                  @click="logout"
+                />
+              </template>
+            </UNavigationMenu>
           </template>
         </UDashboardSidebar>
 

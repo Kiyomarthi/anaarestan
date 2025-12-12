@@ -45,22 +45,12 @@ const { loading, fetch } = useApiRequest();
 
 const { data, pending, execute, error, refresh } =
   useApiFetch<ProductListResponse>("/api/products", {
-    immediate: false,
     query: computed(() => ({
       page: page.value,
       search: globalFilter.value,
       limit: perPage.value,
     })),
-    cacheKey: computed(() => `admin-products-${page.value}-${perPage.value}`),
   });
-
-watch(
-  [page],
-  () => {
-    execute();
-  },
-  { immediate: true }
-);
 
 const rows = computed<Product[]>(() => data.value?.data ?? []);
 const meta = computed(() => data.value?.meta ?? {});

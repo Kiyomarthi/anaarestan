@@ -49,19 +49,38 @@ const { data, pending, error, refresh } = useApiFetch<CategoryListResponse>(
   {
     query: computed(() => ({
       search: globalFilter.value || undefined,
-      page: page.value,
-      perPage: perPage.value,
+      noPaginate: true, // Get all data, we'll paginate in frontend
     })),
   }
 );
 
 type CategoryRow = Category & { level: number };
 
-// API returns already flattened and paginated data with level property
-const rows = computed<CategoryRow[]>(() => {
+// Flatten tree structure and add level property
+const flattenCategories = (
+  items: Category[] = [],
+  level = 0
+): CategoryRow[] => {
+  return items.flatMap((cat) => {
+    const current: CategoryRow = { ...cat, level };
+    const children = flattenCategories(cat.children ?? [], level + 1);
+    return [current, ...children];
+  });
+};
+
+// Flatten and paginate data in frontend
+const allRows = computed<CategoryRow[]>(() => {
   const apiData = data.value?.data || [];
-  return apiData as CategoryRow[];
+  return flattenCategories(apiData);
 });
+
+const rows = computed<CategoryRow[]>(() => {
+  const start = (page.value - 1) * perPage.value;
+  const end = start + perPage.value;
+  return allRows.value.slice(start, end);
+});
+
+const totalRows = computed(() => allRows.value.length);
 
 const columns = [
   {
@@ -220,9 +239,7 @@ const deleteItem = async () => {
               />
             </div>
             <div class="ms-auto text-sm text-gray-500">
-              {{
-                data?.meta?.total ? `تعداد: ${data.meta.total}` : "بدون داده"
-              }}
+              {{ totalRows > 0 ? `تعداد: ${totalRows}` : "بدون داده" }}
             </div>
           </div>
 
@@ -307,13 +324,13 @@ const deleteItem = async () => {
             </template>
           </UTable>
           <div
-            v-if="data?.meta && data.meta.total > 0"
+            v-if="totalRows > 0"
             class="mt-6 flex items-center justify-center"
           >
             <UPagination
               v-model:page="page"
               :items-per-page="perPage"
-              :total="data.meta.total"
+              :total="totalRows"
               :disabled="pending"
             />
           </div>
