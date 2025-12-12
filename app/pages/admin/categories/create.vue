@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // @ts-nocheck
+import { ref } from "vue";
 import { useApiRequest } from "~/composables/useApiRequest";
 
 definePageMeta({
@@ -12,22 +13,32 @@ const router = useRouter();
 const { fetch: sendRequest } = useApiRequest();
 const userStore = useUserStore();
 const token = userStore.token;
+const submitting = ref(false);
 
 const handleSubmit = async (payload: any) => {
-  await sendRequest("/api/products", {
-    method: "POST",
-    body: payload,
-    errorTitle: "خطای ایجاد محصول",
-    headers: {
-      Authorization: token,
-    },
-  });
+  submitting.value = true;
+  try {
+    await sendRequest("/api/categories", {
+      method: "POST",
+      body: payload,
+      errorTitle: "خطای ایجاد دسته‌بندی",
+      headers: {
+        Authorization: token,
+      },
+    });
 
-  toast.add({ title: "محصول با موفقیت ایجاد شد", color: "success" });
-  router.push("/admin/products");
+    toast.add({ title: "دسته‌بندی با موفقیت ایجاد شد", color: "success" });
+    router.push("/admin/categories");
+  } finally {
+    submitting.value = false;
+  }
 };
 </script>
 
 <template>
-  <ModelAdminProductCreateEdit mode="create" @submit="handleSubmit" />
+  <ModelAdminCategoryCreateEdit
+    mode="create"
+    :saving="submitting"
+    @submit="handleSubmit"
+  />
 </template>

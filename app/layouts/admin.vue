@@ -44,8 +44,7 @@ const items: NavigationMenuItem[][] = [
     },
     {
       label: "محتوا",
-      icon: "i-lucide-box",
-      defaultOpen: true,
+      icon: "i-lucide-letter-text",
       children: [
         {
           label: "صفحه خانه",

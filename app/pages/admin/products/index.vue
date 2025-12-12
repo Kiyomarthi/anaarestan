@@ -2,6 +2,7 @@
 // @ts-nocheck
 import { computed, ref, watch } from "vue";
 import { useApiFetch } from "~/composables/useApiFetch";
+import { formatPrice } from "~~/shared/utils/format";
 
 definePageMeta({
   layout: "admin",
@@ -236,12 +237,16 @@ const deleteItem = async () => {
             <template #price-cell="{ row }: { row: any }">
               <div class="flex flex-col">
                 <span class="font-medium">
-                  {{ row?.original?.discount_price ?? row?.original?.price }}
+                  {{
+                    formatPrice(
+                      row?.original?.discount_price ?? row?.original?.price
+                    )
+                  }}
                 </span>
                 <span
                   v-if="row?.original?.discount_price"
                   class="text-xs text-gray-500 line-through"
-                  >{{ row?.original?.price }}</span
+                  >{{ formatPrice(row?.original?.price) }}</span
                 >
               </div>
             </template>
@@ -297,9 +302,9 @@ const deleteItem = async () => {
             class="mt-6 flex items-center justify-center"
           >
             <UPagination
-              v-model="page"
-              :page-count="perPage"
-              :total="meta?.total || rows.length"
+              v-model:page="page"
+              :items-per-page="perPage"
+              :total="data.meta.total || rows.length"
               :disabled="pending"
             />
           </div>

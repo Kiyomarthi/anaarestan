@@ -1,32 +1,34 @@
 <script setup lang="ts">
 // @ts-nocheck
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useApiFetch } from "~/composables/useApiFetch";
+import { useApiRequest } from "~/composables/useApiRequest";
 
 definePageMeta({
   layout: "admin",
   middleware: "admin",
 });
 
-type Product = {
+type Category = {
   id: number;
-  title: string;
+  name: string;
+  slug: string;
   code: string;
-  price: number;
-  discount_price?: number | null;
-  stock: number;
+  parent_id?: number | null;
   status: number;
-  created_at: string;
+  image?: string | null;
+  created_at?: string;
+  children?: Category[];
 };
 
-type ProductListResponse = {
+type CategoryListResponse = {
   success: boolean;
-  data: Product[];
+  data: Category[];
   meta?: {
-    page?: number;
-    limit?: number;
-    total?: number;
-    totalPages?: number;
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
   };
 };
 
@@ -42,44 +44,37 @@ const token = userStore.token;
 
 const { loading, fetch } = useApiRequest();
 
-const { data, pending, execute, error, refresh } =
-  useApiFetch<ProductListResponse>("/api/products", {
-    immediate: false,
+const { data, pending, error, refresh } = useApiFetch<CategoryListResponse>(
+  "/api/categories",
+  {
     query: computed(() => ({
+      search: globalFilter.value || undefined,
       page: page.value,
-      search: globalFilter.value,
-      limit: perPage.value,
+      perPage: perPage.value,
     })),
-    cacheKey: computed(() => `admin-products-${page.value}-${perPage.value}`),
-  });
-
-watch(
-  [page],
-  () => {
-    execute();
-  },
-  { immediate: true }
+  }
 );
 
-const rows = computed<Product[]>(() => data.value?.data ?? []);
-const meta = computed(() => data.value?.meta ?? {});
+type CategoryRow = Category & { level: number };
+
+// API returns already flattened and paginated data with level property
+const rows = computed<CategoryRow[]>(() => {
+  const apiData = data.value?.data || [];
+  return apiData as CategoryRow[];
+});
 
 const columns = [
   {
-    accessorKey: "title",
-    header: "عنوان",
+    accessorKey: "name",
+    header: "نام",
+  },
+  {
+    accessorKey: "slug",
+    header: "اسلاگ",
   },
   {
     accessorKey: "code",
     header: "کد",
-  },
-  {
-    accessorKey: "price",
-    header: "قیمت",
-  },
-  {
-    accessorKey: "stock",
-    header: "موجودی",
   },
   {
     accessorKey: "status",
@@ -90,6 +85,7 @@ const columns = [
     header: "تاریخ ایجاد",
     cell: ({ row }) => {
       const value = row.getValue("created_at");
+      if (!value) return "-";
       return new Date(value).toLocaleDateString("fa-IR", {
         day: "numeric",
         month: "short",
@@ -111,41 +107,51 @@ const columns = [
   },
 ];
 
-const perPageOptions = [
-  { label: "10", value: 10 },
-  { label: "20", value: 20 },
-  { label: "50", value: 50 },
-  { label: "100", value: 100 },
-  { label: "500", value: 500 },
-];
-
 const goCreate = async () => {
-  await router.push("/admin/products/create");
+  await router.push("/admin/categories/create");
 };
 
-const goEdit = async (code: string) => {
-  await router.push(`/admin/products/${code}`);
+watch(
+  () => globalFilter.value,
+  () => {
+    page.value = 1;
+  }
+);
+
+watch(
+  () => perPage.value,
+  () => {
+    page.value = 1;
+  }
+);
+
+const goEdit = async (id: number) => {
+  await router.push(`/admin/categories/${id}`);
 };
 
 const handleRefresh = async () => {
   await refresh();
-  toast.add({ title: "لیست بروزرسانی شد", color: "success" });
+  toast.add({ title: "لیست دسته بندی بروزرسانی شد", color: "success" });
 };
 
-const confirmDelete = (code) => {
+const confirmDelete = (id: number) => {
   openModal.value = true;
-  itemClicked.value = code;
+  itemClicked.value = id;
 };
 
 const deleteItem = async () => {
-  const res = await fetch(`/api/products/${itemClicked.value}`, {
+  const res = await fetch(`/api/categories/${itemClicked.value}`, {
     method: "delete",
     headers: {
       Authorization: token,
     },
   });
-  if (!res.success) return;
-  toast.add({ title: res.message ?? "با موفقیت حذف شد", color: "success" });
+  if (!res.success) {
+    toast.add({ title: res.message ?? "خطا", color: "error" });
+
+    return;
+  }
+  toast.add({ title: res.message ?? "دسته بندی حذف شد", color: "success" });
   openModal.value = false;
   handleRefresh();
 };
@@ -155,8 +161,8 @@ const deleteItem = async () => {
   <div class="md:p-4">
     <UPage>
       <UPageHeader
-        title="محصولات"
-        description="مدیریت و مشاهده لیست محصولات فروشگاه"
+        title="دسته‌بندی‌ها"
+        description="مدیریت و مشاهده دسته‌بندی‌های فروشگاه"
         :ui="{
           root: 'pt-0 pb-4',
         }"
@@ -166,7 +172,7 @@ const deleteItem = async () => {
             icon="i-lucide-plus"
             color="primary"
             variant="solid"
-            label="ایجاد محصول"
+            label="ایجاد دسته‌بندی"
             @click="goCreate"
           />
           <UButton
@@ -186,7 +192,7 @@ const deleteItem = async () => {
           icon="i-lucide-alert-triangle"
           color="error"
           variant="subtle"
-          :title="error?.statusMessage || 'خطا در دریافت محصولات'"
+          :title="error?.statusMessage || 'خطا در دریافت دسته‌بندی‌ها'"
           class="mb-4"
         />
 
@@ -196,7 +202,12 @@ const deleteItem = async () => {
               <span class="text-sm text-gray-500">تعداد در صفحه</span>
               <USelectMenu
                 v-model="perPage"
-                :items="perPageOptions"
+                :items="[
+                  { label: '10', value: 10 },
+                  { label: '20', value: 20 },
+                  { label: '50', value: 50 },
+                  { label: '100', value: 100 },
+                ]"
                 value-key="value"
                 class="w-24"
               />
@@ -209,7 +220,9 @@ const deleteItem = async () => {
               />
             </div>
             <div class="ms-auto text-sm text-gray-500">
-              {{ meta?.total ? `تعداد کل: ${meta.total}` : rows.length }}
+              {{
+                data?.meta?.total ? `تعداد: ${data.meta.total}` : "بدون داده"
+              }}
             </div>
           </div>
 
@@ -218,32 +231,32 @@ const deleteItem = async () => {
             :columns="columns as any"
             :loading="pending"
             empty-state-icon="i-lucide-package-open"
-            empty-state-title="محصولی یافت نشد"
-            empty-state-description="محصول جدیدی ثبت کنید یا فیلترها را بررسی کنید."
+            empty-state-title="دسته‌بندی یافت نشد"
+            empty-state-description="دسته‌بندی جدیدی ثبت کنید یا فیلترها را بررسی کنید."
           >
-            <template #title-cell="{ row }: { row: any }">
-              <span class="text-xs bg-gray-100 px-2 py-1 rounded">
-                {{ row?.original?.title }}
-              </span>
+            <template #name-cell="{ row }: { row: any }">
+              <div
+                class="flex items-center gap-2"
+                :style="{
+                  paddingInlineStart: `${row?.original?.level * 16}px`,
+                }"
+              >
+                <span
+                  v-if="row?.original?.level > 0"
+                  class="text-gray-400 text-lg leading-none"
+                >
+                  └
+                </span>
+                <span class="text-sm font-medium text-gray-900">
+                  {{ row?.original?.name }}
+                </span>
+              </div>
             </template>
 
             <template #code-cell="{ row }: { row: any }">
               <span class="text-xs bg-gray-100 px-2 py-1 rounded">{{
                 row?.original?.code
               }}</span>
-            </template>
-
-            <template #price-cell="{ row }: { row: any }">
-              <div class="flex flex-col">
-                <span class="font-medium">
-                  {{ row?.original?.discount_price ?? row?.original?.price }}
-                </span>
-                <span
-                  v-if="row?.original?.discount_price"
-                  class="text-xs text-gray-500 line-through"
-                  >{{ row?.original?.price }}</span
-                >
-              </div>
             </template>
 
             <template #status-cell="{ row }: { row: any }">
@@ -257,9 +270,11 @@ const deleteItem = async () => {
             <template #created_at-cell="{ row }: { row: any }">
               <span class="text-xs text-gray-600">
                 {{
-                  new Date(row?.original?.created_at).toLocaleDateString(
-                    "fa-IR"
-                  )
+                  row?.original?.created_at
+                    ? new Date(row?.original?.created_at).toLocaleDateString(
+                        "fa-IR"
+                      )
+                    : "-"
                 }}
               </span>
             </template>
@@ -271,7 +286,7 @@ const deleteItem = async () => {
                   variant="ghost"
                   icon="i-lucide-pencil"
                   size="xs"
-                  @click="goEdit(row?.original?.code)"
+                  @click="goEdit(row?.original?.id)"
                 >
                   ویرایش
                 </UButton>
@@ -284,22 +299,21 @@ const deleteItem = async () => {
                   variant="ghost"
                   icon="i-lucide-trash"
                   size="xs"
-                  @click="confirmDelete(row?.original?.code)"
+                  @click="confirmDelete(row?.original?.id)"
                 >
                   حذف
                 </UButton>
               </div>
             </template>
           </UTable>
-
           <div
-            v-if="meta?.totalPages || rows.length > 0"
+            v-if="data?.meta && data.meta.total > 0"
             class="mt-6 flex items-center justify-center"
           >
             <UPagination
-              v-model="page"
-              :page-count="perPage"
-              :total="meta?.total || rows.length"
+              v-model:page="page"
+              :items-per-page="perPage"
+              :total="data.meta.total"
               :disabled="pending"
             />
           </div>
@@ -310,7 +324,7 @@ const deleteItem = async () => {
     <UModal
       v-model:open="openModal"
       title="تایید عملیات"
-      description="آیا از حذف محصول مطمئن هستید"
+      description="آیا از حذف دسته‌بندی مطمئن هستید؟"
       :ui="{ footer: 'justify-end' }"
     >
       <template #footer>

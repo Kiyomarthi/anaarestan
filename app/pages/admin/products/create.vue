@@ -9,7 +9,7 @@ definePageMeta({
 
 const toast = useToast();
 const router = useRouter();
-const { fetch: sendRequest } = useApiRequest();
+const { fetch: sendRequest, loading } = useApiRequest();
 const userStore = useUserStore();
 const token = userStore.token;
 
@@ -29,5 +29,9 @@ const handleSubmit = async (payload: any) => {
 </script>
 
 <template>
-  <ModelAdminProductCreateEdit mode="create" @submit="handleSubmit" />
+  <ModelAdminProductCreateEdit
+    mode="create"
+    :saving="loading"
+    @submit="handleSubmit"
+  />
 </template>

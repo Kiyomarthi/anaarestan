@@ -52,6 +52,7 @@ const props = defineProps<{
   initialData?: any;
   productPending?: boolean;
   name?: string;
+  saving?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -62,7 +63,7 @@ const toast = useToast();
 const router = useRouter();
 const userStore = useUserStore();
 const token = userStore.token;
-const { fetch: sendRequest, loading: saving } = useApiRequest();
+const { fetch: sendRequest, loading: uploading } = useApiRequest();
 
 const formState = reactive<FormState>({
   category_id: null,
@@ -91,7 +92,6 @@ const {
   execute: loadCategories,
 } = useApiFetch<{ data: CategoryNode[] }>("/api/categories", {
   immediate: false,
-  cacheKey: "admin-categories",
 });
 
 const {
@@ -100,7 +100,6 @@ const {
   execute: loadAttributes,
 } = useApiFetch<{ data: any[] }>("/api/attributes", {
   immediate: false,
-  cacheKey: "admin-attributes",
 });
 
 const categoriesLoaded = ref(false);
@@ -674,6 +673,9 @@ const isSlugDisabled = computed(() => props.mode === "edit");
                           description="عکس خود را با فرمت webp، و در حداقلی ترین حجم آپلود کنید"
                           class="w-full min-h-48"
                           interactive
+                          :ui="{
+                            base: 'data-[dragging=true]:bg-primary-200 with-transition',
+                          }"
                           @update:model-value="
                             (files) => uploadImage(idx, files)
                           "
@@ -732,7 +734,7 @@ const isSlugDisabled = computed(() => props.mode === "edit");
               <UButton
                 type="submit"
                 color="primary"
-                :loading="saving"
+                :loading="saving || uploading"
                 icon="i-lucide-save"
               >
                 {{ submitButtonLabel }}
