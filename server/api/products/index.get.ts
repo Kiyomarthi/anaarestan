@@ -18,6 +18,9 @@ export default defineEventHandler(async (event) => {
 
   // Filtering parameters
   const stockStatus = query.stock_status as string; // 'available' or 'unavailable'
+  const categoryId = query.category_id
+    ? parseInt(query.category_id as string)
+    : null;
   const minPrice = query.min_price
     ? parseFloat(query.min_price as string)
     : null;
@@ -29,6 +32,12 @@ export default defineEventHandler(async (event) => {
   // Build WHERE clause
   let whereClause = "1=1";
   const params: unknown[] = [];
+
+  // Category filter
+  if (categoryId !== null && !isNaN(categoryId)) {
+    whereClause += " AND category_id = ?";
+    params.push(categoryId);
+  }
 
   // Stock status filter
   if (stockStatus === "available") {
@@ -75,7 +84,7 @@ export default defineEventHandler(async (event) => {
       orderBy = "ORDER BY created_at DESC";
   }
 
-  // Select fields (excluding description and category_id)
+  // Select fields (excluding description)
   const selectFields = [
     "id",
     "title",
@@ -87,6 +96,7 @@ export default defineEventHandler(async (event) => {
     "code",
     "stock",
     "status",
+    "category_id",
     "created_at",
     "updated_at",
   ].join(", ");

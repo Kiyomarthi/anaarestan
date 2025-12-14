@@ -4,7 +4,6 @@
 ///// page meta /////
 definePageMeta({
   layout: "admin",
-  middleware: "admin",
 });
 ///// props/emits /////
 

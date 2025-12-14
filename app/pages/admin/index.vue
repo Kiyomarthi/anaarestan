@@ -9,7 +9,6 @@ import RecentActivity from "~/components/widget/admin/recent-activity.vue";
 
 definePageMeta({
   layout: "admin",
-  middleware: "admin",
 });
 
 type StatsData = {

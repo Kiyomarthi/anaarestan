@@ -21,9 +21,15 @@ export default defineEventHandler(async (event) => {
   const otp = (rows as any[])[0];
 
   if (!otp)
-    throw createError({ statusCode: 400, statusMessage: "Invalid OTP" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "رمز عبور نامعتبر است",
+    });
   if (new Date(otp.expires_at) < new Date())
-    throw createError({ statusCode: 400, statusMessage: "OTP expired" });
+    throw createError({
+      statusCode: 400,
+      statusMessage: "رمز عبور منقضی شده است",
+    });
 
   await db.execute("UPDATE otp_codes SET used=1 WHERE id=?", [otp.id]);
 
@@ -40,7 +46,7 @@ export default defineEventHandler(async (event) => {
     const newUserId = (result as any).insertId;
 
     const [newUserRows] = await db.execute(
-      `SELECT ${userFields.join(", ")} FROM users WHERE id=?`,  
+      `SELECT ${userFields.join(", ")} FROM users WHERE id=?`,
       [newUserId]
     );
 

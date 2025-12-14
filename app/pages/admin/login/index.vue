@@ -5,7 +5,7 @@
 definePageMeta({
   noHeader: true,
   noFooter: true,
-  middleware: "admin",
+  noBottomNavigation: true,
 });
 
 ///// props/emits /////
@@ -30,7 +30,7 @@ const redirect = () => {
 <template>
   <div class="flex flex-col items-center justify-center gap-4 p-4 w-dvw h-dvh">
     <UPageCard class="w-full max-w-md">
-      <modelAuthPass @on:login="redirect" />
+      <modelAuthPass noOtp @on:login="redirect" />
     </UPageCard>
   </div>
 </template>

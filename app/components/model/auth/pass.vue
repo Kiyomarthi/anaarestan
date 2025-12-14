@@ -4,7 +4,19 @@ import { validate } from "~~/shared/validation";
 import { useApiRequest } from "~/composables/useApiRequest";
 import { useUserStore } from "~/stores/user";
 
-const emit = defineEmits(["on:login"]);
+const emit = defineEmits<{
+  "on:login": [];
+  "on:switch-to-otp": [];
+}>();
+
+withDefaults(
+  defineProps<{
+    noOtp?: boolean;
+  }>(),
+  {
+    noOtp: false,
+  }
+);
 
 const toast = useToast();
 const authStore = useUserStore();
@@ -56,25 +68,36 @@ const onSubmit = async (payload: FormSubmitEvent<any>) => {
 
   if (result?.data?.token) {
     authStore.setAuth(result.data.token, result.data.user);
+
+    toast.add({
+      title: "با موفقیت وارد شدید",
+      color: "success",
+    });
+
+    emit("on:login");
   }
+};
 
-  toast.add({
-    title: "با موفقیت وارد شدید",
-    color: "success",
-  });
-
-  emit("on:login");
+const switchToOtp = () => {
+  emit("on:switch-to-otp");
 };
 </script>
 
 <template>
-  <UAuthForm
-    :validate="validateForm"
-    title="ورود"
-    description="شماره تلفن و رمز عبور خود را جهت ورود به حساب کاربری وارد کنید."
-    icon="i-lucide-user"
-    :fields="fields"
-    :loading="loading"
-    @submit="onSubmit"
-  />
+  <div>
+    <UAuthForm
+      :validate="validateForm"
+      title="ورود با رمز عبور"
+      description="شماره تلفن و رمز عبور خود را جهت ورود به حساب کاربری وارد کنید."
+      icon="i-lucide-user"
+      :fields="fields"
+      :loading="loading"
+      @submit="onSubmit"
+    />
+    <div v-if="!noOtp" class="flex flex-col gap-2 mt-4">
+      <UButton variant="ghost" color="neutral" block @click="switchToOtp">
+        ورود با کد تایید
+      </UButton>
+    </div>
+  </div>
 </template>

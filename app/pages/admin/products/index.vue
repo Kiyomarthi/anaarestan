@@ -6,7 +6,6 @@ import { formatPrice } from "~~/shared/utils/format";
 
 definePageMeta({
   layout: "admin",
-  middleware: "admin",
 });
 
 type Product = {

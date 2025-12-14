@@ -1,15 +1,17 @@
 <script setup lang="ts">
 const route = useRoute();
-const noHeader = route.meta?.noHeader;
-const noFooter = route.meta?.noFooter;
+const noHeader = computed(() => route.meta?.noHeader);
+const noFooter = computed(() => route.meta?.noFooter);
+const noBottomNavigation = computed(() => route.meta?.noFooter);
 </script>
 
 <template>
-  <div>
-    <header v-if="!noHeader">header</header>
-    <main>
+  <div class="min-h-screen flex flex-col">
+    <WidgetHeader v-if="!noHeader" />
+    <main class="flex-1">
       <slot />
     </main>
-    <footer v-if="!noFooter">footer</footer>
+    <!-- <WidgetFooter v-if="!noFooter" /> -->
+    <WidgetBottomNavigation v-if="!noBottomNavigation"  />
   </div>
 </template>
