@@ -9,7 +9,6 @@ export default defineNuxtConfig({
     "@nuxt/image",
     "@nuxt/scripts",
     "@nuxt/test-utils",
-    "@nuxtjs/sitemap",
     "@pinia/nuxt",
     "@nuxt/hints",
     "@vite-pwa/nuxt",
@@ -92,13 +91,14 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    preset: "node-server",
     storage: {
       redis: {
         driver: "redis",
-        port: process.env.REDIS_PORT,
+        port: Number(process.env.REDIS_PORT),
         host: process.env.REDIS_HOST,
         // username: "",
-        // password: process.env.REDIS_PASSWORD,
+        password: process.env.REDIS_PASSWORD || undefined,
         // tls: {},
         db: 0,
       },

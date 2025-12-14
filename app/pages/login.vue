@@ -3,6 +3,7 @@ definePageMeta({
   noHeader: true,
   noFooter: true,
   noBottomNavigation: true,
+  middleware: "auth",
 });
 
 const router = useRouter();

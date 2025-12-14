@@ -14,24 +14,22 @@ const userStore = useUserStore();
 const isAdmin = !!userStore.user && (userStore.user as any).role === "admin";
 const { smAndDown } = useBreakpoints();
 
-const items = computed<NavigationMenuItem[]>(() => [
-  userStore.isLoggedIn
-    ? {
-        label: "پنل کاربری",
-        to: "/docs/getting-started",
-        icon: "i-lucide-layout-dashboard",
-        active: route.path.startsWith("/docs/getting-started"),
-      }
-    : {},
-  isAdmin
-    ? {
-        label: "پنل ادمین",
-        to: "/admin",
-        icon: "i-lucide-user-star",
-        active: route.path.startsWith("/admin"),
-      }
-    : {},
-]);
+const items = computed<NavigationMenuItem[]>(() =>
+  [
+    userStore.isLoggedIn && {
+      label: "پنل کاربری",
+      to: "/docs/getting-started",
+      icon: "i-lucide-layout-dashboard",
+      active: route.path.startsWith("/docs/getting-started"),
+    },
+    isAdmin && {
+      label: "پنل ادمین",
+      to: "/admin",
+      icon: "i-lucide-user-star",
+      active: route.path.startsWith("/admin"),
+    },
+  ].filter(Boolean)
+);
 
 ///// composables/stores /////
 
