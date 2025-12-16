@@ -6,7 +6,7 @@
     "dev": "nuxt dev",
     "build": "nuxt build",
     "build:prod": "NODE_ENV=production nuxt build",
-    "start": "nuxt start -p 8139",
+    "start": "nuxt start -p 1564",
     "start:prod": "node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
