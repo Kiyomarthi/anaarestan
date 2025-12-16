@@ -8,41 +8,49 @@ export default defineEventHandler(async (event) => {
   const uploadDir = config.uploadDir;
   const uploadUrl = config.uploadUrl;
 
+  console.log("[UPLOAD] request received");
+
   const form = await readMultipartFormData(event);
-  if (!form) return { success: false, message: "No file uploaded" };
+  if (!form) {
+    console.error("[UPLOAD] no form data");
+    return { success: false, message: "No file uploaded" };
+  }
+
+  console.log("[UPLOAD] fields:", form.length);
+  console.log("[UPLOAD] uploadDir:", uploadDir);
 
   await fs.mkdir(uploadDir, { recursive: true });
 
   const savedFiles: string[] = [];
 
   for (const field of form) {
-    if (field.filename && field.data) {
-      const MAX_SIZE = 300 * 1024;
-      if (field.data.length > MAX_SIZE) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: "File too large. Max size is 300KB",
-        });
-      }
+    if (!field.filename || !field.data) continue;
 
-      const ext = path.extname(field.filename);
-      const base = path.basename(field.filename, ext);
-      const safeName = base.length > 40 ? base.slice(0, 40) : base;
-      const fileName = `${safeName}-${Date.now()}.webp`;
-      const filePath = path.join(uploadDir, fileName);
+    console.log("[UPLOAD] processing:", field.filename);
 
-      try {
-        await sharp(field.data).webp({ quality: 80 }).toFile(filePath);
-      } catch (err) {
-        console.error("SHARP ERROR:", err);
-        throw createError({
-          statusCode: 500,
-          statusMessage: "Sharp failed to process image",
-        });
-      }
+    if (field.data.length > 300 * 1024) {
+      console.error("[UPLOAD] file too large:", field.filename);
+      throw createError({ statusCode: 400, statusMessage: "File too large" });
+    }
+
+    const base = path.basename(field.filename, path.extname(field.filename));
+    const fileName = `${base.slice(0, 40)}-${Date.now()}.webp`;
+    const filePath = path.join(uploadDir, fileName);
+
+    try {
+      await sharp(field.data).webp({ quality: 80 }).toFile(filePath);
+      console.log("[UPLOAD] saved:", filePath);
       savedFiles.push(`${uploadUrl}/${fileName}`);
+    } catch (err) {
+      console.error("[UPLOAD] sharp error:", err);
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Image processing failed",
+      });
     }
   }
+
+  console.log("[UPLOAD] done:", savedFiles);
 
   return { success: true, files: savedFiles };
 });

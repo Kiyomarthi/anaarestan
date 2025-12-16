@@ -1,9 +1,12 @@
-import { defineNitroPlugin } from "#app";
+import { defineNitroPlugin } from "nitropack";
 import serveStatic from "serve-static";
 
 export default defineNitroPlugin((nitroApp) => {
-  const uploadDir = process.env.UPLOAD_DIR || "/home/anaarest/uploads";
-  const uploadUrl = process.env.UPLOAD_URL || "/uploads";
+  const config = useRuntimeConfig();
 
-  nitroApp.app.use(uploadUrl, serveStatic(uploadDir));
+  console.log("[UPLOADS] static plugin loaded");
+  console.log("[UPLOADS] url:", config.uploadUrl);
+  console.log("[UPLOADS] dir:", config.uploadDir);
+
+  nitroApp.app.use(config.uploadUrl, serveStatic(config.uploadDir));
 });
