@@ -88,8 +88,64 @@ cd ~/public_html/anarstan  # یا مسیر مورد نظر
 # نصب pnpm (اگر نصب نیست)
 npm install -g pnpm
 
-# نصب dependencies
-pnpm install --production=false
+# نصب dependencies (شامل devDependencies برای build)
+# ⚠️ مهم: برای build کردن Nuxt به devDependencies نیاز داریم (TypeScript, Vite, etc)
+# پس باید همه dependencies را نصب کنیم
+pnpm install
+# یا به صورت صریح:
+# pnpm install --production=false
+```
+
+**توضیح**: 
+- برای **build** کردن پروژه، به `devDependencies` نیاز داریم (مثل TypeScript، Vite، و سایر ابزارهای build)
+- اگر `--production=true` بزنید، فقط `dependencies` نصب می‌شوند و build با خطا مواجه می‌شود
+- بعد از build، برای اجرا می‌توانید `node_modules` را پاک کنید و فقط `pnpm install --production` بزنید (اما معمولاً لازم نیست)
+
+#### ⚠️ مشکل: خطای ERR_PNPM_Unknown system error -122
+
+اگر با خطای `ERR_PNPM_Unknown system error -122` مواجه شدید، این راه‌حل‌ها را امتحان کنید:
+
+**راه‌حل 1: پاک کردن cache و نصب مجدد**
+```bash
+# پاک کردن cache pnpm
+pnpm store prune
+
+# پاک کردن node_modules (اگر وجود دارد)
+rm -rf node_modules
+
+# نصب مجدد
+pnpm install
+```
+
+**راه‌حل 2: بررسی فضای دیسک**
+```bash
+# بررسی فضای دیسک
+df -h
+
+# اگر فضای کافی ندارید، فایل‌های غیرضروری را پاک کنید
+```
+
+**راه‌حل 3: استفاده از npm به جای pnpm**
+```bash
+# اگر pnpm مشکل دارد، از npm استفاده کنید
+npm install
+```
+
+**راه‌حل 4: نصب با تنظیمات مختلف**
+```bash
+# نصب با تنظیمات مختلف
+pnpm install --no-frozen-lockfile
+# یا
+pnpm install --force
+```
+
+**راه‌حل 5: بررسی دسترسی‌ها**
+```bash
+# بررسی دسترسی دایرکتوری
+ls -la
+
+# اگر نیاز است، دسترسی را تغییر دهید
+chmod -R 755 .
 ```
 
 ### 5. تنظیم متغیرهای محیطی
@@ -142,6 +198,16 @@ export $(cat .env.production | grep -v '^#' | xargs) && pnpm build
 
 **نکته**: بعد از build، فولدر `.output` ایجاد می‌شود که شامل فایل‌های build شده است.
 
+**بهینه‌سازی اختیاری**: بعد از build موفق، اگر می‌خواهید فضا صرفه‌جویی کنید، می‌توانید `devDependencies` را حذف کنید (اما معمولاً لازم نیست):
+
+```bash
+# حذف node_modules و نصب مجدد فقط dependencies
+rm -rf node_modules
+pnpm install --production
+```
+
+⚠️ **نکته**: این کار اختیاری است و فقط برای صرفه‌جویی در فضا انجام می‌شود. برای به‌روزرسانی‌های بعدی دوباره باید `pnpm install` کامل بزنید.
+
 ### 7. تنظیم Startup File در cPanel
 
 بعد از build، فایل startup در مسیر `.output/server/index.mjs` قرار می‌گیرد.
@@ -164,11 +230,58 @@ export $(cat .env.production | grep -v '^#' | xargs) && pnpm build
 یا از طریق SSH:
 
 ```bash
-# اگر از PM2 استفاده می‌کنید
-pm2 start .output/server/index.mjs --name anarstan
+# وارد دایرکتوری پروژه شوید
+cd /home/anaarest/anaarestan  # یا مسیر پروژه شما
+
+# اگر از PM2 استفاده می‌کنید (⚠️ مهم: باید از دایرکتوری پروژه اجرا شود)
+pm2 start .output/server/index.mjs --name anaarestan.ir --cwd /home/anaarest/anaarestan
+
+# یا با مسیر کامل
+pm2 start /home/anaarest/anaarestan/.output/server/index.mjs --name anaarestan.ir
+
+# یا با استفاده از ecosystem file (توصیه می‌شود)
+# ابتدا فایل ecosystem.config.js را ایجاد کنید (پایین را ببینید)
 
 # یا مستقیماً (برای تست)
 NODE_ENV=production node .output/server/index.mjs
+```
+
+**⚠️ نکته مهم**: PM2 باید از دایرکتوری پروژه یا با مسیر کامل اجرا شود. اگر از دایرکتوری دیگری اجرا کنید، فایل را پیدا نمی‌کند.
+
+**روش بهتر: استفاده از PM2 Ecosystem File**
+
+فایل `ecosystem.config.js` را در ریشه پروژه ایجاد کنید:
+
+```javascript
+module.exports = {
+  apps: [{
+    name: 'anaarestan.ir',
+    script: '.output/server/index.mjs',
+    cwd: '/home/anaarest/anaarestan',
+    instances: 1,
+    exec_mode: 'fork',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    },
+    error_file: './logs/pm2-error.log',
+    out_file: './logs/pm2-out.log',
+    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+    merge_logs: true,
+    autorestart: true,
+    watch: false,
+    max_memory_restart: '1G'
+  }]
+};
+```
+
+سپس اجرا کنید:
+
+```bash
+cd /home/anaarest/anaarestan
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup  # برای راه‌اندازی خودکار بعد از ریستارت سرور
 ```
 
 ### 10. بررسی لاگ‌ها
@@ -247,6 +360,53 @@ tail -f .output/logs/*.log
 1. مطمئن شوید فولدر `public/` در سرور وجود دارد
 2. بررسی کنید که فایل‌های فونت در `public/fonts/` هستند
 3. بررسی کنید که CSS در `public/css/` است
+
+### مشکل: خطای ERR_PNPM_Unknown system error -122 در نصب
+
+این خطا معمولاً به دلیل مشکلات فایل سیستم، کمبود فضا، یا مشکلات دسترسی است:
+
+1. **بررسی فضای دیسک**: `df -h`
+2. **پاک کردن cache**: `pnpm store prune`
+3. **پاک کردن node_modules**: `rm -rf node_modules`
+4. **نصب مجدد**: `pnpm install` یا `npm install`
+5. **بررسی دسترسی‌ها**: `ls -la` و `chmod -R 755 .`
+6. **استفاده از npm**: اگر pnpm مشکل دارد، از `npm install` استفاده کنید
+
+### مشکل: PM2 نمی‌تواند فایل .output/server/index.mjs را پیدا کند
+
+اگر با خطای `Cannot find module '/path/to/.output/server/index.mjs'` مواجه شدید:
+
+1. **مطمئن شوید build انجام شده است**:
+   ```bash
+   ls -la .output/server/index.mjs
+   ```
+
+2. **PM2 را از دایرکتوری پروژه اجرا کنید**:
+   ```bash
+   cd /home/anaarest/anaarestan
+   pm2 start .output/server/index.mjs --name anaarestan.ir
+   ```
+
+3. **یا از مسیر کامل استفاده کنید**:
+   ```bash
+   pm2 start /home/anaarest/anaarestan/.output/server/index.mjs --name anaarestan.ir
+   ```
+
+4. **یا از ecosystem file استفاده کنید** (توصیه می‌شود - بالا را ببینید)
+
+5. **بررسی PM2 processes**:
+   ```bash
+   pm2 list
+   pm2 logs anaarestan.ir
+   ```
+
+6. **Restart PM2 process**:
+   ```bash
+   pm2 restart anaarestan.ir
+   # یا
+   pm2 delete anaarestan.ir
+   pm2 start .output/server/index.mjs --name anaarestan.ir
+   ```
 
 ## به‌روزرسانی پروژه
 

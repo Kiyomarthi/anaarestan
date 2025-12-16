@@ -3,11 +3,11 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "nuxt dev",
+   "dev": "nuxt dev --dotenv .env.dev",
     "build": "nuxt build",
     "build:prod": "NODE_ENV=production nuxt build",
     "start": "nuxt start -p 1564",
-    "start:prod": "node .output/server/index.mjs",
+    "start:prod": "node .output/server/index.mjs -p 1564",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"

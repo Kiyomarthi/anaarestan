@@ -4,23 +4,20 @@ import path from "path";
 import sharp from "sharp";
 
 export default defineEventHandler(async (event) => {
-  return { test: true };
+  const config = useRuntimeConfig();
+  const uploadDir = config.uploadDir;
+  const uploadUrl = config.uploadUrl;
+
   const form = await readMultipartFormData(event);
+  if (!form) return { success: false, message: "No file uploaded" };
 
-  if (!form) {
-    return { success: false, message: "No file uploaded" };
-  }
-
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
   await fs.mkdir(uploadDir, { recursive: true });
 
   const savedFiles: string[] = [];
 
   for (const field of form) {
-    // 🔥 فیلد فایل فقط اگر filename داشت
     if (field.filename && field.data) {
       const MAX_SIZE = 300 * 1024;
-
       if (field.data.length > MAX_SIZE) {
         throw createError({
           statusCode: 400,
@@ -28,12 +25,9 @@ export default defineEventHandler(async (event) => {
         });
       }
 
-      const originalName = field.filename;
-      const ext = path.extname(originalName);
-      const base = path.basename(originalName, ext);
-
-      let safeName = base.length > 40 ? base.slice(0, 40) : base;
-
+      const ext = path.extname(field.filename);
+      const base = path.basename(field.filename, ext);
+      const safeName = base.length > 40 ? base.slice(0, 40) : base;
       const fileName = `${safeName}-${Date.now()}.webp`;
       const filePath = path.join(uploadDir, fileName);
 
@@ -46,13 +40,9 @@ export default defineEventHandler(async (event) => {
           statusMessage: "Sharp failed to process image",
         });
       }
-
-      savedFiles.push(`/uploads/${fileName}`);
+      savedFiles.push(`${uploadUrl}/${fileName}`);
     }
   }
 
-  return {
-    success: true,
-    files: savedFiles,
-  };
+  return { success: true, files: savedFiles };
 });
