@@ -1,5 +1,5 @@
 import { getDB } from "~~/server/db";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { JwtPayload } from "jsonwebtoken";
 import { requireAuth } from "~~/server/utils/auth";
 import { validate } from "~~/shared/validation";

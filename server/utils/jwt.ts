@@ -7,9 +7,10 @@ interface UserPayload {
 }
 
 export const generateAccessToken = (user: UserPayload) => {
+  const config = useRuntimeConfig();
   return jwt.sign(
     { id: user.id, phone: user.phone, role: user.role },
-    process.env.JWT_SECRET!,
+    config.jwtSecret!,
     {
       expiresIn: "48h",
     }
@@ -17,8 +18,9 @@ export const generateAccessToken = (user: UserPayload) => {
 };
 
 export const verifyToken = (token: string) => {
+  const config = useRuntimeConfig();
   try {
-    return jwt.verify(token, process.env.JWT_SECRET!);
+    return jwt.verify(token, config.jwtSecret!);
   } catch {
     return null;
   }

@@ -2,7 +2,7 @@ import { getDB } from "~~/server/db";
 import { generateAccessToken } from "~~/server/utils/jwt";
 import { userFields } from "~~/server/utils/user";
 import { validate } from "~~/shared/validation";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export default defineEventHandler(async (event) => {
   const body = (await readBody(event)) as { phone: string; password: string };

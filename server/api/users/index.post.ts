@@ -1,7 +1,7 @@
 import { getDB } from "~~/server/db";
 import { requireRole } from "~~/server/utils/permissions";
 import { userAdminFields, userFields } from "~~/server/utils/user";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { validate } from "~~/shared/validation";
 import { buildInsertQuery } from "~~/server/utils/common";
 

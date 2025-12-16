@@ -4,6 +4,7 @@ import path from "path";
 import sharp from "sharp";
 
 export default defineEventHandler(async (event) => {
+  return { test: true };
   const form = await readMultipartFormData(event);
 
   if (!form) {

@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV !== "production" },
 
   modules: [
     "@nuxt/eslint",
@@ -92,6 +92,9 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "node-server",
+    externals: {
+      inline: [],
+    },
     storage: {
       redis: {
         driver: "redis",
@@ -101,6 +104,18 @@ export default defineNuxtConfig({
         password: process.env.REDIS_PASSWORD || undefined,
         // tls: {},
         db: 0,
+      },
+    },
+  },
+
+  vite: {
+    optimizeDeps: {
+      include: ["vue", "pinia", "vue-router"],
+    },
+    ssr: {
+      noExternal: ["vue", "pinia", "vue-router"],
+      resolve: {
+        conditions: ["import", "module", "default"],
       },
     },
   },
