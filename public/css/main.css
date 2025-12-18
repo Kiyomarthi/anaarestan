@@ -57,18 +57,17 @@
   --color-warning-900: #78350f;
   --color-warning-950: #451a03;
 
-  /* Error Colors */
-  --color-error-50: #fef2f2;
-  --color-error-100: #fee2e2;
-  --color-error-200: #fecaca;
-  --color-error-300: #fca5a5;
-  --color-error-400: #f87171;
-  --color-error-500: #ef4444;
-  --color-error-600: #dc2626;
-  --color-error-700: #b91c1c;
-  --color-error-800: #991b1b;
-  --color-error-900: #7f1d1d;
-  --color-error-950: #450a0a;
+  --color-primary-50: #fdecec;
+  --color-primary-100: #f9caca;
+  --color-primary-200: #f4a2a0;
+  --color-primary-300: #ef7a76;
+  --color-primary-400: #ea514b;
+  --color-primary-500: #e63a33;
+  --color-primary-600: #cf332d;
+  --color-primary-700: #ab2a25;
+  --color-primary-800: #87211d;
+  --color-primary-900: #641816;
+  --color-primary-950: #3f0f0d;
 
   /* Info Colors */
   --color-info-50: #eff6ff;
@@ -99,7 +98,6 @@
   --color-border-light: #f1f5f9;
   --color-border-dark: #cbd5e1;
 }
-
 
 .with-transition {
   @apply transition ease-out duration-200;

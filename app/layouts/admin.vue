@@ -89,12 +89,7 @@ const items: NavigationMenuItem[][] = [
           collapsible
           :ui="{
             root: 'min-w-[250px]',
-          }"
-          open
-          :toggle="{
-            color: 'primary',
-            variant: 'subtle',
-            class: 'rounded-full',
+            overlay: 'hidden',
           }"
         >
           <template #header="{ collapsed }">
@@ -118,22 +113,24 @@ const items: NavigationMenuItem[][] = [
               :items="items[0]"
               orientation="vertical"
             />
-
-            <UNavigationMenu
-              :collapsed="collapsed"
-              :items="items[1]"
-              orientation="vertical"
-              class="mt-auto"
-            >
-              <template #logout>
-                <UButton
-                  icon="i-lucide-log-out"
-                  label="خروج از حساب کاربری"
-                  variant="ghost"
-                  @click="logout"
-                />
-              </template>
-            </UNavigationMenu>
+          </template>
+          <template #footer="{ collapsed }">
+            <div>
+              <UButton
+                icon="i-lucide-house"
+                :label="'صفحه اصلی'"
+                color="neutral"
+                variant="ghost"
+                class="w-full"
+                to="/"
+              />
+              <UButton
+                icon="i-lucide-log-out"
+                label="خروج از حساب کاربری"
+                variant="ghost"
+                @click="logout"
+              />
+            </div>
           </template>
         </UDashboardSidebar>
 

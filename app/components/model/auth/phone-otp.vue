@@ -77,8 +77,28 @@ const switchToPassword = () => {
       :fields="fields"
       :loading="loading"
       :submit="{ label: 'ارسال رمز یکبار مصرف', block: true }"
+      :ui="{
+        header: 'items-center',
+      }"
       @submit="onSubmit"
-    />
+    >
+      <template #header>
+        <ULink to="/" class="w-fit">
+          <base-image
+            src="/images/logo.webp"
+            class="aspect-square h-17.5 w-auto"
+            :height="70"
+            preload
+            loading="eager"
+            fetchPriority="high"
+            alt="انارستان"
+          />
+        </ULink>
+        <div class="text-xl text-pretty font-semibold text-highlighted mt-2">
+          ورود یا ثبت‌نام در انارستان
+        </div>
+      </template>
+    </UAuthForm>
     <div class="flex flex-col gap-2 mt-4">
       <UButton variant="ghost" color="neutral" block @click="switchToPassword">
         ورود با رمز عبور

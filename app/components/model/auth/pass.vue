@@ -87,13 +87,32 @@ const switchToOtp = () => {
   <div>
     <UAuthForm
       :validate="validateForm"
-      title="ورود با رمز عبور"
+      title="ورود با رمز عبور به انارستان"
       description="شماره تلفن و رمز عبور خود را جهت ورود به حساب کاربری وارد کنید."
-      icon="i-lucide-user"
       :fields="fields"
       :loading="loading"
+      :ui="{
+        header: 'items-center',
+      }"
       @submit="onSubmit"
-    />
+    >
+      <template #header>
+        <ULink to="/" class="w-fit">
+          <base-image
+            src="/images/logo.webp"
+            class="aspect-square h-17.5 w-auto"
+            :height="70"
+            preload
+            loading="eager"
+            fetchPriority="high"
+            alt="انارستان"
+          />
+        </ULink>
+        <div class="text-xl text-pretty font-semibold text-highlighted mt-2">
+          ورود با رمز عبور به انارستان
+        </div>
+      </template>
+    </UAuthForm>
     <div v-if="!noOtp" class="flex flex-col gap-2 mt-4">
       <UButton variant="ghost" color="neutral" block @click="switchToOtp">
         ورود با کد تایید

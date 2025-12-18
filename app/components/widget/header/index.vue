@@ -11,6 +11,7 @@ import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 ///// refs /////
 const route = useRoute();
 const userStore = useUserStore();
+const config = useRuntimeConfig();
 
 const { smAndDown } = useBreakpoints();
 
@@ -43,8 +44,24 @@ const items = computed<NavigationMenuItem[]>(() =>
 </script>
 
 <template>
-  <UHeader>
-    <template #title> انارستان </template>
+  <UHeader
+    :ui="{
+      root: 'h-max max-h-none py-2',
+    }"
+  >
+    <template #title>
+      <ULink to="/">
+        <base-image
+          src="/images/logo.webp"
+          class="aspect-auto h-17.5"
+          :height="70"
+          preload
+          loading="eager"
+          fetchPriority="high"
+          :alt="config.public.siteNameFa || 'انارستان'"
+        />
+      </ULink>
+    </template>
 
     <UNavigationMenu :items="items" />
 

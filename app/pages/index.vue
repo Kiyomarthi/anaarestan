@@ -1,15 +1,17 @@
 <script setup lang="ts">
+import { useConfigSeo } from "~/composables/utils/useConfigSeo";
+
 ///// imports /////
 
 ///// page meta /////
-definePageMeta({
-  title: "صفحه اصلی - انارستان",
-  description: "فروشگاه آنلاین انارستان، ارائه کننده بهترین محصولات با کیفیت عالی",
-});
 
 ///// props/emits /////
 
 ///// refs /////
+const { buildMeta, organizationSchema, websiteSchema, webpageSchema } =
+  useConfigSeo();
+
+const data = ref(null);
 
 ///// composables/stores /////
 const { data: categories } = useApiFetch<{
@@ -18,6 +20,11 @@ const { data: categories } = useApiFetch<{
 }>("/api/categories", {
   query: { noPaginate: true },
 });
+
+buildMeta();
+organizationSchema();
+websiteSchema();
+webpageSchema();
 
 ///// computed /////
 // Select 2 categories for category products sections

@@ -15,10 +15,24 @@ export default defineNuxtConfig({
     "nuxt-schema-org",
   ],
 
+  experimental: {
+    defaults: {
+      nuxtLink: {
+        trailingSlash: "remove",
+        // TODO: enable prefetching when needed
+        // prefetchOn: {
+        //   visibility: false,
+        //   interaction: true,
+        // },
+      },
+    },
+  },
+
   app: {
     layoutTransition: { name: "layout", mode: "out-in" },
     head: {
       title: "انارستان",
+      titleTemplate: "%s | انارستان",
       meta: [
         {
           name: "viewport",
@@ -40,8 +54,8 @@ export default defineNuxtConfig({
       link: [
         {
           rel: "icon",
-          type: "image/png",
-          href: "images/favicon.png",
+          type: "image/x-icon",
+          href: process.env.NUXT_PUBLIC_FAVICON,
         },
       ],
       htmlAttrs: {
@@ -73,6 +87,16 @@ export default defineNuxtConfig({
       phones: {
         mashhad: process.env.NUXT_PUBLIC_MASHHAD_PHONE,
       },
+      social: {
+        fb: process.env.NUXT_PUBLIC_FB,
+        x: process.env.NUXT_PUBLIC_X,
+        ig: process.env.NUXT_PUBLIC_IG,
+        yt: process.env.NUXT_PUBLIC_YT,
+      },
+      favicon: process.env.NUXT_PUBLIC_FAVICON,
+      logo: process.env.NUXT_PUBLIC_LOGO,
+      ogImage: process.env.NUXT_PUBLIC_OG_IMAGE,
+      desc: process.env.NUXT_PUBLIC_DESC,
     },
 
     redis: {

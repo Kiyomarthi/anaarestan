@@ -12,6 +12,7 @@ definePageMeta({
 
 ///// refs /////
 const router = useRouter();
+const user = useUserStore();
 
 ///// composables/stores /////
 
@@ -21,7 +22,8 @@ const router = useRouter();
 
 ///// functions /////
 const redirect = () => {
-  router.replace("/admin");
+  if (user.isAdmin) router.replace("/admin");
+  else router.replace("/");
 };
 
 ///// lifecycle /////
@@ -30,6 +32,17 @@ const redirect = () => {
 <template>
   <div class="flex flex-col items-center justify-center gap-4 p-4 w-dvw h-dvh">
     <UPageCard class="w-full max-w-md">
+      <template #header>
+        <UButton
+          variant="ghost"
+          color="neutral"
+          icon="i-lucide-arrow-right"
+          :ui="{
+            base: 'absolute right-3 top-3',
+          }"
+          @click="$router.back()"
+        />
+      </template>
       <modelAuthPass noOtp @on:login="redirect" />
     </UPageCard>
   </div>
