@@ -1,4 +1,4 @@
-import { defineNitroPlugin } from "nitropack";
+import { fromNodeMiddleware } from "h3";
 import serveStatic from "serve-static";
 
 export default defineNitroPlugin((nitroApp) => {
@@ -8,5 +8,10 @@ export default defineNitroPlugin((nitroApp) => {
   console.log("[UPLOADS] url:", config.uploadUrl);
   console.log("[UPLOADS] dir:", config.uploadDir);
 
-  nitroApp.app.use(config.uploadUrl, serveStatic(config.uploadDir));
+  nitroApp.h3App.use(
+    config.uploadUrl,
+    fromNodeMiddleware(
+      serveStatic(config.uploadDir)
+    )
+  );
 });

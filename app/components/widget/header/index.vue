@@ -12,7 +12,7 @@ import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 const route = useRoute();
 const userStore = useUserStore();
 const isAdmin = computed(
-  () => !!userStore.user && (userStore.user as any).role === "admin"
+  () => !!userStore.isLoggedIn && (userStore?.user as any)?.role === "admin"
 );
 
 const { smAndDown } = useBreakpoints();

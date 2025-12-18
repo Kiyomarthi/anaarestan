@@ -90,6 +90,7 @@ export default defineNuxtConfig({
     jwtSecret: process.env.JWT_SECRET,
     uploadDir: process.env.UPLOAD_DIR || "/home/anaarest/uploads",
     uploadUrl: process.env.UPLOAD_URL || "/uploads",
+    persistSecret: process.env.PERSIST_SECRET,
   },
 
   nitro: {
