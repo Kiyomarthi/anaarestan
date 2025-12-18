@@ -1,5 +1,6 @@
 import { defineNuxtPlugin, useRuntimeConfig, useCookie } from "#app";
-import type { Pinia, PiniaPluginContext, StateTree } from "pinia";
+import type { Pinia, StateTree } from "pinia";
+import { encrypt, decrypt } from "~~/shared/utils/crypto";
 
 type StorageKind = "local" | "session" | "cookie";
 type JsonObject = Record<string, unknown>;
@@ -17,9 +18,6 @@ interface PersistOptions {
   throttle?: number;
   encrypt?: boolean;
 }
-
-const encoder = new TextEncoder();
-const decoder = new TextDecoder();
 
 function isClient() {
   return typeof window !== "undefined";
@@ -79,56 +77,6 @@ function pickPaths<T extends JsonObject>(state: T, paths?: string[]) {
     if (p in state) out[p] = state[p];
   }
   return out;
-}
-
-async function getKey(secret: string) {
-  const material = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    "PBKDF2",
-    false,
-    ["deriveKey"]
-  );
-
-  return crypto.subtle.deriveKey(
-    {
-      name: "PBKDF2",
-      salt: encoder.encode("pinia-persist"),
-      iterations: 100_000,
-      hash: "SHA-256",
-    },
-    material,
-    { name: "AES-GCM", length: 256 },
-    false,
-    ["encrypt", "decrypt"]
-  );
-}
-
-async function encrypt(text: string, secret: string) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const key = await getKey(secret);
-  const encrypted = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
-    key,
-    encoder.encode(text)
-  );
-  const buf = new Uint8Array(iv.length + encrypted.byteLength);
-  buf.set(iv, 0);
-  buf.set(new Uint8Array(encrypted), iv.length);
-  return btoa(String.fromCharCode(...buf));
-}
-
-async function decrypt(cipher: string, secret: string) {
-  const buf = Uint8Array.from(atob(cipher), (c) => c.charCodeAt(0));
-  const iv = buf.slice(0, 12);
-  const data = buf.slice(12);
-  const key = await getKey(secret);
-  const decrypted = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv },
-    key,
-    data
-  );
-  return decoder.decode(decrypted);
 }
 
 function throttle<T extends (...a: any[]) => void>(fn: T, delay = 200): T {

@@ -11,9 +11,6 @@ import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 ///// refs /////
 const route = useRoute();
 const userStore = useUserStore();
-const isAdmin = computed(
-  () => !!userStore.isLoggedIn && (userStore?.user as any)?.role === "admin"
-);
 
 const { smAndDown } = useBreakpoints();
 
@@ -25,7 +22,7 @@ const items = computed<NavigationMenuItem[]>(() =>
       icon: "i-lucide-layout-dashboard",
       active: route.path.startsWith("/docs/getting-started"),
     },
-    isAdmin.value && {
+    userStore.isAdmin && {
       label: "پنل ادمین",
       to: "/admin",
       icon: "i-lucide-user-star",

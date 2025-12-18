@@ -30,6 +30,10 @@ export const useUserStore = defineStore(
       return Boolean(token.value) && !isExpired.value;
     });
 
+    const isAdmin = computed(
+      () => isLoggedIn.value && user.value?.role === "admin"
+    );
+
     function setUser(userData: UserPayload | null) {
       user.value = userData;
       createdAt.value = userData ? Date.now() : null;
@@ -87,6 +91,7 @@ export const useUserStore = defineStore(
       createdAt,
       token,
       isExpired,
+      isAdmin,
       isLoggedIn,
       setUser,
       setAuth,
