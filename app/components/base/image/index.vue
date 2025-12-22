@@ -14,8 +14,8 @@ const props = withDefaults(
     loading?: "lazy" | "eager";
     fetchPriority?: "low" | "high";
     showLoadingOverlay?: boolean;
-    width?: string | number;
-    height?: string | number;
+    width?: number;
+    height?: number;
     class?: string;
     preload?: boolean;
   }>(),
@@ -28,8 +28,6 @@ const props = withDefaults(
     loading: "lazy",
     fetchPriority: "low",
     showLoadingOverlay: true,
-    width: "100%",
-    height: "100%",
     class: "",
   }
 );
@@ -69,11 +67,12 @@ watch(
 
 <template>
   <div :class="wrapperClasses">
+    <!-- TODO: fix this -->
     <!-- <div
       v-if="isLoading && props.showLoadingOverlay"
       class="absolute inset-0 z-10 bg-gray-200 animate-pulse"
     /> -->
-    <nuxt-img
+    <img
       v-bind="$attrs"
       :src="props.src"
       :alt="props.alt"

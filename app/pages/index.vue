@@ -1,47 +1,23 @@
 <script setup lang="ts">
 import { useConfigSeo } from "~/composables/utils/useConfigSeo";
 
-///// imports /////
-
-///// page meta /////
-
-///// props/emits /////
-
-///// refs /////
 const { buildMeta, organizationSchema, websiteSchema, webpageSchema } =
   useConfigSeo();
-
-const data = ref(null);
-
-///// composables/stores /////
-const { data: categories } = useApiFetch<{
-  success: boolean;
-  data: any[];
-}>("/api/categories", {
-  query: { noPaginate: true },
-});
 
 buildMeta();
 organizationSchema();
 websiteSchema();
 webpageSchema();
-
-///// computed /////
-// Select 2 categories for category products sections
-const selectedCategories = computed(() => {
-  if (!categories.value?.data) return [];
-  return categories.value.data.slice(0, 2);
-});
-
-///// watchers /////
-
-///// functions /////
-
-///// lifecycle /////
 </script>
 
 <template>
   <div>
+    <base-editor />
+
+    <!-- نمایش خروجی HTML -->
+    <!-- <div v-html="value" class="border p-2 mt-2" /> -->
+
+    <!-- ----------------------------------------------------------------------------------------------- -->
     <!-- Hero Slider -->
     <!-- <WidgetSectionsHeroSlider /> -->
 

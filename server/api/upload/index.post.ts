@@ -1,7 +1,6 @@
 import { readMultipartFormData } from "h3";
 import { promises as fs } from "fs";
 import path from "path";
-import sharp from "sharp";
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
@@ -11,7 +10,7 @@ export default defineEventHandler(async (event) => {
   console.log("[UPLOAD] request received");
 
   const form = await readMultipartFormData(event);
-  if (!form) {
+  if (!form || !form.length) {
     console.error("[UPLOAD] no form data");
     return { success: false, message: "No file uploaded" };
   }
@@ -34,18 +33,19 @@ export default defineEventHandler(async (event) => {
     }
 
     const base = path.basename(field.filename, path.extname(field.filename));
-    const fileName = `${base.slice(0, 40)}-${Date.now()}.webp`;
+    const ext = path.extname(field.filename).toLowerCase();
+    const fileName = `${base.slice(0, 40)}-${Date.now()}${ext}`;
     const filePath = path.join(uploadDir, fileName);
 
     try {
-      await sharp(field.data).webp({ quality: 80 }).toFile(filePath);
+      await fs.writeFile(filePath, field.data);
       console.log("[UPLOAD] saved:", filePath);
       savedFiles.push(`${uploadUrl}/${fileName}`);
     } catch (err) {
-      console.error("[UPLOAD] sharp error:", err);
+      console.error("[UPLOAD] save error:", err);
       throw createError({
         statusCode: 500,
-        statusMessage: "Image processing failed",
+        statusMessage: "File saving failed",
       });
     }
   }

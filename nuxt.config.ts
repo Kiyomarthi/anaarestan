@@ -28,6 +28,11 @@ export default defineNuxtConfig({
     },
   },
 
+  image: {
+    provider: "ipx",
+    dir: "images",
+  },
+
   app: {
     layoutTransition: { name: "layout", mode: "out-in" },
     head: {

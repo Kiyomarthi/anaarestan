@@ -1,112 +1,71 @@
 <script setup lang="ts">
-const { data: categories } = useApiFetch<{
-  success: boolean;
-  data: any[];
-}>("/api/categories", {
-  query: { noPaginate: true },
-});
+import type { NavigationMenuItem } from "@nuxt/ui";
 
-const footerLinks = [
+const items: NavigationMenuItem[] = [
   {
-    title: "دسترسی سریع",
-    links: [
-      { label: "صفحه اصلی", href: "/" },
-      { label: "درباره ما", href: "/about" },
-      { label: "تماس با ما", href: "/contact" },
-      { label: "سوالات متداول", href: "/faq" },
-    ],
+    label: "Figma Kit",
+    to: "https://go.nuxt.com/figma-ui",
+    target: "_blank",
   },
   {
-    title: "خدمات مشتریان",
-    links: [
-      { label: "راهنمای خرید", href: "/help" },
-      { label: "روش‌های پرداخت", href: "/payment" },
-      { label: "شرایط بازگشت", href: "/return" },
-      { label: "حریم خصوصی", href: "/privacy" },
-    ],
+    label: "Playground",
+    to: "https://stackblitz.com/edit/nuxt-ui",
+    target: "_blank",
+  },
+  {
+    label: "Releases",
+    to: "https://github.com/nuxt/ui/releases",
+    target: "_blank",
   },
 ];
 </script>
 
 <template>
-  <footer class="bg-gray-900 text-white mt-16">
-    <div class="container mx-auto px-4 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <!-- About -->
-        <div>
-          <h3 class="text-xl font-bold mb-4">انارستان</h3>
-          <p class="text-gray-400 text-sm">
-            فروشگاه آنلاین انارستان، ارائه کننده بهترین محصولات با کیفیت
-            عالی و قیمت مناسب
-          </p>
-        </div>
+  <UFooter>
+    <template #left>
+      <p class="text-muted text-sm">
+        Copyright © {{ new Date().getFullYear() }}
+      </p>
+    </template>
 
-        <!-- Quick Links -->
-        <div v-for="section in footerLinks" :key="section.title">
-          <h4 class="text-lg font-semibold mb-4">{{ section.title }}</h4>
-          <ul class="space-y-2">
-            <li v-for="link in section.links" :key="link.href">
-              <NuxtLink
-                :to="link.href"
-                class="text-gray-400 hover:text-white text-sm transition-colors"
-              >
-                {{ link.label }}
-              </NuxtLink>
-            </li>
-          </ul>
-        </div>
+    <UNavigationMenu :items="items" variant="link" />
 
-        <!-- Categories -->
-        <div v-if="categories?.data">
-          <h4 class="text-lg font-semibold mb-4">دسته‌بندی‌ها</h4>
-          <ul class="space-y-2">
-            <li
-              v-for="category in categories.data.slice(0, 6)"
-              :key="category.id"
-            >
-              <NuxtLink
-                :to="`/category/${category.slug}`"
-                class="text-gray-400 hover:text-white text-sm transition-colors"
-              >
-                {{ category.name }}
-              </NuxtLink>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Bottom Bar -->
-      <div class="border-t border-gray-800 mt-8 pt-8">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-          <p class="text-gray-400 text-sm text-center">
-            © {{ new Date().getFullYear() }} انارستان. تمامی حقوق محفوظ است.
-          </p>
-          <div class="flex items-center gap-4">
-            <a
-              href="#"
-              class="text-gray-400 hover:text-white transition-colors"
-              aria-label="اینستاگرام"
-            >
-              <UIcon name="i-simple-icons-instagram" class="text-xl" />
-            </a>
-            <a
-              href="#"
-              class="text-gray-400 hover:text-white transition-colors"
-              aria-label="تلگرام"
-            >
-              <UIcon name="i-simple-icons-telegram" class="text-xl" />
-            </a>
-            <a
-              href="#"
-              class="text-gray-400 hover:text-white transition-colors"
-              aria-label="واتساپ"
-            >
-              <UIcon name="i-simple-icons-whatsapp" class="text-xl" />
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </footer>
+    <template #right>
+      <a
+        referrerpolicy="origin"
+        target="_blank"
+        href="https://trustseal.enamad.ir/?id=689420&Code=TYwmi73C2FCMfKGzrnyFyy4dZ35kJLZd"
+        ><img
+          referrerpolicy="origin"
+          src="https://trustseal.enamad.ir/logo.aspx?id=689420&Code=TYwmi73C2FCMfKGzrnyFyy4dZ35kJLZd"
+          alt=""
+          style="cursor: pointer"
+          code="TYwmi73C2FCMfKGzrnyFyy4dZ35kJLZd"
+      /></a>
+      <UButton
+        icon="i-simple-icons-discord"
+        color="neutral"
+        variant="ghost"
+        to="https://go.nuxt.com/discord"
+        target="_blank"
+        aria-label="Discord"
+      />
+      <UButton
+        icon="i-simple-icons-x"
+        color="neutral"
+        variant="ghost"
+        to="https://go.nuxt.com/x"
+        target="_blank"
+        aria-label="X"
+      />
+      <UButton
+        icon="i-simple-icons-github"
+        color="neutral"
+        variant="ghost"
+        to="https://github.com/nuxt/nuxt"
+        target="_blank"
+        aria-label="GitHub"
+      />
+    </template>
+  </UFooter>
 </template>
-

@@ -11,7 +11,7 @@ const noBottomNavigation = computed(() => route.meta?.noFooter);
     <main class="flex-1">
       <slot />
     </main>
-    <!-- <WidgetFooter v-if="!noFooter" /> -->
+    <WidgetFooter v-if="!noFooter" />
     <WidgetBottomNavigation v-if="!noBottomNavigation"  />
   </div>
 </template>
