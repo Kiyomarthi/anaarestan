@@ -236,15 +236,16 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
   }
 
   // Validate media_blocks
-  for (const block of formState.media_blocks) {
-    if (!block.title || !block.image) {
-      toast.add({
-        title: "لطفا عنوان و تصویر برای media blocks را پر کنید",
-        color: "error",
-      });
-      return;
-    }
-  }
+  console.log("formstate", formState);
+  // for (const block of formState?.media_blocks) {
+  //   if (!block.title || !block.image) {
+  //     toast.add({
+  //       title: "لطفا عنوان و تصویر برای media blocks را پر کنید",
+  //       color: "error",
+  //     });
+  //     return;
+  //   }
+  // }
 
   // Validate faqs
   for (const faq of formState.faqs) {
