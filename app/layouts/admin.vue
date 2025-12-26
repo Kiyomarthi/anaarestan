@@ -3,6 +3,10 @@ import type { NavigationMenuItem } from "@nuxt/ui";
 import { routerKey } from "vue-router";
 import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 
+definePageMeta({
+  ssr: false,
+});
+
 const { mdAndDown } = useBreakpoints();
 const userStore = useUserStore();
 const router = useRouter();
@@ -50,14 +54,9 @@ const items: NavigationMenuItem[][] = [
       ],
     },
     {
-      label: "محتوا",
+      label: "محتوای صفحات",
       icon: "i-lucide-letter-text",
-      children: [
-        {
-          label: "صفحه خانه",
-          to: "/admin/seo/home",
-        },
-      ],
+      to: "/admin/seo",
     },
     {
       label: "تنظیمات",

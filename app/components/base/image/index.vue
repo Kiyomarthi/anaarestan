@@ -70,7 +70,7 @@ watch(
     <!-- TODO: fix this -->
     <!-- <div
       v-if="isLoading && props.showLoadingOverlay"
-      class="absolute inset-0 z-10 bg-gray-200 animate-pulse"
+      class="absolute inset-0 z-10 bg-gray-300 animate-pulse"
     /> -->
     <img
       v-bind="$attrs"

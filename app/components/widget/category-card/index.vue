@@ -43,7 +43,7 @@ function handleClick() {
         />
         <div
           v-else
-          class="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center"
+          class="w-full h-full bg-gray-300 rounded-lg flex items-center justify-center"
         >
           <svg
             class="w-12 h-12 text-gray-400"

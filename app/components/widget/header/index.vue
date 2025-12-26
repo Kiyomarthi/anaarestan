@@ -13,7 +13,7 @@ const route = useRoute();
 const userStore = useUserStore();
 const config = useRuntimeConfig();
 
-const { smAndDown } = useBreakpoints();
+const { smAndDown, mdAndUp } = useBreakpoints();
 
 const items = computed<NavigationMenuItem[]>(() =>
   [
@@ -66,15 +66,30 @@ const items = computed<NavigationMenuItem[]>(() =>
     <UNavigationMenu :items="items" />
 
     <template #right>
-      <UButton
-        v-if="userStore.isLoggedIn"
-        color="neutral"
-        variant="ghost"
-        to="/panel"
-        class="flex items-center gap-2"
-        icon="i-lucide-user"
-      >
-      </UButton>
+      <UPopover v-if="userStore.isLoggedIn" mode="hover">
+        <UButton
+          color="neutral"
+          variant="ghost"
+          to="/panel"
+          class="flex items-center gap-2"
+          icon="i-lucide-user"
+        >
+        </UButton>
+
+        <template #content>
+          <div v-if="mdAndUp" class="p-3">
+            <UNavigationMenu
+              :items="items"
+              orientation="vertical"
+              :ui="{
+                list: 'space-y-2',
+                item: 'rounded-xl border border-gray-300 hover:bg-gray-100 with-transition min-w-[200px]',
+                link: 'flex items-center gap-3 font-medium px-4 py-3',
+              }"
+            />
+          </div>
+        </template>
+      </UPopover>
       <UButton
         v-else
         color="neutral"
@@ -120,7 +135,7 @@ const items = computed<NavigationMenuItem[]>(() =>
               orientation="vertical"
               :ui="{
                 list: 'space-y-2',
-                item: 'rounded-xl border border-gray-200 hover:bg-gray-100 with-transition px-4 py-3',
+                item: 'rounded-xl border border-gray-300 hover:bg-gray-100 with-transition px-4 py-3',
                 link: 'flex items-center gap-3 font-medium',
               }"
             />

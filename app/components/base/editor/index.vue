@@ -228,7 +228,7 @@ const items: EditorToolbarItem[][] = [
       class="min-h-48 prose"
       v-slot="{ editor }"
     >
-      <div class="flex items-center gap-2 border-b pb-2 mb-2 flex-wrap">
+      <div class="flex items-center gap-2 border-b border-gray-300 pb-2 mb-2 flex-wrap">
         <UEditorToolbar :editor="editor" :items="items" class="flex-wrap" />
 
         <UPopover>

@@ -74,7 +74,7 @@ const isOpen = (id: number) => openItems.value.includes(id);
           </UButton>
           <div
             v-show="isOpen(faq.id)"
-            class="mt-3 pt-3 border-t border-gray-200"
+            class="mt-3 pt-3 border-t border-gray-300"
           >
             <p class="text-gray-600 text-sm leading-relaxed">
               {{ faq.answer }}

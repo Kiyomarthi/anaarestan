@@ -34,7 +34,7 @@ const isActive = (href: string) => {
     class="fixed bottom-4 left-4 right-4 z-50 md:hidden"
     style="backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.9);"
   >
-    <div class="flex items-center justify-around rounded-2xl shadow-lg border border-gray-200 p-2">
+    <div class="flex items-center justify-around rounded-2xl shadow-lg border border-gray-300 p-2">
       <NuxtLink
         v-for="item in navItems"
         :key="item.href"

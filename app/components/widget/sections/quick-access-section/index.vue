@@ -21,7 +21,7 @@ function handleCategoryClick(category: any) {
         <div
           v-for="category in categories.data"
           :key="category.id"
-          class="p-4 bg-white rounded-lg border border-gray-200 hover:border-primary-500 hover:shadow-md transition-all cursor-pointer"
+          class="p-4 bg-white rounded-lg border border-gray-300 hover:border-primary-500 hover:shadow-md transition-all cursor-pointer"
           @click="handleCategoryClick(category)"
         >
           <div class="flex flex-col items-center text-center">

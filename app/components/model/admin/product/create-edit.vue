@@ -259,6 +259,17 @@ function validateForm(state: FormState) {
   const errors: any[] = [];
   validate(state.category_id).required().pushError("category_id", errors);
   validate(state.title).required().min(2).max(150).pushError("title", errors);
+  validate(state.short_description)
+    .required()
+    .min(2)
+    .max(150)
+    .pushError("short_description", errors);
+
+  validate(state.description)
+    .required()
+    .min(1000)
+    .max(10000)
+    .pushError("description", errors);
 
   if (props.mode === "create") {
     validate(state.slug).required().slug().pushError("slug", errors);
@@ -469,15 +480,6 @@ const isSlugDisabled = computed(() => props.mode === "edit");
                     v-model="formState.short_description"
                     :rows="3"
                     placeholder="توضیح کوتاه محصول"
-                    :ui="{ root: 'w-full' }"
-                  />
-                </UFormField>
-
-                <UFormField label="توضیحات" name="description">
-                  <UTextarea
-                    v-model="formState.description"
-                    :rows="5"
-                    placeholder="توضیحات کامل"
                     :ui="{ root: 'w-full' }"
                   />
                 </UFormField>
@@ -722,6 +724,22 @@ const isSlugDisabled = computed(() => props.mode === "edit");
                   </div>
                 </UCard>
               </div>
+            </div>
+
+            <div class="border border-gray-300 rounded-xl p-2 mt-4">
+              <UFormField label="توضیحات" name="description">
+                <clientOnly>
+                  <template #placeholder>
+                    <div class="border border-gray-300 rounded p-4">
+                      در حال بارگذاری ویرایشگر...
+                    </div>
+                  </template>
+                  <BaseEditor
+                    v-model="formState.description"
+                    :ui="{ root: 'w-full' }"
+                  />
+                </clientOnly>
+              </UFormField>
             </div>
 
             <div class="mt-8 flex items-center gap-3 justify-end">

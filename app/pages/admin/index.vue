@@ -32,6 +32,11 @@ type StatsData = {
   attributes: {
     total: number;
   };
+  pages: {
+    total: number;
+    active: number;
+    recent: number;
+  };
 };
 
 type StatsResponse = {
@@ -91,6 +96,13 @@ const quickActions = [
     description: "افزودن ویژگی جدید",
   },
   {
+    label: "ایجاد صفحه",
+    icon: "i-lucide-file-plus",
+    to: "/admin/seo/create",
+    color: "secondary" as const,
+    description: "افزودن صفحه جدید",
+  },
+  {
     label: "مشاهده کاربران",
     icon: "i-lucide-users",
     to: "/admin/users",
@@ -103,6 +115,13 @@ const quickActions = [
     to: "/admin/products",
     color: "success" as const,
     description: "لیست تمام محصولات",
+  },
+  {
+    label: "مشاهده صفحات",
+    icon: "i-lucide-files",
+    to: "/admin/seo",
+    color: "secondary" as const,
+    description: "لیست تمام صفحات",
   },
 ];
 
@@ -132,6 +151,18 @@ const recentActivities = computed(() => {
       time: "۷ روز گذشته",
       type: "product" as const,
       to: "/admin/products",
+    });
+  }
+
+  if (stats.value?.pages.recent > 0) {
+    activities.push({
+      id: "pages-recent",
+      title: `${stats.value.pages.recent} صفحه جدید`,
+      description: "در ۷ روز گذشته",
+      icon: "i-lucide-file-plus",
+      time: "۷ روز گذشته",
+      type: "page" as const,
+      to: "/admin/seo",
     });
   }
 
@@ -174,7 +205,7 @@ const recentActivities = computed(() => {
         <!-- Statistics Cards -->
         <div
           v-if="stats"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6"
         >
           <StatsCard
             title="کل کاربران"
@@ -222,6 +253,20 @@ const recentActivities = computed(() => {
             color="warning"
             :to="'/admin/attributes'"
             description="ویژگی‌های تعریف شده"
+          />
+
+          <StatsCard
+            title="صفحات"
+            :value="formatNumber(stats.pages.total)"
+            icon="i-lucide-files"
+            color="secondary"
+            :to="'/admin/seo'"
+            :trend="{
+              value: stats.pages.recent,
+              label: 'صفحه جدید',
+              direction: 'up',
+            }"
+            :description="`${formatNumber(stats.pages.active)} فعال`"
           />
         </div>
 

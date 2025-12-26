@@ -15,15 +15,18 @@ export default defineNuxtConfig({
     "nuxt-schema-org",
   ],
 
+  routeRules: {
+    "/admin/**": { ssr: false },
+  },
+
   experimental: {
     defaults: {
       nuxtLink: {
         trailingSlash: "remove",
-        // TODO: enable prefetching when needed
-        // prefetchOn: {
-        //   visibility: false,
-        //   interaction: true,
-        // },
+        prefetchOn: {
+          visibility: false,
+          interaction: true,
+        },
       },
     },
   },
@@ -78,7 +81,15 @@ export default defineNuxtConfig({
     fonts: true,
     colorMode: false,
     theme: {
-      colors: ["primary", "white", "info", "success", "warning", "error"],
+      colors: [
+        "primary",
+        "white",
+        "info",
+        "success",
+        "warning",
+        "error",
+        "default",
+      ],
     },
   },
 

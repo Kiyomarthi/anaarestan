@@ -12,14 +12,8 @@ webpageSchema();
 
 <template>
   <div>
-    <base-editor />
-
-    <!-- نمایش خروجی HTML -->
-    <!-- <div v-html="value" class="border p-2 mt-2" /> -->
-
     <!-- ----------------------------------------------------------------------------------------------- -->
     <!-- Hero Slider -->
-    <!-- <WidgetSectionsHeroSlider /> -->
 
     <!-- Categories Section -->
     <!-- <WidgetSectionsCategoriesSection /> -->

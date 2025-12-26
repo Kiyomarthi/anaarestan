@@ -2,27 +2,23 @@
 // @ts-nocheck
 import { computed, ref, watch } from "vue";
 import { useApiFetch } from "~/composables/useApiFetch";
-import { formatPrice } from "~~/shared/utils/format";
 
 definePageMeta({
   layout: "admin",
-  ssr: false,
 });
 
-type Product = {
+type Page = {
   id: number;
+  slug: string;
   title: string;
-  code: string;
-  price: number;
-  discount_price?: number | null;
-  stock: number;
-  status: number;
+  type: string;
+  is_active: number;
   created_at: string;
 };
 
-type ProductListResponse = {
+type PageListResponse = {
   success: boolean;
-  data: Product[];
+  data: Page[];
   meta?: {
     page?: number;
     limit?: number;
@@ -44,15 +40,18 @@ const token = userStore.token;
 const { loading, fetch } = useApiRequest();
 
 const { data, pending, execute, error, refresh } =
-  useApiFetch<ProductListResponse>("/api/products", {
+  useApiFetch<PageListResponse>("/api/page", {
     query: computed(() => ({
       page: page.value,
       search: globalFilter.value,
       limit: perPage.value,
     })),
+    headers: {
+      authorization: token,
+    },
   });
 
-const rows = computed<Product[]>(() => data.value?.data ?? []);
+const rows = computed<Page[]>(() => data.value?.data ?? []);
 const meta = computed(() => data.value?.meta ?? {});
 
 const columns = [
@@ -61,19 +60,15 @@ const columns = [
     header: "عنوان",
   },
   {
-    accessorKey: "code",
-    header: "کد",
+    accessorKey: "slug",
+    header: "Slug",
   },
   {
-    accessorKey: "price",
-    header: "قیمت",
+    accessorKey: "type",
+    header: "نوع",
   },
   {
-    accessorKey: "stock",
-    header: "موجودی",
-  },
-  {
-    accessorKey: "status",
+    accessorKey: "is_active",
     header: "وضعیت",
   },
   {
@@ -111,11 +106,11 @@ const perPageOptions = [
 ];
 
 const goCreate = async () => {
-  await router.push("/admin/products/create");
+  await router.push("/admin/seo/create");
 };
 
-const goEdit = async (code: string) => {
-  await router.push(`/admin/products/${code}`);
+const goEdit = async (slug: string) => {
+  await router.push(`/admin/seo/${slug}`);
 };
 
 const handleRefresh = async () => {
@@ -123,13 +118,13 @@ const handleRefresh = async () => {
   toast.add({ title: "لیست بروزرسانی شد", color: "success" });
 };
 
-const confirmDelete = (code) => {
+const confirmDelete = (id: number) => {
   openModal.value = true;
-  itemClicked.value = code;
+  itemClicked.value = id;
 };
 
 const deleteItem = async () => {
-  const res = await fetch(`/api/products/${itemClicked.value}`, {
+  const res = await fetch(`/api/page/${itemClicked.value}`, {
     method: "delete",
     headers: {
       Authorization: token,
@@ -146,8 +141,8 @@ const deleteItem = async () => {
   <div class="md:p-4">
     <UPage>
       <UPageHeader
-        title="محصولات"
-        description="مدیریت و مشاهده لیست محصولات فروشگاه"
+        title="مدیریت محتوای صفحات"
+        description="مدیریت و مشاهده لیست صفحات"
         :ui="{
           root: 'pt-0 pb-4',
         }"
@@ -157,7 +152,7 @@ const deleteItem = async () => {
             icon="i-lucide-plus"
             color="primary"
             variant="solid"
-            label="ایجاد محصول"
+            label="ایجاد صفحه"
             @click="goCreate"
           />
           <UButton
@@ -177,7 +172,7 @@ const deleteItem = async () => {
           icon="i-lucide-alert-triangle"
           color="error"
           variant="subtle"
-          :title="error?.statusMessage || 'خطا در دریافت محصولات'"
+          :title="error?.statusMessage || 'خطا در دریافت صفحات'"
           class="mb-4"
         />
 
@@ -208,9 +203,9 @@ const deleteItem = async () => {
             :data="rows as any"
             :columns="columns as any"
             :loading="pending"
-            empty-state-icon="i-lucide-package-open"
-            empty-state-title="محصولی یافت نشد"
-            empty-state-description="محصول جدیدی ثبت کنید یا فیلترها را بررسی کنید."
+            empty-state-icon="i-lucide-file-text"
+            empty-state-title="صفحه‌ای یافت نشد"
+            empty-state-description="صفحه جدیدی ثبت کنید یا فیلترها را بررسی کنید."
           >
             <template #title-cell="{ row }: { row: any }">
               <span class="text-xs bg-gray-100 px-2 py-1 rounded">
@@ -218,33 +213,24 @@ const deleteItem = async () => {
               </span>
             </template>
 
-            <template #code-cell="{ row }: { row: any }">
+            <template #slug-cell="{ row }: { row: any }">
               <span class="text-xs bg-gray-100 px-2 py-1 rounded">{{
-                row?.original?.code
+                row?.original?.slug
               }}</span>
             </template>
 
-            <template #price-cell="{ row }: { row: any }">
-              <div class="flex flex-col">
-                <span class="font-medium">
-                  {{
-                    formatPrice(
-                      row?.original?.discount_price ?? row?.original?.price
-                    )
-                  }}
-                </span>
-                <span
-                  v-if="row?.original?.discount_price"
-                  class="text-xs text-gray-500 line-through"
-                  >{{ formatPrice(row?.original?.price) }}</span
-                >
-              </div>
+            <template #type-cell="{ row }: { row: any }">
+              <UBadge
+                color="info"
+                :label="row?.original?.type"
+                variant="soft"
+              />
             </template>
 
-            <template #status-cell="{ row }: { row: any }">
+            <template #is_active-cell="{ row }: { row: any }">
               <UBadge
-                :color="row?.original?.status === 1 ? 'success' : 'warning'"
-                :label="row?.original?.status === 1 ? 'فعال' : 'غیرفعال'"
+                :color="row?.original?.is_active === 1 ? 'success' : 'warning'"
+                :label="row?.original?.is_active === 1 ? 'فعال' : 'غیرفعال'"
                 variant="soft"
               />
             </template>
@@ -266,7 +252,7 @@ const deleteItem = async () => {
                   variant="ghost"
                   icon="i-lucide-pencil"
                   size="xs"
-                  @click="goEdit(row?.original?.code)"
+                  @click="goEdit(row?.original?.slug)"
                 >
                   ویرایش
                 </UButton>
@@ -279,7 +265,7 @@ const deleteItem = async () => {
                   variant="ghost"
                   icon="i-lucide-trash"
                   size="xs"
-                  @click="confirmDelete(row?.original?.code)"
+                  @click="confirmDelete(row?.original?.id)"
                 >
                   حذف
                 </UButton>
@@ -305,7 +291,7 @@ const deleteItem = async () => {
     <UModal
       v-model:open="openModal"
       title="تایید عملیات"
-      description="آیا از حذف محصول مطمئن هستید"
+      description="آیا از حذف صفحه مطمئن هستید"
       :ui="{ footer: 'justify-end' }"
     >
       <template #footer>

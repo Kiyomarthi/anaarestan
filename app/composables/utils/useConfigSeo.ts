@@ -17,8 +17,8 @@ export const useConfigSeo = () => {
       },
       description: seo?.description || siteConfig.value?.public?.desc,
       robots: {
-        index: true,
-        follow: true,
+        index: false, // TODO: change to true in production
+        follow: false, // TODO: change to true in production
         noimageindex: false,
         nosnippet: false,
         maxSnippet: -1,

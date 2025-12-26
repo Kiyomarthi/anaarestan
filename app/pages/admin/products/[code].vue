@@ -6,6 +6,7 @@ import { useApiRequest } from "~/composables/useApiRequest";
 
 definePageMeta({
   layout: "admin",
+  ssr: false,
 });
 
 const toast = useToast();

@@ -30,6 +30,11 @@ export default defineEventHandler(async (event) => {
     const totalAttributes =
       (attributesCount as { total: number }[])[0]?.total || 0;
 
+    const [pagesCount] = await db.execute(
+      "SELECT COUNT(*) as total FROM pages"
+    );
+    const totalPages = (pagesCount as { total: number }[])[0]?.total || 0;
+
     // Get products with stock status
     const [productsInStock] = await db.execute(
       "SELECT COUNT(*) as total FROM products WHERE stock > 0"
@@ -56,6 +61,13 @@ export default defineEventHandler(async (event) => {
     );
     const activeCategoriesCount =
       (activeCategories as { total: number }[])[0]?.total || 0;
+
+    // Get active pages
+    const [activePages] = await db.execute(
+      "SELECT COUNT(*) as total FROM pages WHERE is_active = 1"
+    );
+    const activePagesCount =
+      (activePages as { total: number }[])[0]?.total || 0;
 
     // Get admin users count
     const [adminUsers] = await db.execute(
@@ -84,6 +96,13 @@ export default defineEventHandler(async (event) => {
     const recentUsersCount =
       (recentUsers as { total: number }[])[0]?.total || 0;
 
+    // Get recent pages (last 7 days)
+    const [recentPages] = await db.execute(
+      "SELECT COUNT(*) as total FROM pages WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
+    );
+    const recentPagesCount =
+      (recentPages as { total: number }[])[0]?.total || 0;
+
     return {
       success: true,
       data: {
@@ -106,6 +125,11 @@ export default defineEventHandler(async (event) => {
         },
         attributes: {
           total: totalAttributes,
+        },
+        pages: {
+          total: totalPages,
+          active: activePagesCount,
+          recent: recentPagesCount,
         },
       },
     };
