@@ -28,8 +28,9 @@ const { loading, fetch } = useApiRequest<{
 const fields: AuthFormField[] = [
   {
     name: "phone",
-    type: "text",
+    type: "tel",
     label: "شماره همراه",
+    class: "rtl",
     placeholder: "09151111111",
     required: true,
   },
@@ -94,6 +95,7 @@ const switchToOtp = () => {
       :ui="{
         header: 'items-center',
       }"
+      dir="rlt"
       @submit="onSubmit"
     >
       <template #header>

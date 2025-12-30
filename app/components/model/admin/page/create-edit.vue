@@ -80,6 +80,8 @@ const router = useRouter();
 const userStore = useUserStore();
 const token = userStore.token;
 const { fetch: sendRequest, loading: uploading } = useApiRequest();
+const MAX_IMAGE_SIZE = 300 * 1024; // 300KB
+const imageFiles = ref<File[][]>([]);
 
 const formState = reactive<FormState>({
   slug: "",
@@ -100,22 +102,22 @@ const formState = reactive<FormState>({
 });
 
 const typeOptions = [
-  { label: "Static", value: "static" },
-  { label: "Blog", value: "blog" },
-  { label: "Landing", value: "landing" },
+  { label: "لندینگ", value: "Landing" },
+  { label: "بلاگ", value: "blog" },
+  { label: "دسته بندی", value: "category" },
 ];
 
 const mediaBlockTypes = [
-  { label: "Banner", value: "banner" },
-  { label: "Slider", value: "slider" },
+  { label: "بنر", id: "banner" },
+  { label: "اسلایدر", id: "slider" },
 ];
 
 const contentTypes = [
-  { label: "Text", value: "text" },
-  { label: "HTML", value: "html" },
-  { label: "Title", value: "title" },
-  { label: "Subtitle", value: "subtitle" },
-  { label: "Quote", value: "quote" },
+  { label: "Text", id: "text" },
+  { label: "HTML", id: "html" },
+  { label: "Title", id: "title" },
+  { label: "Subtitle", id: "subtitle" },
+  { label: "Quote", id: "quote" },
 ];
 
 // Watch for initial data in edit mode
@@ -236,16 +238,15 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
   }
 
   // Validate media_blocks
-  console.log("formstate", formState);
-  // for (const block of formState?.media_blocks) {
-  //   if (!block.title || !block.image) {
-  //     toast.add({
-  //       title: "لطفا عنوان و تصویر برای media blocks را پر کنید",
-  //       color: "error",
-  //     });
-  //     return;
-  //   }
-  // }
+  for (const block of formState?.media_blocks) {
+    if (!block.title || !block.image) {
+      toast.add({
+        title: "لطفا عنوان و تصویر برای media blocks را پر کنید",
+        color: "error",
+      });
+      return;
+    }
+  }
 
   // Validate faqs
   for (const faq of formState.faqs) {
@@ -303,6 +304,52 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
     breadcrumbs: formState.breadcrumbs,
   });
 };
+
+const uploadImage = async (idx: number, file: File) => {
+  if (!file || !file.name) return;
+
+  if (file.size > MAX_IMAGE_SIZE) {
+    toast.add({
+      title: "حجم فایل بیش از 300 کیلوبایت است",
+      color: "error",
+    });
+    imageFiles.value[idx] = [];
+    formState.media_blocks[idx].image = "";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const res = await sendRequest("/api/upload", {
+      method: "POST",
+      body: formData,
+      errorTitle: "خطای آپلود تصویر",
+    });
+
+    const uploadedUrl =
+      res?.files?.[0] ||
+      res?.files?.[0]?.url ||
+      res?.data?.url ||
+      res?.url ||
+      res?.file?.url ||
+      "";
+
+    if (!uploadedUrl) {
+      throw new Error("آدرس فایل دریافت نشد");
+    }
+
+    formState.media_blocks[idx].image = uploadedUrl;
+  } catch (err: any) {
+    imageFiles.value[idx] = [];
+    formState.media_blocks[idx].image = "";
+    toast.add({
+      title: err?.message || "آپلود تصویر ناموفق بود",
+      color: "error",
+    });
+  }
+};
 </script>
 
 <template>
@@ -325,21 +372,39 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
             </template>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <UFormField label="Slug" required>
-                <UInput v-model="formState.slug" placeholder="about-us" />
+                <UInput
+                  v-model="formState.slug"
+                  placeholder="about-us"
+                  :ui="{ root: 'w-full' }"
+                />
               </UFormField>
               <UFormField label="عنوان" required>
-                <UInput v-model="formState.title" placeholder="درباره ما" />
+                <UInput
+                  v-model="formState.title"
+                  placeholder="درباره ما"
+                  :ui="{ root: 'w-full' }"
+                />
               </UFormField>
               <UFormField label="نوع صفحه" required>
-                <USelectMenu v-model="formState.type" :items="typeOptions" />
+                <USelectMenu
+                  v-model="formState.type"
+                  value-key="value"
+                  :items="typeOptions"
+                  :searchInput="false"
+                  :ui="{ base: 'w-full' }"
+                />
               </UFormField>
+
               <UFormField label="وضعیت">
                 <USelectMenu
                   v-model="formState.is_active"
+                  value-key="value"
                   :items="[
                     { label: 'فعال', value: 1 },
                     { label: 'غیرفعال', value: 0 },
                   ]"
+                  :searchInput="false"
+                  :ui="{ base: 'w-full' }"
                 />
               </UFormField>
             </div>
@@ -347,32 +412,53 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
 
           <UCard class="mt-4">
             <template #header>
-              <h3 class="text-lg font-semibold">تنظیمات SEO</h3>
+              <h3 class="text-lg font-semibold">تنظیمات سئو</h3>
             </template>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <UFormField label="SEO Title">
-                <UInput v-model="formState.seo_title" />
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <UFormField label="عنوان سئو">
+                <UInput
+                  v-model="formState.seo_title"
+                  :ui="{ root: 'w-full' }"
+                />
               </UFormField>
-              <UFormField label="SEO Description">
-                <UTextarea v-model="formState.seo_description" rows="3" />
+              <UFormField label="توضیح سئو">
+                <UTextarea
+                  v-model="formState.seo_description"
+                  rows="3"
+                  :ui="{ root: 'w-full' }"
+                />
               </UFormField>
-              <UFormField label="SEO Index">
+              <UFormField label="ایندکس">
                 <USelectMenu
                   v-model="formState.seo_index"
+                  value-key="value"
+                  :searchInput="false"
                   :items="[
-                    { label: 'Index', value: 1 },
-                    { label: 'No Index', value: 0 },
+                    { label: 'فعال', value: 1 },
+                    { label: 'غیرفعال', value: 0 },
                   ]"
+                  :ui="{ base: 'w-full' }"
                 />
               </UFormField>
               <UFormField label="Canonical URL">
-                <UInput v-model="formState.seo_canonical" />
+                <UInput
+                  v-model="formState.seo_canonical"
+                  :ui="{ root: 'w-full' }"
+                />
               </UFormField>
               <UFormField label="OG Type">
-                <UInput v-model="formState.seo_og_type" placeholder="website" />
+                <UInput
+                  v-model="formState.seo_og_type"
+                  placeholder="website"
+                  :ui="{ root: 'w-full' }"
+                />
               </UFormField>
               <UFormField label="SEO Image">
-                <UInput v-model="formState.seo_image" />
+                <UInput
+                  v-model="formState.seo_image"
+                  disabled
+                  :ui="{ root: 'w-full' }"
+                />
               </UFormField>
             </div>
           </UCard>
@@ -380,27 +466,66 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
           <UCard class="mt-4">
             <template #header>
               <div class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold">Media Blocks</h3>
+                <h3 class="text-lg font-semibold">تصاویر</h3>
                 <UButton icon="i-lucide-plus" @click="addMediaBlock"
                   >افزودن</UButton
                 >
               </div>
             </template>
-            <div
-              v-for="(block, index) in formState.media_blocks"
-              :key="index"
-              class="border border-gray-400 rounded-xl border-dashed mb-4 p-3"
-            >
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
+                v-for="(block, index) in formState.media_blocks"
+                :key="index"
+                class="border border-gray-400 rounded-xl border-dashed mb-4 p-3"
+              >
+                <div>
+                  <UFormField
+                    :name="`image-${index}-url`"
+                    label="آدرس عکس"
+                    required
+                  >
+                    <div class="relative">
+                      <UFileUpload
+                        v-model="imageFiles[index]"
+                        accept="image/*"
+                        :max-files="1"
+                        :label="`عکس ${index + 1}`"
+                        description="عکس خود را با فرمت webp، و در حداقلی ترین حجم آپلود کنید"
+                        class="w-full min-h-48"
+                        interactive
+                        :ui="{
+                          base: 'data-[dragging=true]:bg-primary-200 with-transition',
+                        }"
+                        @update:model-value="
+                          (files) => uploadImage(index, files)
+                        "
+                      />
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                      حداکثر حجم: 300KB – پس از آپلود، آدرس در فیلد ذخیره
+                      می‌شود.
+                    </p>
+                    <p v-if="block?.image" class="text-xs text-green-600 mt-1">
+                      آپلود شد
+                    </p>
+                  </UFormField>
+                  <UFormField label="تصویر" required>
+                    <UInput v-model="block.image" disabled />
+                  </UFormField>
+                </div>
                 <UFormField label="نوع">
-                  <USelectMenu v-model="block.type" :items="mediaBlockTypes" />
+                  <USelectMenu
+                    v-model="block.type"
+                    :search-input="false"
+                    :items="mediaBlockTypes"
+                    value-key="id"
+                    :ui="{ base: 'w-full' }"
+                  />
                 </UFormField>
-                <UFormField label="عنوان" required>
+                <UFormField label="متن جایگزین (alt)" required>
                   <UInput v-model="block.title" />
                 </UFormField>
-                <UFormField label="تصویر" required>
-                  <UInput v-model="block.image" />
-                </UFormField>
+
                 <UFormField label="لینک">
                   <UInput v-model="block.link" />
                 </UFormField>
@@ -408,28 +533,38 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
                   <UInput v-model.number="block.position" type="number" />
                 </UFormField>
                 <UFormField label="گروه">
-                  <UInput v-model.number="block.group_index" type="number" />
+                  <UInput
+                    v-model.number="block.group_index"
+                    type="number"
+                    :disabled="block.type === 'banner'"
+                  />
                 </UFormField>
                 <UFormField label="ترتیب">
-                  <UInput v-model.number="block.item_order" type="number" />
+                  <UInput
+                    v-model.number="block.item_order"
+                    type="number"
+                    disabled
+                  />
                 </UFormField>
                 <UFormField label="وضعیت">
                   <USelectMenu
                     v-model="block.is_active"
+                    :search-input="false"
+                    value-key="id"
                     :items="[
-                      { label: 'فعال', value: 1 },
-                      { label: 'غیرفعال', value: 0 },
+                      { label: 'فعال', id: 1 },
+                      { label: 'غیرفعال', id: 0 },
                     ]"
                   />
                 </UFormField>
+                <UButton
+                  color="error"
+                  variant="ghost"
+                  @click="removeMediaBlock(index)"
+                  class="mt-2"
+                  >حذف</UButton
+                >
               </div>
-              <UButton
-                color="error"
-                variant="ghost"
-                @click="removeMediaBlock(index)"
-                class="mt-2"
-                >حذف</UButton
-              >
             </div>
           </UCard>
 
@@ -459,9 +594,11 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
                   <UFormField label="وضعیت">
                     <USelectMenu
                       v-model="faq.is_active"
+                      :search-input="false"
+                      value-key="id"
                       :items="[
-                        { label: 'فعال', value: 1 },
-                        { label: 'غیرفعال', value: 0 },
+                        { label: 'فعال', id: 1 },
+                        { label: 'غیرفعال', id: 0 },
                       ]"
                     />
                   </UFormField>
@@ -493,7 +630,12 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
             >
               <div class="grid grid-cols-1 gap-4">
                 <UFormField label="نوع">
-                  <USelectMenu v-model="content.type" :items="contentTypes" />
+                  <USelectMenu
+                    v-model="content.type"
+                    value-key="id"
+                    :items="contentTypes"
+                    :search-input="false"
+                  />
                 </UFormField>
                 <UFormField label="عنوان">
                   <UInput v-model="content.title" />
@@ -504,9 +646,11 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
                 <UFormField label="وضعیت">
                   <USelectMenu
                     v-model="content.is_active"
+                    :search-input="false"
+                    value-key="id"
                     :items="[
-                      { label: 'فعال', value: 1 },
-                      { label: 'غیرفعال', value: 0 },
+                      { label: 'فعال', id: 1 },
+                      { label: 'غیرفعال', id: 0 },
                     ]"
                   />
                 </UFormField>
@@ -543,9 +687,11 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
                 <UFormField label="وضعیت">
                   <USelectMenu
                     v-model="link.is_active"
+                    :search-input="false"
+                    value-key="id"
                     :items="[
-                      { label: 'فعال', value: 1 },
-                      { label: 'غیرفعال', value: 0 },
+                      { label: 'فعال', id: 1 },
+                      { label: 'غیرفعال', id: 0 },
                     ]"
                   />
                 </UFormField>
@@ -587,9 +733,11 @@ const onSubmit = async (event: FormSubmitEvent<any>) => {
                 <UFormField label="وضعیت">
                   <USelectMenu
                     v-model="breadcrumb.is_active"
+                    :search-input="false"
+                    value-key="id"
                     :items="[
-                      { label: 'فعال', value: 1 },
-                      { label: 'غیرفعال', value: 0 },
+                      { label: 'فعال', id: 1 },
+                      { label: 'غیرفعال', id: 0 },
                     ]"
                   />
                 </UFormField>

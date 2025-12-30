@@ -105,3 +105,18 @@
 .with-transition {
   @apply transition ease-out duration-200;
 }
+
+.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl input[type="tel" i] {
+  direction: rtl;
+  text-align: right;
+}

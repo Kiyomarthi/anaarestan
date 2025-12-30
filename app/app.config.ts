@@ -8,5 +8,17 @@ export default defineAppConfig({
       primary: "primary",
       default: "gray",
     },
+
+    selectMenu: {
+      slots: {
+        base: "w-full",
+      },
+    },
+
+    input: {
+      slots: {
+        root: "w-full",
+      },
+    },
   },
 });

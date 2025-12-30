@@ -21,7 +21,8 @@ const { loading, fetch } = useApiRequest<{
 const fields: AuthFormField[] = [
   {
     name: "phone",
-    type: "text",
+    type: "tel",
+    class: "rtl",
     label: "شماره همراه",
     placeholder: "09151111111",
     required: true,
