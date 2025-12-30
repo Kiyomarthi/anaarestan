@@ -2,23 +2,6 @@ import { getDB } from "~~/server/db";
 import { buildAbsoluteUrl, buildCacheKey } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
-  const runtime = useRuntimeConfig();
-  const siteNameEn = runtime.public?.siteNameEn || "anarestan";
-  const redis = useStorage("redis");
-  const isCache = getHeader(event, "cache");
-  const cacheKey = buildCacheKey(event, `${siteNameEn}:page`) || null;
-
-  if (isCache === "true" && cacheKey) {
-    const cached = await redis.getItem(cacheKey);
-
-    if (cached) {
-      return {
-        ...cached,
-        cache: true,
-      };
-    }
-  }
-
   const {
     public: { siteUrl },
   } = useRuntimeConfig();
@@ -123,10 +106,6 @@ export default defineEventHandler(async (event) => {
     response.meta = {
       total,
     };
-  }
-
-  if (cacheKey) {
-    await redis.setItem(cacheKey, response, { ttl: 60 * 60 * 24 * 30 });
   }
 
   return response;

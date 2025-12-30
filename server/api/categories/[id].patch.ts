@@ -18,6 +18,11 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const redis = useStorage("redis");
+  await redis.removeItem(`${CACHE_KEY.category}:${id}`);
+  await redis.removeItem(CACHE_KEY.category);
+  await redis.removeItem(`${CACHE_KEY.category}:noPaginate:true`);
+
   const body = await readBody(event);
   const { name, parent_id, status, image } = body;
   validateBody(body, {

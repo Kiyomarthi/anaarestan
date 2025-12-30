@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const siteNameEn = runtime.public?.siteNameEn || "anarestan";
   const redis = useStorage("redis");
   const isCache = getHeader(event, "cache");
-  const cacheKey = buildCacheKey(event, `${siteNameEn}:page`) || null;
+  const cacheKey = buildCacheKey(event, `${siteNameEn}:page:${slug}`) || null;
 
   if (isCache === "true" && cacheKey) {
     const cached = await redis.getItem(cacheKey);

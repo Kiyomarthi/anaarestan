@@ -40,35 +40,11 @@ export default defineEventHandler(async (event) => {
       return [current, ...children];
     });
 
-  if (isCache) {
+  if (isCache === "true" && cacheKey) {
     const cached = await redis.getItem(cacheKey);
     if (cached) {
-      const cachedTree = (cached as any[]).map((cat: any) => addSiteUrl(cat));
-
-      if (noPaginate) {
-        return {
-          success: true,
-          data: cachedTree,
-          meta: {
-            total: flattenCategories(cachedTree).length,
-          },
-          cache: true,
-        };
-      }
-
-      const flattened = flattenCategories(cachedTree);
-      const total = flattened.length;
-      const paginatedData = flattened.slice(offset, offset + limit);
-
       return {
-        success: true,
-        data: paginatedData,
-        meta: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
+        ...cached,
         cache: true,
       };
     }
@@ -124,11 +100,7 @@ export default defineEventHandler(async (event) => {
   // Apply pagination on parent categories only (tree structure)
   const paginatedData = responseData.slice(offset, offset + limit);
 
-  if (cacheKey) {
-    await redis.setItem(cacheKey, tree);
-  }
-
-  return {
+  const response = {
     success: true,
     data: paginatedData,
     meta: {
@@ -138,4 +110,10 @@ export default defineEventHandler(async (event) => {
       totalPages: Math.ceil(responseData.length / limit),
     },
   };
+
+  if (cacheKey) {
+    await redis.setItem(cacheKey, response, { ttl: 60 * 60 * 24 * 60 });
+  }
+
+  return response;
 });

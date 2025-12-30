@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const slug = pageRows?.[0]?.slug;
-    await redis.removeItem(`${CACHE_KEY.page}:api:page:${slug}:GET`);
+    await redis.removeItem(`${CACHE_KEY.page}:${slug}`);
 
     // Delete related data first (due to foreign key constraints)
     await connection.query(`DELETE FROM media_blocks WHERE page_id = ?`, [id]);

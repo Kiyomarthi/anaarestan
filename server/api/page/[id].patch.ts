@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
     breadcrumbs,
   } = body;
 
-  await redis.removeItem(`${CACHE_KEY.page}:api:page:${slug}:GET`);
+  await redis.removeItem(`${CACHE_KEY.page}:${slug}`);
 
   // Validation - only validate provided fields
   const validationSchema: Record<string, (v: any) => true | string> = {};

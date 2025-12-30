@@ -5,7 +5,9 @@ export default defineEventHandler(async (event) => {
   const {
     public: { siteUrl },
   } = useRuntimeConfig();
+
   const id = getRouterParam(event, "id");
+  const isCache = getHeader(event, "cache");
 
   if (!id) {
     return {
@@ -17,7 +19,7 @@ export default defineEventHandler(async (event) => {
   const db = await getDB();
   const redis = useStorage("redis");
 
-  const cacheKey = buildCacheKey(event, CACHE_KEY.category) || null;
+  const cacheKey = buildCacheKey(event, `${CACHE_KEY.category}:${id}`) || null;
 
   const addSiteUrl = (category: any): any => ({
     ...category,
@@ -28,11 +30,10 @@ export default defineEventHandler(async (event) => {
   });
 
   // Check cache first
-  const cached = await redis.getItem(cacheKey);
-  if (cached) {
+  if (isCache === "true" && cacheKey) {
+    const cached = await redis.getItem(cacheKey);
     return {
-      success: true,
-      data: addSiteUrl(cached),
+      ...cached,
       cache: true,
     };
   }
@@ -65,11 +66,14 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  // Cache the result
-  await redis.setItem(cacheKey, category);
-
-  return {
+  const response = {
     success: true,
     data: addSiteUrl(category),
   };
+
+  // Cache the result
+  if (cacheKey)
+    await redis.setItem(cacheKey, response, { ttl: 60 * 60 * 24 * 60 });
+
+  return response;
 });

@@ -14,6 +14,11 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const redis = useStorage("redis");
+  await redis.removeItem(`${CACHE_KEY.category}:${id}`);
+  await redis.removeItem(CACHE_KEY.category);
+  await redis.removeItem(`${CACHE_KEY.category}:noPaginate:true`);
+
   const db = await getDB();
 
   // Get the category first so we can return it after deletion

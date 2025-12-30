@@ -102,5 +102,5 @@ export function buildCacheKey(event: H3Event, prefix: string): string {
     .map((key) => `${key}:${String(query[key])}`)
     .join("|");
 
-  return `${prefix}:${event.path}:${normalizedQuery}:${event.method}`;
+  return `${prefix}:${normalizedQuery}`;
 }
