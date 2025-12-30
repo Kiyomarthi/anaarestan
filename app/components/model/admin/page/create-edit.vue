@@ -90,7 +90,7 @@ const formState = reactive<FormState>({
   seo_description: "",
   seo_index: 1,
   seo_canonical: "",
-  seo_og_type: "",
+  seo_og_type: "website",
   seo_image: "",
   is_active: 1,
   type: "",
@@ -132,8 +132,9 @@ watch(
       formState.seo_description = page.seo_description || "";
       formState.seo_index = page.seo_index || 1;
       formState.seo_canonical = page.seo_canonical || "";
-      formState.seo_og_type = page.seo_og_type || "";
-      formState.seo_image = page.seo_image || "";
+      formState.seo_og_type = page.seo_og_type || "website";
+      formState.seo_image =
+        page.seo_image || newDate?.data?.media_blocks?.[0]?.image || "";
       formState.is_active = page.is_active || 1;
       formState.type = page.type || "";
       formState.media_blocks = newData.data.media_blocks || [];
@@ -178,8 +179,8 @@ const removeFAQ = (index: number) => {
 
 const addContent = () => {
   formState.contents.push({
-    type: "text",
-    title: "",
+    type: "html",
+    title: "عنوان در اینجا وارد نشود",
     body: "",
     is_active: 1,
   });
@@ -350,6 +351,86 @@ const uploadImage = async (idx: number, file: File) => {
     });
   }
 };
+
+function validateForm(state: FormState) {
+  const errors: any[] = [];
+  validate(state.slug).required().pushError("slug", errors);
+  validate(state.title).required().min(2).max(225).pushError("title", errors);
+  validate(state.type).required().pushError("type", errors);
+
+  if (props.mode === "create") {
+    validate(state.slug).required().slug().pushError("slug", errors);
+  }
+
+  validate(state.seo_title)
+    .required()
+    .min(1)
+    .max(255)
+    .pushError("seo_title", errors);
+
+  validate(state.seo_description)
+    .required()
+    .min(1)
+    .max(160)
+    .pushError("seo_description", errors);
+
+  validate(state.seo_canonical).required().pushError("seo_canonical", errors);
+
+  if (state.seo_og_type) {
+    validate(state.seo_og_type).min(1).max(50).pushError("seo_og_type", errors);
+  }
+  if (state.seo_image) {
+    validate(state.seo_image).pushError("seo_image", errors);
+  }
+
+  validate(state.media_blocks).array().pushError("media_blocks", errors);
+  state.media_blocks.forEach((block, index) => {
+    const base = `media-${index}`;
+    validate(block.title).required().pushError(`${base}-title`, errors);
+    validate(block.image).required().pushError(`${base}-image`, errors);
+  });
+
+  validate(state.faqs).array().pushError("faqs", errors);
+  state.faqs.forEach((faq, index) => {
+    const base = `faq-${index}`;
+    validate(faq.question).required().pushError(`${base}-question`, errors);
+    validate(faq.answer).required().pushError(`${base}-answer`, errors);
+  });
+
+  validate(state.contents).array().pushError("contents", errors);
+  state.contents.forEach((content, index) => {
+    const base = `content-${index}`;
+    validate(content.body).required().pushError(`${base}-body`, errors);
+  });
+
+  validate(state.links).array().pushError("links", errors);
+  state.links.forEach((link, index) => {
+    const base = `link-${index}`;
+    validate(link.title).required().pushError(`${base}-title`, errors);
+    validate(link.target).required().pushError(`${base}-target`, errors);
+  });
+
+  validate(state.breadcrumbs).array().pushError("breadcrumbs", errors);
+  state.breadcrumbs.forEach((breadcrumb, index) => {
+    const base = `breadcrumb-${index}`;
+    validate(breadcrumb.title).required().pushError(`${base}-title`, errors);
+    validate(breadcrumb.target).required().pushError(`${base}-target`, errors);
+  });
+
+  return errors;
+}
+
+watch(
+  () => formState.media_blocks,
+  (val) => {
+    const mainMedia = val?.find((v) => v?.position == 1 && v?.group_index == 1);
+
+    if (!mainMedia?.image) return;
+
+    formState.seo_image = mainMedia?.image;
+  },
+  { deep: true }
+);
 </script>
 
 <template>
@@ -365,27 +446,27 @@ const uploadImage = async (idx: number, file: File) => {
         :ui="{ root: 'pt-0 pb-4' }"
       />
       <UPageBody>
-        <UForm :state="formState" @submit="onSubmit">
+        <UForm :state="formState" :validate="validateForm" @submit="onSubmit">
           <UCard>
             <template #header>
               <h3 class="text-lg font-semibold">اطلاعات پایه</h3>
             </template>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <UFormField label="Slug" required>
+              <UFormField label="Slug" name="slug" required>
                 <UInput
                   v-model="formState.slug"
                   placeholder="about-us"
                   :ui="{ root: 'w-full' }"
                 />
               </UFormField>
-              <UFormField label="عنوان" required>
+              <UFormField label="عنوان" name="title" required>
                 <UInput
                   v-model="formState.title"
                   placeholder="درباره ما"
                   :ui="{ root: 'w-full' }"
                 />
               </UFormField>
-              <UFormField label="نوع صفحه" required>
+              <UFormField label="نوع صفحه" name="type" required>
                 <USelectMenu
                   v-model="formState.type"
                   value-key="value"
@@ -395,7 +476,7 @@ const uploadImage = async (idx: number, file: File) => {
                 />
               </UFormField>
 
-              <UFormField label="وضعیت">
+              <UFormField label="وضعیت" name="is_active">
                 <USelectMenu
                   v-model="formState.is_active"
                   value-key="value"
@@ -415,20 +496,20 @@ const uploadImage = async (idx: number, file: File) => {
               <h3 class="text-lg font-semibold">تنظیمات سئو</h3>
             </template>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <UFormField label="عنوان سئو">
+              <UFormField label="عنوان سئو" name="seo_title">
                 <UInput
                   v-model="formState.seo_title"
                   :ui="{ root: 'w-full' }"
                 />
               </UFormField>
-              <UFormField label="توضیح سئو">
+              <UFormField label="توضیح سئو" name="seo_description">
                 <UTextarea
                   v-model="formState.seo_description"
                   rows="3"
                   :ui="{ root: 'w-full' }"
                 />
               </UFormField>
-              <UFormField label="ایندکس">
+              <UFormField label="ایندکس" name="seo_index">
                 <USelectMenu
                   v-model="formState.seo_index"
                   value-key="value"
@@ -440,20 +521,20 @@ const uploadImage = async (idx: number, file: File) => {
                   :ui="{ base: 'w-full' }"
                 />
               </UFormField>
-              <UFormField label="Canonical URL">
+              <UFormField label="Canonical URL" name="seo_canonical">
                 <UInput
                   v-model="formState.seo_canonical"
                   :ui="{ root: 'w-full' }"
                 />
               </UFormField>
-              <UFormField label="OG Type">
+              <UFormField label="OG Type" name="seo_og_type">
                 <UInput
                   v-model="formState.seo_og_type"
                   placeholder="website"
                   :ui="{ root: 'w-full' }"
                 />
               </UFormField>
-              <UFormField label="SEO Image">
+              <UFormField label="SEO Image" name="seo_image">
                 <UInput
                   v-model="formState.seo_image"
                   disabled
@@ -476,9 +557,9 @@ const uploadImage = async (idx: number, file: File) => {
               <div
                 v-for="(block, index) in formState.media_blocks"
                 :key="index"
-                class="border border-gray-400 rounded-xl border-dashed mb-4 p-3"
+                class="border border-gray-400 rounded-xl border-dashed mb-4 p-3 space-y-3"
               >
-                <div>
+                <div class="">
                   <UFormField
                     :name="`image-${index}-url`"
                     label="آدرس عکس"
@@ -509,7 +590,11 @@ const uploadImage = async (idx: number, file: File) => {
                       آپلود شد
                     </p>
                   </UFormField>
-                  <UFormField label="تصویر" required>
+                  <UFormField
+                    :name="`media-${index}-image`"
+                    label="تصویر"
+                    required
+                  >
                     <UInput v-model="block.image" disabled />
                   </UFormField>
                 </div>
@@ -522,7 +607,11 @@ const uploadImage = async (idx: number, file: File) => {
                     :ui="{ base: 'w-full' }"
                   />
                 </UFormField>
-                <UFormField label="متن جایگزین (alt)" required>
+                <UFormField
+                  label="متن جایگزین (alt)"
+                  :name="`media-${index}-title`"
+                  required
+                >
                   <UInput v-model="block.title" />
                 </UFormField>
 
@@ -581,12 +670,14 @@ const uploadImage = async (idx: number, file: File) => {
               class="border border-gray-400 rounded-xl border-dashed mb-4 p-3"
             >
               <div class="grid grid-cols-1 gap-4">
-                <UFormField label="سوال" required>
+                <UFormField
+                  :name="`faq-${index}-question`"
+                  label="سوال"
+                  required
+                >
                   <UInput v-model="faq.question" />
                 </UFormField>
-                <UFormField label="پاسخ" required>
-                  <UTextarea v-model="faq.answer" rows="3" />
-                </UFormField>
+
                 <div class="grid grid-cols-2 gap-4">
                   <UFormField label="ترتیب">
                     <UInput v-model.number="faq.sort_order" type="number" />
@@ -604,6 +695,14 @@ const uploadImage = async (idx: number, file: File) => {
                   </UFormField>
                 </div>
               </div>
+              <UFormField
+                :name="`faq-${index}-answer`"
+                label="پاسخ"
+                required
+                :ui="{ root: 'border border-gray-300 rounded-xl p-2 mt-4' }"
+              >
+                <base-editor v-model="faq.answer" />
+              </UFormField>
               <UButton
                 color="error"
                 variant="ghost"
@@ -628,20 +727,18 @@ const uploadImage = async (idx: number, file: File) => {
               :key="index"
               class="border border-gray-400 rounded-xl border-dashed mb-4 p-3"
             >
-              <div class="grid grid-cols-1 gap-4">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <UFormField label="نوع">
                   <USelectMenu
                     v-model="content.type"
                     value-key="id"
                     :items="contentTypes"
+                    disabled
                     :search-input="false"
                   />
                 </UFormField>
                 <UFormField label="عنوان">
-                  <UInput v-model="content.title" />
-                </UFormField>
-                <UFormField label="بدنه" required>
-                  <UTextarea v-model="content.body" rows="4" />
+                  <UInput v-model="content.title" disabled />
                 </UFormField>
                 <UFormField label="وضعیت">
                   <USelectMenu
@@ -655,6 +752,14 @@ const uploadImage = async (idx: number, file: File) => {
                   />
                 </UFormField>
               </div>
+              <UFormField
+                :name="`content-${index}-body`"
+                label="بدنه"
+                required
+                :ui="{ root: 'border border-gray-300 rounded-xl p-2 mt-4' }"
+              >
+                <base-editor v-model="content.body" rows="4" />
+              </UFormField>
               <UButton
                 color="error"
                 variant="ghost"
@@ -678,10 +783,14 @@ const uploadImage = async (idx: number, file: File) => {
               class="border border-gray-400 rounded-xl border-dashed mb-4 p-3"
             >
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <UFormField label="عنوان" required>
+                <UFormField
+                  :name="`link-${index}-title`"
+                  label="عنوان"
+                  required
+                >
                   <UInput v-model="link.title" />
                 </UFormField>
-                <UFormField label="هدف" required>
+                <UFormField :name="`link-${index}-target`" label="هدف" required>
                   <UInput v-model="link.target" />
                 </UFormField>
                 <UFormField label="وضعیت">
@@ -721,10 +830,18 @@ const uploadImage = async (idx: number, file: File) => {
               class="border border-gray-400 rounded-xl border-dashed mb-4 p-3"
             >
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <UFormField label="عنوان" required>
+                <UFormField
+                  :name="`breadcrumb-${index}-title`"
+                  label="عنوان"
+                  required
+                >
                   <UInput v-model="breadcrumb.title" />
                 </UFormField>
-                <UFormField label="هدف" required>
+                <UFormField
+                  :name="`breadcrumb-${index}-target`"
+                  label="هدف"
+                  required
+                >
                   <UInput v-model="breadcrumb.target" />
                 </UFormField>
                 <UFormField label="موقعیت">
