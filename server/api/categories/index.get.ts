@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   const offset = noPaginate ? 0 : (page - 1) * limit;
 
   const isCache = getHeader(event, "cache");
-  const cacheKey = buildCacheKey(event, CACHE_KEY.data("category")) || null;
+  const cacheKey = buildCacheKey(event, CACHE_KEY.category) || null;
 
   const addSiteUrl = (category: any): any => ({
     ...category,

@@ -3,6 +3,7 @@ import { requireRole } from "~~/server/utils/permissions";
 
 export default defineEventHandler(async (event) => {
   const user = requireRole(event, "admin");
+  const redis = useStorage("redis");
 
   const id = getRouterParam(event, "id");
 
@@ -22,7 +23,7 @@ export default defineEventHandler(async (event) => {
   try {
     // Check if page exists
     const [pageRows] = (await connection.query(
-      `SELECT id FROM pages WHERE id = ?`,
+      `SELECT id, slug FROM pages WHERE id = ?`,
       [id]
     )) as any[];
 
@@ -34,6 +35,9 @@ export default defineEventHandler(async (event) => {
         statusMessage: "صفحه مورد نظر پیدا نشد",
       });
     }
+
+    const slug = pageRows?.[0]?.slug;
+    await redis.removeItem(`${CACHE_KEY.page}:api:page:${slug}:GET`);
 
     // Delete related data first (due to foreign key constraints)
     await connection.query(`DELETE FROM media_blocks WHERE page_id = ?`, [id]);

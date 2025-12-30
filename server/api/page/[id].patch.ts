@@ -6,6 +6,7 @@ import { validateBody } from "~~/server/utils/validate";
 export default defineEventHandler(async (event) => {
   const db = await getDB();
   const user = requireRole(event, "admin");
+  const redis = useStorage("redis");
 
   const id = getRouterParam(event, "id");
 
@@ -35,19 +36,32 @@ export default defineEventHandler(async (event) => {
     breadcrumbs,
   } = body;
 
+  await redis.removeItem(`${CACHE_KEY.page}:api:page:${slug}:GET`);
+
   // Validation - only validate provided fields
   const validationSchema: Record<string, (v: any) => true | string> = {};
 
-  if (slug !== undefined) validationSchema.slug = (v) => validate(v).required().slug().run();
-  if (title !== undefined) validationSchema.title = (v) => validate(v).required().min(2).max(255).run();
-  if (seo_title !== undefined) validationSchema.seo_title = (v) => validate(v).max(255).run();
-  if (seo_description !== undefined) validationSchema.seo_description = (v) => validate(v).max(255).run();
-  if (seo_index !== undefined) validationSchema.seo_index = (v) => validate(v).checkMatch([0, 1]).run();
-  if (seo_canonical !== undefined) validationSchema.seo_canonical = (v) => validate(v).run();
-  if (seo_og_type !== undefined) validationSchema.seo_og_type = (v) => validate(v).run();
-  if (seo_image !== undefined) validationSchema.seo_image = (v) => validate(v).run();
-  if (is_active !== undefined) validationSchema.is_active = (v) => validate(v).checkMatch([0, 1]).run();
-  if (type !== undefined) validationSchema.type = (v) => validate(v).required().run();
+  if (slug !== undefined)
+    validationSchema.slug = (v) => validate(v).required().slug().run();
+  if (title !== undefined)
+    validationSchema.title = (v) =>
+      validate(v).required().min(2).max(255).run();
+  if (seo_title !== undefined)
+    validationSchema.seo_title = (v) => validate(v).max(255).run();
+  if (seo_description !== undefined)
+    validationSchema.seo_description = (v) => validate(v).max(255).run();
+  if (seo_index !== undefined)
+    validationSchema.seo_index = (v) => validate(v).checkMatch([0, 1]).run();
+  if (seo_canonical !== undefined)
+    validationSchema.seo_canonical = (v) => validate(v).run();
+  if (seo_og_type !== undefined)
+    validationSchema.seo_og_type = (v) => validate(v).run();
+  if (seo_image !== undefined)
+    validationSchema.seo_image = (v) => validate(v).run();
+  if (is_active !== undefined)
+    validationSchema.is_active = (v) => validate(v).checkMatch([0, 1]).run();
+  if (type !== undefined)
+    validationSchema.type = (v) => validate(v).required().run();
 
   validateBody(body, validationSchema);
 
@@ -60,7 +74,7 @@ export default defineEventHandler(async (event) => {
       });
     }
     for (const block of media_blocks) {
-      if (!block.type || !['banner', 'slider'].includes(block.type)) {
+      if (!block.type || !["banner", "slider"].includes(block.type)) {
         throw createError({
           statusCode: 400,
           statusMessage: "type در media_blocks باید 'banner' یا 'slider' باشد",
@@ -69,19 +83,22 @@ export default defineEventHandler(async (event) => {
       if (block.position === undefined || block.position < 1) {
         throw createError({
           statusCode: 400,
-          statusMessage: "position در media_blocks الزامی و باید بزرگتر از 0 باشد",
+          statusMessage:
+            "position در media_blocks الزامی و باید بزرگتر از 0 باشد",
         });
       }
       if (block.group_index === undefined || block.group_index < 1) {
         throw createError({
           statusCode: 400,
-          statusMessage: "group_index در media_blocks الزامی و باید بزرگتر از 0 باشد",
+          statusMessage:
+            "group_index در media_blocks الزامی و باید بزرگتر از 0 باشد",
         });
       }
       if (block.item_order === undefined || block.item_order < 1) {
         throw createError({
           statusCode: 400,
-          statusMessage: "item_order در media_blocks الزامی و باید بزرگتر از 0 باشد",
+          statusMessage:
+            "item_order در media_blocks الزامی و باید بزرگتر از 0 باشد",
         });
       }
       if (!block.title) {
@@ -150,10 +167,14 @@ export default defineEventHandler(async (event) => {
       });
     }
     for (const content of contents) {
-      if (!content.type || !['text', 'html', 'title', 'subtitle', 'quote'].includes(content.type)) {
+      if (
+        !content.type ||
+        !["text", "html", "title", "subtitle", "quote"].includes(content.type)
+      ) {
         throw createError({
           statusCode: 400,
-          statusMessage: "type در contents باید یکی از 'text', 'html', 'title', 'subtitle', 'quote' باشد",
+          statusMessage:
+            "type در contents باید یکی از 'text', 'html', 'title', 'subtitle', 'quote' باشد",
         });
       }
       if (!content.body) {
@@ -162,7 +183,10 @@ export default defineEventHandler(async (event) => {
           statusMessage: "body در contents الزامی است",
         });
       }
-      if (content.is_active !== undefined && ![0, 1].includes(content.is_active)) {
+      if (
+        content.is_active !== undefined &&
+        ![0, 1].includes(content.is_active)
+      ) {
         throw createError({
           statusCode: 400,
           statusMessage: "is_active در contents باید 0 یا 1 باشد",
@@ -225,10 +249,14 @@ export default defineEventHandler(async (event) => {
       if (breadcrumb.position === undefined || breadcrumb.position < 1) {
         throw createError({
           statusCode: 400,
-          statusMessage: "position در breadcrumbs الزامی و باید بزرگتر از 0 باشد",
+          statusMessage:
+            "position در breadcrumbs الزامی و باید بزرگتر از 0 باشد",
         });
       }
-      if (breadcrumb.is_active !== undefined && ![0, 1].includes(breadcrumb.is_active)) {
+      if (
+        breadcrumb.is_active !== undefined &&
+        ![0, 1].includes(breadcrumb.is_active)
+      ) {
         throw createError({
           statusCode: 400,
           statusMessage: "is_active در breadcrumbs باید 0 یا 1 باشد",
@@ -321,7 +349,9 @@ export default defineEventHandler(async (event) => {
 
     if (updateFields.length > 0) {
       updateFields.push("updated_at = NOW()");
-      const updateSql = `UPDATE pages SET ${updateFields.join(", ")} WHERE id = ?`;
+      const updateSql = `UPDATE pages SET ${updateFields.join(
+        ", "
+      )} WHERE id = ?`;
       updateParams.push(id);
       await connection.query(updateSql, updateParams);
     }
@@ -329,7 +359,9 @@ export default defineEventHandler(async (event) => {
     // Update media_blocks if provided
     if (media_blocks !== undefined) {
       // Delete existing media_blocks
-      await connection.query(`DELETE FROM media_blocks WHERE page_id = ?`, [id]);
+      await connection.query(`DELETE FROM media_blocks WHERE page_id = ?`, [
+        id,
+      ]);
 
       // Insert new media_blocks
       if (media_blocks.length > 0) {

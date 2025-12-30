@@ -1,5 +1,5 @@
 import { getDB } from "~~/server/db";
-import { buildAbsoluteUrl } from "~~/server/utils/common";
+import { buildAbsoluteUrl, buildCacheKey } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
   const {
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
   const db = await getDB();
   const redis = useStorage("redis");
 
-  const cacheKey = CACHE_KEY.category(`id:${id}`);
+  const cacheKey = buildCacheKey(event, CACHE_KEY.category) || null;
 
   const addSiteUrl = (category: any): any => ({
     ...category,

@@ -134,7 +134,7 @@ watch(
       formState.seo_canonical = page.seo_canonical || "";
       formState.seo_og_type = page.seo_og_type || "website";
       formState.seo_image =
-        page.seo_image || newDate?.data?.media_blocks?.[0]?.image || "";
+        page.seo_image || newData?.data?.media_blocks?.[0]?.image || "";
       formState.is_active = page.is_active || 1;
       formState.type = page.type || "";
       formState.media_blocks = newData.data.media_blocks || [];

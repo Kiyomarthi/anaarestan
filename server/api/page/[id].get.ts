@@ -1,7 +1,24 @@
 import { getDB } from "~~/server/db";
+import { buildCacheKey } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, "id");
+  const runtime = useRuntimeConfig();
+  const siteNameEn = runtime.public?.siteNameEn || "anarestan";
+  const redis = useStorage("redis");
+  const isCache = getHeader(event, "cache");
+  const cacheKey = buildCacheKey(event, `${siteNameEn}:page`) || null;
+
+  if (isCache === "true" && cacheKey) {
+    const cached = await redis.getItem(cacheKey);
+
+    if (cached) {
+      return {
+        ...cached,
+        cache: true,
+      };
+    }
+  }
 
   if (!slug) {
     throw createError({
@@ -58,7 +75,7 @@ export default defineEventHandler(async (event) => {
     [id]
   );
 
-  return {
+  const response = {
     success: true,
     data: {
       page,
@@ -69,4 +86,10 @@ export default defineEventHandler(async (event) => {
       breadcrumbs: breadcrumbRows,
     },
   };
+
+  if (cacheKey) {
+    await redis.setItem(cacheKey, response, { ttl: 60 * 60 * 24 * 30 });
+  }
+
+  return response;
 });

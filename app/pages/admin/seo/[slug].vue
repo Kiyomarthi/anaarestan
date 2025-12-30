@@ -15,8 +15,7 @@ const slug = computed(() => route.params.slug as string);
 const { fetch: sendRequest } = useApiRequest();
 
 const { data: pageRes, pending: pagePending } = useApiFetch<any>(
-  computed(() => `/api/page/${slug.value}`),
-  { cacheKey: computed(() => `page-${slug.value}`) }
+  computed(() => `/api/page/${slug.value}`)
 );
 const userStore = useUserStore();
 const token = userStore.token;
