@@ -1,11 +1,28 @@
 import { getDB } from "~~/server/db";
-import { buildAbsoluteUrl } from "~~/server/utils/common";
+import { buildAbsoluteUrl, buildCacheKey } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
-  const db = await getDB();
+  const runtime = useRuntimeConfig();
+  const siteNameEn = runtime.public?.siteNameEn || "anarestan";
+  const redis = useStorage("redis");
+  const isCache = getHeader(event, "cache");
+  const cacheKey = buildCacheKey(event, `${siteNameEn}:page`) || null;
+
+  if (isCache === "true" && cacheKey) {
+    const cached = await redis.getItem(cacheKey);
+
+    if (cached) {
+      return {
+        ...cached,
+        cache: true,
+      };
+    }
+  }
+
   const {
     public: { siteUrl },
   } = useRuntimeConfig();
+
   const query = getQuery(event);
 
   // Pagination parameters
@@ -15,6 +32,7 @@ export default defineEventHandler(async (event) => {
     parseInt(query.limit as string) || parseInt(query.per as string) || 20;
   const offset = noPaginate ? 0 : (page - 1) * limit;
   const search = query.search ? String(query.search).trim() : null;
+  const db = await getDB();
 
   // Filtering parameters
   const type = query.type as string;
@@ -105,6 +123,10 @@ export default defineEventHandler(async (event) => {
     response.meta = {
       total,
     };
+  }
+
+  if (cacheKey) {
+    await redis.setItem(cacheKey, response);
   }
 
   return response;

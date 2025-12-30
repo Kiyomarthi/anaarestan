@@ -3,7 +3,8 @@ const BASE = runtime.public?.siteNameEn || "anarestan";
 
 export const CACHE_KEY = {
   PAGE: (canonical: string) => `${BASE}:page:${canonical}`,
-  category: (canonical: string) => `${BASE}:category:${canonical}`,
+  base: (canonical: string) => `${BASE}:${canonical}`,
+  data: (canonical: string) => `${BASE}:data:${canonical}`,
   attribute: (canonical: string) => `${BASE}:attribute:${canonical}`,
   //   BLOG: (posts: string) => `${BASE}:blog:${posts}`,
   //   USER: (userId: string) => `${BASE}:user:${userId}`,

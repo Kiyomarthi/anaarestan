@@ -1,4 +1,6 @@
 import bcrypt from "bcryptjs";
+import type { H3Event } from "h3";
+import { getQuery } from "h3";
 
 export async function buildUpdateQuery(
   table: string,
@@ -87,4 +89,18 @@ export function buildAbsoluteUrl(
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
   return `${host}${normalizedPath}`;
+}
+
+export function buildCacheKey(event: H3Event, prefix: string): string {
+  const query = getQuery(event) as Record<
+    string,
+    string | number | boolean | null | undefined
+  >;
+
+  const normalizedQuery = Object.keys(query)
+    .sort()
+    .map((key) => `${key}:${String(query[key])}`)
+    .join("|");
+
+  return `${prefix}:${event.method}:${event.path}:${normalizedQuery}`;
 }

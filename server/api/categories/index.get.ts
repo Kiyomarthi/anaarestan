@@ -1,5 +1,5 @@
 import { getDB } from "~~/server/db";
-import { buildAbsoluteUrl } from "~~/server/utils/common";
+import { buildAbsoluteUrl, buildCacheKey } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
   const db = await getDB();
@@ -21,9 +21,8 @@ export default defineEventHandler(async (event) => {
     parseInt(query.limit as string) || parseInt(query.perPage as string) || 10;
   const offset = noPaginate ? 0 : (page - 1) * limit;
 
-  const cacheKeyHeader = getHeader(event, "cache-key");
-  const cacheKey =
-    cacheKeyHeader && !search ? CACHE_KEY.category(cacheKeyHeader) : null;
+  const isCache = getHeader(event, "cache");
+  const cacheKey = buildCacheKey(event, CACHE_KEY.data("category")) || null;
 
   const addSiteUrl = (category: any): any => ({
     ...category,
@@ -41,7 +40,7 @@ export default defineEventHandler(async (event) => {
       return [current, ...children];
     });
 
-  if (cacheKey) {
+  if (isCache) {
     const cached = await redis.getItem(cacheKey);
     if (cached) {
       const cachedTree = (cached as any[]).map((cat: any) => addSiteUrl(cat));

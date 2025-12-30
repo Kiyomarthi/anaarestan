@@ -383,34 +383,29 @@ function validateForm(state: FormState) {
     validate(state.seo_image).pushError("seo_image", errors);
   }
 
-  validate(state.media_blocks).array().pushError("media_blocks", errors);
   state.media_blocks.forEach((block, index) => {
     const base = `media-${index}`;
     validate(block.title).required().pushError(`${base}-title`, errors);
     validate(block.image).required().pushError(`${base}-image`, errors);
   });
 
-  validate(state.faqs).array().pushError("faqs", errors);
   state.faqs.forEach((faq, index) => {
     const base = `faq-${index}`;
     validate(faq.question).required().pushError(`${base}-question`, errors);
     validate(faq.answer).required().pushError(`${base}-answer`, errors);
   });
 
-  validate(state.contents).array().pushError("contents", errors);
   state.contents.forEach((content, index) => {
     const base = `content-${index}`;
     validate(content.body).required().pushError(`${base}-body`, errors);
   });
 
-  validate(state.links).array().pushError("links", errors);
   state.links.forEach((link, index) => {
     const base = `link-${index}`;
     validate(link.title).required().pushError(`${base}-title`, errors);
     validate(link.target).required().pushError(`${base}-target`, errors);
   });
 
-  validate(state.breadcrumbs).array().pushError("breadcrumbs", errors);
   state.breadcrumbs.forEach((breadcrumb, index) => {
     const base = `breadcrumb-${index}`;
     validate(breadcrumb.title).required().pushError(`${base}-title`, errors);
