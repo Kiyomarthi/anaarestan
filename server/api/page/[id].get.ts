@@ -88,7 +88,7 @@ export default defineEventHandler(async (event) => {
   };
 
   if (cacheKey) {
-    await redis.setItem(cacheKey, response, { ttl: 60 * 60 * 24 * 30 });
+    await redis.setItem(cacheKey, response, { ttl: 60 * 60 * 24 * 90 });
   }
 
   return response;

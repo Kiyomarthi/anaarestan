@@ -12,7 +12,7 @@ const toast = useToast();
 const router = useRouter();
 const route = useRoute();
 const slug = computed(() => route.params.slug as string);
-const { fetch: sendRequest } = useApiRequest();
+const { fetch: sendRequest, loading } = useApiRequest();
 
 const { data: pageRes, pending: pagePending } = useApiFetch<any>(
   computed(() => `/api/page/${slug.value}`)
@@ -47,6 +47,7 @@ const handleSubmit = async (payload: any) => {
     :page-slug="slug"
     :initial-data="pageRes"
     :page-pending="pagePending"
+    :saving="loading"
     @submit="handleSubmit"
   />
 </template>

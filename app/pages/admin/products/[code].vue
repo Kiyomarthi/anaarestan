@@ -13,7 +13,7 @@ const toast = useToast();
 const router = useRouter();
 const route = useRoute();
 const code = computed(() => route.params.code as string);
-const { fetch: sendRequest } = useApiRequest();
+const { fetch: sendRequest, loading } = useApiRequest();
 
 const { data: productRes, pending: productPending } = useApiFetch<any>(
   computed(() => `/api/products/${code.value}`),
@@ -44,6 +44,7 @@ const handleSubmit = async (payload: any) => {
     :product-code="code"
     :initial-data="productRes"
     :product-pending="productPending"
+    :saving="loading"
     @submit="handleSubmit"
   />
 </template>
