@@ -5,6 +5,7 @@ export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, "id");
   const runtime = useRuntimeConfig();
   const siteNameEn = runtime.public?.siteNameEn || "anarestan";
+  const siteUrl = runtime.public?.siteUrl;
   const redis = useStorage("redis");
   const isCache = getHeader(event, "cache");
   const cacheKey = buildCacheKey(event, `${siteNameEn}:page:${slug}`) || null;
@@ -75,11 +76,21 @@ export default defineEventHandler(async (event) => {
     [id]
   );
 
+  const mappedGallery = mediaRows?.map((img: any) => ({
+    ...img,
+    image: buildAbsoluteUrl(img.image, siteUrl),
+  }));
+
+  const pageAbsoluteImageUrl = {
+    ...page,
+    seo_image: buildAbsoluteUrl(page.seo_image, siteUrl),
+  };
+
   const response = {
     success: true,
     data: {
-      page,
-      media_blocks: mediaRows,
+      page: pageAbsoluteImageUrl,
+      media_blocks: mappedGallery,
       faqs: faqRows,
       contents: contentRows,
       links: linkRows,

@@ -5,6 +5,7 @@ export default defineEventHandler(async (event) => {
   const {
     public: { siteUrl },
   } = useRuntimeConfig();
+  
   const code = getRouterParam(event, "code");
 
   if (!code) {
