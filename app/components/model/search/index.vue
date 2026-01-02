@@ -143,7 +143,7 @@ watch(open, (isOpen) => {
     v-model:open="open"
     :ui="{
       content:
-        'w-(--reka-popper-anchor-width) p-4 max-h-[60dvh] overflow-auto pretty-scroll',
+        'md:w-(--reka-popper-anchor-width) p-4 max-h-[60dvh] overflow-auto pretty-scroll w-[calc(100dvw-20px)]',
     }"
   >
     <template #anchor>
@@ -207,7 +207,7 @@ watch(open, (isOpen) => {
           <h4 class="text-sm font-semibold text-gray-700 mb-2">
             جستجوهای اخیر
           </h4>
-          <div class="px-10">
+          <div class="px-5 md:px-10">
             <UCarousel
               v-slot="{ item }"
               arrows
@@ -218,8 +218,8 @@ watch(open, (isOpen) => {
               :items="historyStore.searches"
               :ui="{
                 item: 'basis-auto px-px',
-                prev: 'sm:-start-10 focus:outline-none focus:ring-0',
-                next: 'sm:-end-10 focus:outline-none focus:ring-0',
+                prev: '-start-8 md:-start-10 focus:outline-none focus:ring-0',
+                next: '-end-8 md:-end-10 focus:outline-none focus:ring-0',
                 container: 'ms-0',
                 root: '',
               }"

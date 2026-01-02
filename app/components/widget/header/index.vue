@@ -47,7 +47,7 @@ const items = computed<NavigationMenuItem[]>(() =>
   <UHeader
     :ui="{
       root: 'h-max max-h-none py-2',
-      center: 'flex-1',
+      center: 'flex-1 block',
     }"
   >
     <template #title>
