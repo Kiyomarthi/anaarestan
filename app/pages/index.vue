@@ -1,20 +1,43 @@
 <script setup lang="ts">
+///// imports /////
 import { useConfigSeo } from "~/composables/utils/useConfigSeo";
+import type { ApiResponse, PageResponse } from "~~/shared/types/api";
 
+///// page meta /////
+
+///// props/emits /////
+
+///// refs /////
+
+///// composables/stores /////
 const { buildMeta, organizationSchema, websiteSchema, webpageSchema } =
   useConfigSeo();
 
-buildMeta();
+const { fetch, loading, data } = useCacheFetch<ApiResponse<PageResponse>>();
+
+await fetch("/api/page/home", {
+  headers: {
+    cache: "true",
+  },
+});
+
+buildMeta(data.value?.data as PageResponse);
 organizationSchema();
 websiteSchema();
-webpageSchema();
+webpageSchema(data.value?.data as PageResponse);
+
+///// computed /////
+
+///// functions /////
+
+///// watchers /////
+
+///// lifecycle /////
 </script>
 
 <template>
   <div>
-    <!-- ----------------------------------------------------------------------------------------------- -->
     <!-- Hero Slider -->
-
     <!-- Categories Section -->
     <!-- <WidgetSectionsCategoriesSection /> -->
 

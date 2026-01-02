@@ -19,9 +19,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const redis = useStorage("redis");
-  await redis.removeItem(`${CACHE_KEY.category}:${id}`);
-  await redis.removeItem(CACHE_KEY.category);
-  await redis.removeItem(`${CACHE_KEY.category}:noPaginate:true`);
+  const keys = await redis.getKeys(`${CACHE_KEY.category}:`);
+
+  await Promise.all(keys.map((key) => redis.removeItem(key)));
 
   const body = await readBody(event);
   const { name, parent_id, status, image } = body;

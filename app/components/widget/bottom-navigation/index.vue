@@ -15,12 +15,12 @@ const navItems = [
   {
     label: "سبد خرید",
     icon: "i-heroicons-shopping-cart",
-    href: "/cart",
+    href: "/",
   },
   {
     label: "پروفایل",
     icon: "i-heroicons-user",
-    href: "/profile",
+    href: "/",
   },
 ];
 

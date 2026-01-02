@@ -100,7 +100,7 @@ function throttle<T extends (...a: any[]) => void>(fn: T, delay = 200): T {
 
 export default defineNuxtPlugin((nuxtApp) => {
   const pinia = nuxtApp.$pinia as Pinia;
-  const secret = useRuntimeConfig().persistSecret;
+  const secret = useRuntimeConfig().public.persistSecret;
 
   pinia.use((store) => {
     const opts = store.options as { persist?: boolean | PersistOptions };

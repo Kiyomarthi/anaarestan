@@ -123,7 +123,7 @@ const contentTypes = [
 // Watch for initial data in edit mode
 watch(
   () => props.initialData,
-  (newData) => {
+  async (newData) => {
     if (props.mode === "edit" && newData?.data) {
       const page = newData.data.page;
       formState.slug = page.slug || "";
@@ -142,6 +142,12 @@ watch(
       formState.contents = newData.data.contents || [];
       formState.links = newData.data.links || [];
       formState.breadcrumbs = newData.data.breadcrumbs || [];
+
+      imageFiles.value = await Promise.all(
+        newData?.data?.media_blocks?.map(async (img) => {
+          return await urlToFile(img.image, "image");
+        })
+      );
     }
   },
   { immediate: true }
@@ -566,7 +572,7 @@ watch(
                         accept="image/*"
                         :max-files="1"
                         :label="`عکس ${index + 1}`"
-                        description="عکس خود را با فرمت webp، و در حداقلی ترین حجم آپلود کنید"
+                        description="عکس خود را با فرمت .avif و در حداقلی ترین حجم آپلود کنید"
                         class="w-full min-h-48"
                         interactive
                         :ui="{

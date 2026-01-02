@@ -1,24 +1,25 @@
 import { computed } from "vue";
-import type { SeoItem } from "~~/shared/types/seo";
+import type { PageResponse } from "~~/shared/types/api";
 
 export const useConfigSeo = () => {
   const siteConfig = computed(() => useRuntimeConfig());
   const route = useRoute();
 
-  const buildMeta = (seo: SeoItem) => {
+  const buildMeta = (seo: PageResponse) => {
     useSeoMeta({
-      title: seo?.title || `انارستان | فروشگاه آنلاین خرید کالاهای متنوع`,
+      title:
+        seo?.page?.seo_title || `انارستان | فروشگاه آنلاین خرید کالاهای متنوع`,
       titleTemplate: (title) => {
         if (route.path === "/") {
-          return `انارستان | فروشگاه آنلاین خرید کالاهای متنوع`;
+          return seo?.page?.seo_title;
         } else {
           return `${title} | انارستان`;
         }
       },
-      description: seo?.description || siteConfig.value?.public?.desc,
+      description: seo?.page?.seo_description || siteConfig.value?.public?.desc,
       robots: {
-        index: false, // TODO: change to true in production
-        follow: false, // TODO: change to true in production
+        index: !!seo?.page?.seo_index, // TODO: change to true in production
+        follow: !!seo?.page?.seo_index, // TODO: change to true in production
         noimageindex: false,
         nosnippet: false,
         maxSnippet: -1,
@@ -33,23 +34,29 @@ export const useConfigSeo = () => {
       ogSiteName: siteConfig.value.public.siteNameFa,
       appleMobileWebAppTitle: siteConfig.value.public.siteNameFa,
       ogImage:
-        seo?.image || `${siteConfig.value.public.siteUrl}/images/logo-og.png`,
-      ogImageAlt: seo?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
+        seo?.page?.seo_image ||
+        `${siteConfig.value.public.siteUrl}/images/logo-og.png`,
+      ogImageAlt: seo?.page?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
       ogImageHeight: "630",
       ogImageWidth: "1200",
       themeColor: "#e63a33",
       referrer: "strict-origin-when-cross-origin",
       ogImageType: "image/png",
       ogLocale: "fa_IR",
-      ogTitle: seo?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
-      ogDescription: seo?.description || siteConfig.value?.public?.desc,
-      ogUrl: `${siteConfig.value.public.siteUrl}/${seo?.canonical ?? ""}`,
-      ogType: seo?.ogType || "website",
-      twitterTitle: seo?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
-      twitterDescription: seo?.description || siteConfig.value?.public?.desc,
-      twitterImageAlt: seo?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
+      ogTitle: seo?.page?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
+      ogDescription:
+        seo?.page?.seo_description || siteConfig.value?.public?.desc,
+      ogUrl: `${siteConfig.value.public.siteUrl}/${
+        seo?.page?.seo_canonical ?? ""
+      }`,
+      ogType: seo?.page?.seo_og_type || "website",
+      twitterTitle: seo?.page?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
+      twitterDescription:
+        seo?.page?.seo_description || siteConfig.value?.public?.desc,
+      twitterImageAlt: seo?.page?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
       twitterImage:
-        seo?.image || `${siteConfig.value.public.siteUrl}/images/logo-og.png`,
+        seo?.page?.seo_image ||
+        `${siteConfig.value.public.siteUrl}/images/logo-og.png`,
       twitterCard: "summary_large_image",
     });
 
@@ -57,10 +64,10 @@ export const useConfigSeo = () => {
       link: [
         {
           rel: "canonical",
-          href: seo?.canonical
+          href: seo?.page?.seo_canonical
             ? `${
                 siteConfig.value.public.siteUrl
-              }/${seo?.canonical.toLowerCase()}`
+              }/${seo?.page?.seo_canonical.toLowerCase()}`
             : siteConfig.value.public.siteUrl.toLowerCase(),
         },
       ],
@@ -111,14 +118,14 @@ export const useConfigSeo = () => {
       inLanguage: "fa-IR",
     });
 
-  const webpageSchema = (seo: SeoItem) =>
+  const webpageSchema = (seo: PageResponse) =>
     defineWebPage({
-      name: seo?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
+      name: seo?.page?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
       description:
-        seo?.description ||
+        seo?.page?.seo_description ||
         siteConfig.value?.public?.desc ||
         "انارستان، فروشگاه آنلاین انواع محصولات",
-      url: seo?.canonical || siteConfig.value.public.siteUrl,
+      url: seo?.page?.seo_canonical || siteConfig.value.public.siteUrl,
       inLanguage: "fa-IR",
     });
 

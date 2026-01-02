@@ -33,8 +33,9 @@ export default defineNuxtConfig({
   },
 
   image: {
-    provider: "ipx",
-    dir: "images",
+    ipx: {
+      maxAge: 2764800,
+    },
   },
 
   app: {
@@ -66,6 +67,27 @@ export default defineNuxtConfig({
           type: "image/x-icon",
           href: process.env.NUXT_PUBLIC_FAVICON,
         },
+        {
+          rel: "preload",
+          as: "font",
+          href: "/fonts/yekan-bakh-normal-subset.woff2",
+          type: "font/woff2",
+          crossorigin: "anonymous",
+        },
+        {
+          rel: "preload",
+          as: "font",
+          href: "/fonts/yekan-bakh-bold-subset.woff2",
+          type: "font/woff2",
+          crossorigin: "anonymous",
+        },
+        {
+          rel: "preload",
+          as: "font",
+          href: "/fonts/yekan-bakh-semibold-subset.woff2",
+          type: "font/woff2",
+          crossorigin: "anonymous",
+        },
       ],
       htmlAttrs: {
         dir: "rtl",
@@ -82,15 +104,7 @@ export default defineNuxtConfig({
     fonts: true,
     colorMode: false,
     theme: {
-      colors: [
-        "primary",
-        "white",
-        "info",
-        "success",
-        "warning",
-        "error",
-        "default",
-      ],
+      colors: ["primary", "info", "success", "warning", "error", "default"],
     },
   },
 
@@ -101,6 +115,7 @@ export default defineNuxtConfig({
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL,
       siteNameFa: process.env.NUXT_PUBLIC_SITE_NAME_FA,
       siteNameEn: process.env.NUXT_PUBLIC_SITE_NAME_EN,
+      persistSecret: process.env.NUXT_PUBLIC_PERSIST_SECRET,
       phones: {
         mashhad: process.env.NUXT_PUBLIC_MASHHAD_PHONE,
       },
@@ -131,13 +146,17 @@ export default defineNuxtConfig({
     jwtSecret: process.env.JWT_SECRET,
     uploadDir: process.env.UPLOAD_DIR || "/home/anaarest/uploads",
     uploadUrl: process.env.UPLOAD_URL || "/uploads",
-    persistSecret: process.env.PERSIST_SECRET,
   },
 
   nitro: {
     preset: "node-server",
     externals: {
+      external: ["mysql2", "sharp", "bcryptjs", "jsonwebtoken", "serve-static"],
       inline: [],
+    },
+    compressPublicAssets: {
+      gzip: true,
+      brotli: true,
     },
     storage: {
       redis: {
@@ -148,6 +167,77 @@ export default defineNuxtConfig({
         password: process.env.REDIS_PASSWORD || undefined,
         // tls: {},
         db: 0,
+      },
+    },
+
+    // TODO: check this service worker cache control
+    routeRules: {
+      "/_nuxt/**": {
+        cache: { maxAge: 60 * 60 * 24 * 365 },
+        headers: {
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      },
+    },
+
+    "/_ipx/**": {
+      cache: { maxAge: 60 * 60 * 24 * 30 },
+      headers: {
+        "Cache-Control":
+          "public, max-age=31536000, stale-while-revalidate=86400, immutable",
+      },
+    },
+
+    "/images/**": {
+      cache: { maxAge: 60 * 60 * 24 * 365 },
+      headers: {
+        "Cache-Control": "public, max-age=31536000, immutable",
+      },
+    },
+
+    "/icons/**": {
+      cache: { maxAge: 60 * 60 * 24 * 365 },
+      headers: {
+        "Cache-Control": "public, max-age=31536000, immutable",
+      },
+    },
+
+    "/fonts/**": {
+      cache: { maxAge: 60 * 60 * 24 * 365 },
+      headers: {
+        "Cache-Control":
+          "public, max-age=31536000, stale-while-revalidate=86400",
+      },
+    },
+
+    "/**/*.(png|jpg|jpeg|webp|avif|svg|ico|woff|woff2|ttf|otf)": {
+      cache: { maxAge: 60 * 60 * 24 * 365 },
+      headers: {
+        "Cache-Control":
+          "public, max-age=31536000, stale-while-revalidate=86400, immutable",
+      },
+    },
+
+    // TODO: complete this
+    "/api/page/**": {
+      cache: { maxAge: 60 * 60, swr: 60 * 10 },
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
+      },
+    },
+
+    // TODO: complete this
+    "/api/**": { headers: { "Cache-Control": "no-store" } },
+    "/cart/**": { headers: { "Cache-Control": "no-store" } },
+
+    // TODO: complete this
+    "/admin/**": { ssr: false, headers: { "Cache-Control": "no-store" } },
+    "/login": { ssr: false, headers: { "Cache-Control": "no-store" } },
+
+    "/**": {
+      cache: { maxAge: 60 * 60, swr: 60 * 10 },
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=600",
       },
     },
   },
@@ -162,6 +252,10 @@ export default defineNuxtConfig({
         conditions: ["import", "module", "default"],
       },
     },
+    build: {
+      minify: "terser",
+      cssMinify: "lightningcss",
+    },
   },
 
   fonts: {
@@ -169,34 +263,33 @@ export default defineNuxtConfig({
     families: [
       {
         name: "YekanBakh",
-        src: ["/fonts/yekan-bakh-normal.woff2"],
+        src: ["/fonts/yekan-bakh-normal-subset.woff2"],
         weight: "400",
         style: "normal",
+        preload: true,
         global: true,
         display: "swap",
+        unicodeRange: "U+0600-06FF,U+06F0-06F9",
       },
       {
         name: "YekanBakh",
-        src: ["/fonts/yekan-bakh-light.woff2"],
-        weight: "300",
-        style: "normal",
-        global: true,
-      },
-      {
-        name: "YekanBakh",
-        src: ["/fonts/yekan-bakh-semibold.woff2"],
+        src: ["/fonts/yekan-bakh-semibold-subset.woff2"],
         weight: "500",
         style: "normal",
+        preload: true,
         global: true,
         display: "swap",
+        unicodeRange: "U+0600-06FF,U+06F0-06F9",
       },
       {
         name: "YekanBakh",
-        src: ["/fonts/yekan-bakh-bold.woff2"],
+        src: ["/fonts/yekan-bakh-bold-subset.woff2"],
         weight: "700",
         style: "normal",
+        preload: true,
         global: true,
         display: "swap",
+        unicodeRange: "U+0600-06FF,U+06F0-06F9",
       },
     ],
   },

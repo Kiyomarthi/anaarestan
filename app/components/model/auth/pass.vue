@@ -101,7 +101,7 @@ const switchToOtp = () => {
       <template #header>
         <ULink to="/" class="w-fit">
           <base-image
-            src="/images/logo.webp"
+            src="/images/logo.avif"
             class="aspect-square h-17.5 w-auto"
             :height="70"
             preload

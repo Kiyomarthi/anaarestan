@@ -327,7 +327,6 @@ const uploadImage = async (idx: number, file: File) => {
       errorTitle: "خطای آپلود تصویر",
     });
 
-    // بک‌اند مقدار `files` را به صورت آرایه مسیر برمی‌گرداند
     const uploadedUrl =
       res?.files?.[0] ||
       res?.files?.[0]?.url ||
@@ -672,7 +671,7 @@ const isSlugDisabled = computed(() => props.mode === "edit");
                           accept="image/*"
                           :max-files="1"
                           :label="`عکس ${idx + 1}`"
-                          description="عکس خود را با فرمت webp، و در حداقلی ترین حجم آپلود کنید"
+                          description="عکس خود را با فرمت .avif و در حداقلی ترین حجم آپلود کنید"
                           class="w-full min-h-48"
                           interactive
                           :ui="{

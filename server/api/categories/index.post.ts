@@ -10,7 +10,10 @@ export default defineEventHandler(async (event) => {
     public: { siteUrl },
   } = useRuntimeConfig();
 
+  const redis = useStorage("redis");
   const user = requireRole(event, "admin");
+  const keys = await redis.getKeys(`${CACHE_KEY.category}:`);
+  await Promise.all(keys.map((key) => redis.removeItem(key)));
 
   const body = await readBody(event);
   const { name, parent_id, status = 1, image, slug } = body;

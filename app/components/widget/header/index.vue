@@ -47,60 +47,62 @@ const items = computed<NavigationMenuItem[]>(() =>
   <UHeader
     :ui="{
       root: 'h-max max-h-none py-2',
+      center: 'flex-1',
     }"
   >
     <template #title>
-      <ULink to="/">
-        <base-image
-          src="/images/logo.webp"
-          class="aspect-auto h-17.5"
-          :height="70"
-          preload
-          loading="eager"
-          fetchPriority="high"
-          :alt="config.public.siteNameFa || 'انارستان'"
-        />
-      </ULink>
+      <base-image
+        src="/images/logo.avif"
+        :width="70"
+        preload
+        loading="eager"
+        fetchPriority="high"
+        :alt="config.public.siteNameFa || 'انارستان'"
+        sizes="70px"
+        class="size-17.5 aspect-auto"
+      />
     </template>
 
-    <UNavigationMenu :items="items" />
+    <ModelSearch />
 
     <template #right>
-      <UPopover v-if="userStore.isLoggedIn" mode="hover">
-        <UButton
-          color="neutral"
-          variant="ghost"
-          to="/panel"
-          class="flex items-center gap-2"
-          icon="i-lucide-user"
-        >
-        </UButton>
+      <div class="flex items-center gap-3">
+        <UPopover v-if="userStore.isLoggedIn" mode="hover">
+          <UButton
+            color="neutral"
+            variant="ghost"
+            to="/panel"
+            class="flex items-center gap-2"
+            icon="i-lucide-user"
+          >
+          </UButton>
 
-        <template #content>
-          <div v-if="mdAndUp" class="p-3">
-            <UNavigationMenu
-              :items="items"
-              orientation="vertical"
-              :ui="{
-                list: 'space-y-2',
-                item: 'rounded-xl border border-gray-300 hover:bg-gray-100 with-transition min-w-[200px]',
-                link: 'flex items-center gap-3 font-medium px-4 py-3',
-              }"
-            />
-          </div>
-        </template>
-      </UPopover>
-      <UButton
-        v-else
-        color="neutral"
-        variant="outline"
-        to="/login"
-        class="flex items-center gap-2"
-      >
-        <span>ورود</span>
-        <span class="text-gray-400">|</span>
-        <span>ثبت‌نام</span>
-      </UButton>
+          <template #content>
+            <div v-if="mdAndUp" class="p-3">
+              <UNavigationMenu
+                :items="items"
+                orientation="vertical"
+                :ui="{
+                  list: 'space-y-2',
+                  item: 'rounded-xl border border-gray-300 hover:bg-gray-100 with-transition min-w-[200px]',
+                  link: 'flex items-center gap-3 font-medium px-4 py-3',
+                }"
+              />
+            </div>
+          </template>
+        </UPopover>
+        <UButton
+          v-else
+          color="neutral"
+          variant="outline"
+          to="/login"
+          class="flex items-center gap-2"
+        >
+          <span>ورود</span>
+          <span class="text-gray-400">|</span>
+          <span>ثبت‌نام</span>
+        </UButton>
+      </div>
     </template>
 
     <template #body>

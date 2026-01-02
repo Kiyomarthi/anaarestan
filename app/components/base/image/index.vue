@@ -24,7 +24,7 @@ const props = withDefaults(
     wrapperClass: "relative w-full overflow-hidden",
     imageClass: "w-full h-full object-cover",
     placeholder: [10, 10, 10, 10],
-    format: "webp",
+    format: "avif",
     loading: "lazy",
     fetchPriority: "low",
     showLoadingOverlay: true,
@@ -72,13 +72,18 @@ watch(
       v-if="isLoading && props.showLoadingOverlay"
       class="absolute inset-0 z-10 bg-gray-300 animate-pulse"
     /> -->
-    <img
+    <nuxt-picture
       v-bind="$attrs"
       :src="props.src"
       :alt="props.alt"
       :format="props.format"
       :width="props.width"
       :height="props.height"
+      :imgAttrs="{
+        preload: props.preload,
+        fetchPriority: props.fetchPriority,
+        loading: props.loading,
+      }"
       :preload="props.preload"
       :loading="props.loading"
       :fetch-priority="props.fetchPriority"
