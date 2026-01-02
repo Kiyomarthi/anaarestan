@@ -83,11 +83,11 @@ watch(
         preload: props.preload,
         fetchPriority: props.fetchPriority,
         loading: props.loading,
+        class: props.imageClass,
       }"
       :preload="props.preload"
       :loading="props.loading"
       :fetch-priority="props.fetchPriority"
-      :class="imageClasses"
       @load="handleImageLoad"
       @error="handleImageError"
     />

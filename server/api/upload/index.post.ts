@@ -38,9 +38,9 @@ export default defineEventHandler(async (event) => {
     const filePath = path.join(uploadDir, fileName);
 
     try {
-      await fs.writeFile(filePath, field.data);
-      console.log("[UPLOAD] saved:", filePath);
-      savedFiles.push(`${uploadUrl}/${fileName}`);
+      await fs.writeFile(field.filename, field.data);
+      console.log("[UPLOAD] saved:", field.filename);
+      savedFiles.push(`${uploadUrl}/${field.filename}`);
     } catch (err) {
       console.error("[UPLOAD] save error:", err);
       throw createError({

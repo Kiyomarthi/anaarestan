@@ -143,7 +143,7 @@ watch(open, (isOpen) => {
     v-model:open="open"
     :ui="{
       content:
-        'w-(--reka-popper-anchor-width) p-4 max-h-[50dvh] overflow-auto pretty-scroll',
+        'w-(--reka-popper-anchor-width) p-4 max-h-[60dvh] overflow-auto pretty-scroll',
     }"
   >
     <template #anchor>

@@ -42,7 +42,8 @@ const formattedPrice = (value: number) => {
       <BaseImage
         :src="product.image"
         :alt="product.title"
-        class="w-full h-full object-cover"
+        image-class="size-16 object-cover"
+        class="w-16"
         :width="64"
         sizes="64px"
         :loading="'lazy'"
