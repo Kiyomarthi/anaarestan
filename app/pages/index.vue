@@ -15,11 +15,27 @@ const { buildMeta, organizationSchema, websiteSchema, webpageSchema } =
 
 const { fetch, loading, data } = useCacheFetch<ApiResponse<PageResponse>>();
 
-await fetch("/api/page/home", {
-  headers: {
-    cache: "true",
-  },
-});
+const {
+  fetch: fetchCategory,
+  loading: loadingCategory,
+  data: dataCategory,
+} = useCacheFetch<ApiResponse<PageResponse>>();
+
+await Promise.all([
+  fetch("/api/page/home", {
+    headers: {
+      cache: "true",
+    },
+  }),
+  fetchCategory("/api/categories", {
+    headers: {
+      cache: "true",
+    },
+    params: {
+      noPaginate: "true",
+    },
+  }),
+]);
 
 buildMeta(data.value?.data as PageResponse);
 organizationSchema();

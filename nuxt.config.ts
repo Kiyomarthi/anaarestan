@@ -60,6 +60,10 @@ export default defineNuxtConfig({
           name: "application-name",
           content: "انارستان",
         },
+        {
+          name: "theme-color",
+          content: "#e63a33",
+        },
       ],
       link: [
         {
@@ -159,13 +163,18 @@ export default defineNuxtConfig({
       brotli: true,
     },
     storage: {
+      // redis: {
+      //   driver: "redis",
+      //   port: Number(process.env.REDIS_PORT),
+      //   host: process.env.REDIS_HOST,
+      //   // username: "",
+      //   password: process.env.REDIS_PASSWORD || undefined,
+      //   // tls: {},
+      //   db: 0,
+      // },
       redis: {
         driver: "redis",
-        port: Number(process.env.REDIS_PORT),
-        host: process.env.REDIS_HOST,
-        // username: "",
-        password: process.env.REDIS_PASSWORD || undefined,
-        // tls: {},
+        path: "/home/anaarest/redis/redis.sock",
         db: 0,
       },
     },

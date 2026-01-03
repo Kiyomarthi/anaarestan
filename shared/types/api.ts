@@ -98,3 +98,16 @@ export interface PageResponse {
   links: PageLink[];
   breadcrumbs: Breadcrumb[];
 }
+
+export interface Category {
+  id: number;
+  parent_id: number | null;
+  name: string;
+  slug: string;
+  image: string;
+  status: 0 | 1;
+  code: string;
+  created_at: string; // ISO Date
+  updated_at: string; // ISO Date
+  children?: Category[];
+}

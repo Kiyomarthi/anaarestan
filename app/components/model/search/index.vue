@@ -149,7 +149,7 @@ watch(open, (isOpen) => {
     <template #anchor>
       <UInput
         v-model="searchQuery"
-        placeholder="جستجو در محصولات و دسته‌بندی‌ها..."
+        placeholder="جستجو..."
         icon="i-lucide-search"
         :ui="{
           base: 'h-11 max-w-150',
@@ -207,7 +207,7 @@ watch(open, (isOpen) => {
           <h4 class="text-sm font-semibold text-gray-700 mb-2">
             جستجوهای اخیر
           </h4>
-          <div class="px-5 md:px-10">
+          <div class="px-5 md:px-10"> 
             <UCarousel
               v-slot="{ item }"
               arrows
@@ -216,8 +216,9 @@ watch(open, (isOpen) => {
               :prev="{ variant: 'outline', icon: 'i-lucide-chevron-right' }"
               :next="{ variant: 'outline', icon: 'i-lucide-chevron-left' }"
               :items="historyStore.searches"
+              containScroll="keepSnaps"
               :ui="{
-                item: 'basis-auto px-px',
+                item: 'basis-auto',
                 prev: '-start-8 md:-start-10 focus:outline-none focus:ring-0',
                 next: '-end-8 md:-end-10 focus:outline-none focus:ring-0',
                 container: 'ms-0',

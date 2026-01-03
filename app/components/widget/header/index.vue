@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
 import { useBreakpoints } from "~/composables/utils/useBreakpoints";
+import type { ApiResponse, Category } from "~~/shared/types/api";
 
 ///// imports /////
 
@@ -17,6 +18,12 @@ const { smAndDown, mdAndUp } = useBreakpoints();
 
 const items = computed<NavigationMenuItem[]>(() =>
   [
+    !userStore.isLoggedIn && {
+      label: "ورد یا ثبت نام",
+      to: "/login",
+      icon: "i-lucide-log-in",
+      active: route.path.startsWith("/docs/getting-started"),
+    },
     userStore.isLoggedIn && {
       label: "پنل کاربری",
       to: "/docs/getting-started",
@@ -32,7 +39,141 @@ const items = computed<NavigationMenuItem[]>(() =>
   ].filter(Boolean)
 );
 
+const categoryItems = ref([
+  {
+    label: "Guide",
+    icon: "i-lucide-book-open",
+    to: "/docs/getting-started",
+    children: [
+      {
+        label: "Introduction",
+        description: "Fully styled and customizable components for Nuxt.",
+        icon: "i-lucide-house",
+      },
+      {
+        label: "Installation",
+        description:
+          "Learn how to install and configure Nuxt UI in your application.",
+        icon: "i-lucide-cloud-download",
+      },
+      {
+        label: "Icons",
+        icon: "i-lucide-smile",
+        description:
+          "You have nothing to do, @nuxt/icon will handle it automatically.",
+      },
+      {
+        label: "Colors",
+        icon: "i-lucide-swatch-book",
+        description:
+          "Choose a primary and a neutral color from your Tailwind CSS theme.",
+      },
+      {
+        label: "Theme",
+        icon: "i-lucide-cog",
+        description:
+          "You can customize components by using the `class` / `ui` props or in your app.config.ts.",
+      },
+    ],
+  },
+  {
+    label: "Composables",
+    icon: "i-lucide-database",
+    to: "/docs/composables",
+    children: [
+      {
+        label: "defineShortcuts",
+        icon: "i-lucide-file-text",
+        description: "Define shortcuts for your application.",
+        to: "/docs/composables/define-shortcuts",
+      },
+      {
+        label: "useOverlay",
+        icon: "i-lucide-file-text",
+        description: "Display a modal/slideover within your application.",
+        to: "/docs/composables/use-overlay",
+      },
+      {
+        label: "useToast",
+        icon: "i-lucide-file-text",
+        description: "Display a toast within your application.",
+        to: "/docs/composables/use-toast",
+      },
+    ],
+  },
+  {
+    label: "Components",
+    icon: "i-lucide-box",
+    to: "/docs/components",
+    children: [
+      {
+        label: "Link",
+        icon: "i-lucide-file-text",
+        description: "Use NuxtLink with superpowers.",
+        to: "/docs/components/link",
+      },
+      {
+        label: "Modal",
+        icon: "i-lucide-file-text",
+        description: "Display a modal within your application.",
+        to: "/docs/components/modal",
+      },
+      {
+        label: "NavigationMenu",
+        icon: "i-lucide-file-text",
+        description: "Display a list of links.",
+        to: "/docs/components/navigation-menu",
+      },
+      {
+        label: "Pagination",
+        icon: "i-lucide-file-text",
+        description: "Display a list of pages.",
+        to: "/docs/components/pagination",
+      },
+      {
+        label: "Popover",
+        icon: "i-lucide-file-text",
+        description:
+          "Display a non-modal dialog that floats around a trigger element.",
+        to: "/docs/components/popover",
+      },
+      {
+        label: "Progress",
+        icon: "i-lucide-file-text",
+        description: "Show a horizontal bar to indicate task progression.",
+        to: "/docs/components/progress",
+      },
+    ],
+  },
+  {
+    label: "GitHub",
+    icon: "i-simple-icons-github",
+    badge: "3.8k",
+    to: "https://github.com/nuxt/ui",
+    target: "_blank",
+  },
+  {
+    label: "Help",
+    icon: "i-lucide-circle-help",
+    disabled: true,
+  },
+]);
+
 ///// composables/stores /////
+const {
+  fetch: fetchCategory,
+  loading: loadingCategory,
+  data: dataCategory,
+} = useCacheFetch<ApiResponse<Category>>();
+
+await fetchCategory("/api/categories", {
+  headers: {
+    cache: "true",
+  },
+  params: {
+    noPaginate: "true",
+  },
+});
 
 ///// computed /////
 
@@ -66,7 +207,7 @@ const items = computed<NavigationMenuItem[]>(() =>
     <ModelSearch />
 
     <template #right>
-      <div class="flex items-center gap-3">
+      <div v-if="mdAndUp" class="flex items-center gap-3">
         <UPopover v-if="userStore.isLoggedIn" mode="hover">
           <UButton
             color="neutral"
@@ -84,7 +225,7 @@ const items = computed<NavigationMenuItem[]>(() =>
                 orientation="vertical"
                 :ui="{
                   list: 'space-y-2',
-                  item: 'rounded-xl border border-gray-300 hover:bg-gray-100 with-transition min-w-[200px]',
+                  item: 'rounded-xl border border-gray-300 hover:bg-gray-100 with-transition min-w-50',
                   link: 'flex items-center gap-3 font-medium px-4 py-3',
                 }"
               />
@@ -146,4 +287,31 @@ const items = computed<NavigationMenuItem[]>(() =>
       </UDrawer>
     </template>
   </UHeader>
+  <div v-if="mdAndUp" class="py-2 border-b border-default">
+    <UPopover
+      v-for="(item, index) in dataCategory?.data as Category[] ?? []"
+      :key="index"
+      arrow
+      :items="dataCategory?.data"
+      labelKey="name"
+      mode="hover"
+      :open-delay="0"
+      :close-delay="0"
+      :ui="{
+        content: [!item?.children?.length && 'hidden'],
+      }"
+    >
+      <UButton
+        :label="item?.name ?? ''"
+        color="default"
+        variant="ghost"
+        :to="`/categories/${item.code}/${item.slug}`"
+      />
+      <template v-if="item?.children?.length" #content>
+        <div class="w-max p-4 px-6">
+          <widget-category-children :categories="item?.children" />
+        </div>
+      </template>
+    </UPopover>
+  </div>
 </template>

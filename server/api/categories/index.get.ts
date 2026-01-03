@@ -85,16 +85,17 @@ export default defineEventHandler(async (event) => {
 
   if (noPaginate) {
     // Return tree structure without pagination
-    if (cacheKey) {
-      await redis.setItem(cacheKey, tree);
-    }
-    return {
+    const res = {
       success: true,
       data: responseData,
       meta: {
         total,
       },
     };
+    if (cacheKey) {
+      await redis.setItem(cacheKey, res, { ttl: 60 * 60 * 24 * 60 });
+    }
+    return res;
   }
 
   // Apply pagination on parent categories only (tree structure)
