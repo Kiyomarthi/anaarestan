@@ -155,7 +155,7 @@ export default defineNuxtConfig({
   nitro: {
     preset: "node-server",
     externals: {
-      external: ["mysql2", "sharp", "bcryptjs", "jsonwebtoken", "serve-static"],
+      external: ["mysql2", "bcryptjs", "jsonwebtoken", "serve-static"],
       inline: [],
     },
     compressPublicAssets: {

@@ -41,6 +41,8 @@ const items: NavigationMenuItem[] = [
           alt=""
           style="cursor: pointer"
           code="TYwmi73C2FCMfKGzrnyFyy4dZ35kJLZd"
+          loading="lazy"
+          fetchPriority="low"
       /></a>
       <UButton
         icon="i-simple-icons-discord"
