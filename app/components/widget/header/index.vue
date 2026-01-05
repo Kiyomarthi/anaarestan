@@ -185,133 +185,138 @@ await fetchCategory("/api/categories", {
 </script>
 
 <template>
-  <UHeader
-    :ui="{
-      root: 'h-max max-h-none py-2',
-      center: 'flex-1 block',
-    }"
-  >
-    <template #title>
-      <base-image
-        src="/images/logo.avif"
-        :width="70"
-        preload
-        loading="eager"
-        fetchPriority="high"
-        :alt="config.public.siteNameFa || 'انارستان'"
-        sizes="70px"
-        class="size-17.5 aspect-auto"
-      />
-    </template>
+  <div>
+    <UHeader
+      :ui="{
+        root: 'h-max max-h-none py-2 static!',
+        center: 'flex-1 block',
+      }"
+    >
+      <template #title>
+        <base-image
+          src="/images/logo.avif"
+          :width="50"
+          preload
+          loading="eager"
+          fetchPriority="high"
+          :alt="config.public.siteNameFa || 'انارستان'"
+          sizes="50px"
+          class="size-12.5 aspect-auto"
+        />
+      </template>
 
-    <ModelSearch />
+      <ModelSearch />
 
-    <template #right>
-      <div v-if="mdAndUp" class="flex items-center gap-3">
-        <UPopover v-if="userStore.isLoggedIn" mode="hover">
+      <template #right>
+        <div v-if="mdAndUp" class="flex items-center gap-3">
+          <UPopover v-if="userStore.isLoggedIn" mode="hover">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              to="/panel"
+              class="flex items-center gap-2"
+              icon="i-lucide-user"
+            >
+            </UButton>
+
+            <template #content>
+              <div v-if="mdAndUp" class="p-3">
+                <UNavigationMenu
+                  :items="items"
+                  orientation="vertical"
+                  :ui="{
+                    list: 'space-y-2',
+                    item: 'rounded-xl border border-gray-300 hover:bg-gray-100 with-transition min-w-50',
+                    link: 'flex items-center gap-3 font-medium px-4 py-3',
+                  }"
+                />
+              </div>
+            </template>
+          </UPopover>
+          <UButton
+            v-else
+            color="neutral"
+            variant="outline"
+            to="/login"
+            class="flex items-center gap-2"
+          >
+            <span>ورود</span>
+            <span class="text-gray-400">|</span>
+            <span>ثبت‌نام</span>
+          </UButton>
+        </div>
+      </template>
+
+      <template #body>
+        <UNavigationMenu
+          :items="items"
+          orientation="vertical"
+          toggleSide="right"
+          class="-mx-2.5"
+        />
+      </template>
+      <template #toggle="{ open }">
+        <UDrawer
+          v-if="smAndDown"
+          direction="left"
+          should-scale-background
+          set-background-color-on-scale
+          :ui="{
+            content: 'min-w-[80%] p-3',
+            handle: 'hidden!',
+          }"
+        >
           <UButton
             color="neutral"
-            variant="ghost"
-            to="/panel"
-            class="flex items-center gap-2"
-            icon="i-lucide-user"
-          >
-          </UButton>
+            variant="link"
+            :trailing-icon="open ? 'i-lucide-x' : 'i-lucide-menu'"
+          />
 
           <template #content>
-            <div v-if="mdAndUp" class="p-3">
+            <div class="w-full">
               <UNavigationMenu
                 :items="items"
                 orientation="vertical"
                 :ui="{
                   list: 'space-y-2',
-                  item: 'rounded-xl border border-gray-300 hover:bg-gray-100 with-transition min-w-50',
-                  link: 'flex items-center gap-3 font-medium px-4 py-3',
+                  item: 'rounded-xl border border-gray-300 hover:bg-gray-100 with-transition px-4 py-3',
+                  link: 'flex items-center gap-3 font-medium',
                 }"
               />
             </div>
           </template>
-        </UPopover>
-        <UButton
-          v-else
-          color="neutral"
-          variant="outline"
-          to="/login"
-          class="flex items-center gap-2"
-        >
-          <span>ورود</span>
-          <span class="text-gray-400">|</span>
-          <span>ثبت‌نام</span>
-        </UButton>
-      </div>
-    </template>
-
-    <template #body>
-      <UNavigationMenu
-        :items="items"
-        orientation="vertical"
-        toggleSide="right"
-        class="-mx-2.5"
-      />
-    </template>
-    <template #toggle="{ open }">
-      <UDrawer
-        v-if="smAndDown"
-        direction="left"
-        should-scale-background
-        set-background-color-on-scale
+        </UDrawer>
+      </template>
+    </UHeader>
+    <nav
+      v-if="mdAndUp"
+      class="py-2 border-b border-default max-w-(--ui-container) w-full mx-auto"
+    >
+      <UPopover
+        v-for="(item, index) in dataCategory?.data as Category[] ?? []"
+        :key="index"
+        arrow
+        :items="dataCategory?.data"
+        labelKey="name"
+        mode="hover"
+        :open-delay="0"
+        :close-delay="0"
         :ui="{
-          content: 'min-w-[80%] p-3',
-          handle: 'hidden!',
+          content: [!item?.children?.length && 'hidden'],
         }"
       >
         <UButton
-          color="neutral"
-          variant="link"
-          :trailing-icon="open ? 'i-lucide-x' : 'i-lucide-menu'"
+          :label="item?.name ?? ''"
+          color="default"
+          variant="ghost"
+          :to="`/categories/${item.code}/${item.slug}`"
         />
-
-        <template #content>
-          <div class="w-full">
-            <UNavigationMenu
-              :items="items"
-              orientation="vertical"
-              :ui="{
-                list: 'space-y-2',
-                item: 'rounded-xl border border-gray-300 hover:bg-gray-100 with-transition px-4 py-3',
-                link: 'flex items-center gap-3 font-medium',
-              }"
-            />
+        <template v-if="item?.children?.length" #content>
+          <div class="w-max p-2 px-4">
+            <widget-category-children :categories="item?.children" />
           </div>
         </template>
-      </UDrawer>
-    </template>
-  </UHeader>
-  <div v-if="mdAndUp" class="py-2 border-b border-default">
-    <UPopover
-      v-for="(item, index) in dataCategory?.data as Category[] ?? []"
-      :key="index"
-      arrow
-      :items="dataCategory?.data"
-      labelKey="name"
-      mode="hover"
-      :open-delay="0"
-      :close-delay="0"
-      :ui="{
-        content: [!item?.children?.length && 'hidden'],
-      }"
-    >
-      <UButton
-        :label="item?.name ?? ''"
-        color="default"
-        variant="ghost"
-        :to="`/categories/${item.code}/${item.slug}`"
-      />
-      <template v-if="item?.children?.length" #content>
-        <div class="w-max p-4 px-6">
-          <widget-category-children :categories="item?.children" />
-        </div>
-      </template>
-    </UPopover>
+      </UPopover>
+    </nav>
   </div>
 </template>

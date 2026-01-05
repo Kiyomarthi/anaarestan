@@ -63,6 +63,18 @@ watch(
     isLoading.value = true;
   }
 );
+
+if (props.preload)
+  useHead({
+    link: [
+      {
+        rel: "preload",
+        as: "image",
+        href: props.src,
+        fetchpriority: "high",
+      },
+    ],
+  });
 </script>
 
 <template>
@@ -72,7 +84,7 @@ watch(
       v-if="isLoading && props.showLoadingOverlay"
       class="absolute inset-0 z-10 bg-gray-300 animate-pulse"
     /> -->
-    <nuxt-picture
+    <img
       v-bind="$attrs"
       :src="props.src"
       :alt="props.alt"
@@ -88,6 +100,7 @@ watch(
       :preload="props.preload"
       :loading="props.loading"
       :fetch-priority="props.fetchPriority"
+      :class="imageClass"
       @load="handleImageLoad"
       @error="handleImageError"
     />

@@ -1,0 +1,36 @@
+name: Manual Build
+
+on:
+  workflow_dispatch: # اجرا فقط دستی
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DOTENV_PATH: ".env" # مسیر فایل env در روت پروژه
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Load .env
+        run: |
+          if [ -f "$DOTENV_PATH" ]; then
+            export $(grep -v '^#' $DOTENV_PATH | xargs)
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: nuxt-build
+          path: .nuxt

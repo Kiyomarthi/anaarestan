@@ -56,6 +56,7 @@ webpageSchema(data.value?.data as PageResponse);
     <!-- Hero Slider -->
     <!-- Categories Section -->
     <!-- <WidgetSectionsCategoriesSection /> -->
+    {{ Array.from({ length: 1000 }).fill("lskfdjlskdfjs") }}
 
     <!-- Discounts Section -->
     <!-- <WidgetSectionsDiscountsSection /> -->

@@ -90,6 +90,7 @@ const switchToPassword = () => {
             :width="70"
             sizes="70px"
             preload
+            class="w-17.5"
             loading="eager"
             fetchPriority="high"
             alt="انارستان"

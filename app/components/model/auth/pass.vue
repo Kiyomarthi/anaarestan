@@ -106,6 +106,7 @@ const switchToOtp = () => {
             sizes="70px"
             preload
             loading="eager"
+            class="w-17.5"
             fetchPriority="high"
             alt="انارستان"
           />
