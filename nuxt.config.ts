@@ -158,20 +158,38 @@ export default defineNuxtConfig({
       external: ["mysql2", "bcryptjs", "jsonwebtoken", "serve-static"],
       inline: [],
     },
+    minify: true,
     compressPublicAssets: {
-      gzip: true,
       brotli: true,
+      gzip: true,
+    },
+    compression: {
+      gzip: true,
+      // Optional: Configure compression level (1-9, higher is more compression)
+      gzipLevel: 6, // Default is 6, balance between speed and compression
+    },
+    esbuild: {
+      options: {
+        drop: ["console", "debugger"],
+      },
     },
     storage: {
-      redis: {
-        driver: "redis",
-        port: Number(process.env.REDIS_PORT),
-        host: process.env.REDIS_HOST,
-        // username: "",
-        password: process.env.REDIS_PASSWORD || undefined,
-        // tls: {},
-        db: 0,
+      // Filesystem-based cache storage (no external dependencies required)
+      db: {
+        driver: "fs",
+        base: ".cache",
       },
+      // Redis configuration (commented out for shared hosting compatibility)
+      // Uncomment below if you want to use Redis again:
+      // redis: {
+      //   driver: "redis",
+      //   port: Number(process.env.REDIS_PORT),
+      //   host: process.env.REDIS_HOST,
+      //   // username: "",
+      //   password: process.env.REDIS_PASSWORD || undefined,
+      //   // tls: {},
+      //   db: 0,
+      // },
       // redis: {
       //   driver: "redis",
       //   path: "/home/anaarest/redis/redis.sock",

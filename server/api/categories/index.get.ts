@@ -1,9 +1,9 @@
 import { getDB } from "~~/server/db";
 import { buildAbsoluteUrl, buildCacheKey } from "~~/server/utils/common";
+import { getCachedData, setCacheData } from "~~/server/utils/cache";
+import { CACHE_KEY } from "~~/shared/utils/cache";
 
 export default defineEventHandler(async (event) => {
-  const db = await getDB();
-  const redis = useStorage("redis");
   const {
     public: { siteUrl },
   } = useRuntimeConfig();
@@ -40,80 +40,90 @@ export default defineEventHandler(async (event) => {
       return [current, ...children];
     });
 
-  if (isCache === "true" && cacheKey) {
-    const cached = await redis.getItem(cacheKey);
-    if (cached) {
+  // Function to fetch categories from database
+  async function fetchCategories() {
+    const db = await getDB();
+    // const redis = useStorage("redis"); // Commented out - using filesystem cache instead
+
+    const params: any[] = [];
+    let sql = "SELECT * FROM categories";
+
+    if (search) {
+      sql += " WHERE name LIKE ? OR slug LIKE ? OR code LIKE ?";
+      const term = `%${search}%`;
+      params.push(term, term, term);
+    }
+
+    sql += " ORDER BY id ASC";
+
+    const [rows] = (await db.query(sql, params)) as any[];
+
+    const map = new Map<number, any>();
+
+    rows?.forEach((row: any) => {
+      map.set(row.id, { ...row, children: [] });
+    });
+
+    const tree: any[] = [];
+
+    map.forEach((cat) => {
+      if (cat.parent_id && map.has(cat.parent_id)) {
+        map.get(cat.parent_id).children.push(cat);
+      } else {
+        tree.push(cat);
+      }
+    });
+
+    const responseData = tree.map((cat) => addSiteUrl(cat));
+    const flattened = flattenCategories(tree).map((cat) => addSiteUrl(cat));
+    const total = flattened.length;
+
+    if (noPaginate) {
+      // Return tree structure without pagination
       return {
-        ...cached,
-        cache: true,
+        success: true,
+        data: responseData,
+        meta: {
+          total,
+        },
       };
     }
-  }
 
-  const params: any[] = [];
-  let sql = "SELECT * FROM categories";
+    // Apply pagination on parent categories only (tree structure)
+    const paginatedData = responseData.slice(offset, offset + limit);
 
-  if (search) {
-    sql += " WHERE name LIKE ? OR slug LIKE ? OR code LIKE ?";
-    const term = `%${search}%`;
-    params.push(term, term, term);
-  }
-
-  sql += " ORDER BY id ASC";
-
-  const [rows] = (await db.query(sql, params)) as any[];
-
-  const map = new Map<number, any>();
-
-  rows?.forEach((row: any) => {
-    map.set(row.id, { ...row, children: [] });
-  });
-
-  const tree: any[] = [];
-
-  map.forEach((cat) => {
-    if (cat.parent_id && map.has(cat.parent_id)) {
-      map.get(cat.parent_id).children.push(cat);
-    } else {
-      tree.push(cat);
-    }
-  });
-
-  const responseData = tree.map((cat) => addSiteUrl(cat));
-  const flattened = flattenCategories(tree).map((cat) => addSiteUrl(cat));
-  const total = flattened.length;
-
-  if (noPaginate) {
-    // Return tree structure without pagination
-    const res = {
+    return {
       success: true,
-      data: responseData,
+      data: paginatedData,
       meta: {
-        total,
+        page,
+        limit,
+        total: responseData.length, // Total parent categories
+        totalPages: Math.ceil(responseData.length / limit),
       },
     };
-    if (cacheKey) {
-      await redis.setItem(cacheKey, res, { ttl: 60 * 60 * 24 * 60 });
-    }
-    return res;
   }
 
-  // Apply pagination on parent categories only (tree structure)
-  const paginatedData = responseData.slice(offset, offset + limit);
+  if (isCache === "true" && cacheKey) {
+    // Use filesystem-based cache with stale-while-revalidate pattern
+    const cached = await getCachedData(
+      event,
+      cacheKey,
+      60 * 60 * 24 * 60, // 60 days TTL
+      fetchCategories
+    );
 
-  const response = {
-    success: true,
-    data: paginatedData,
-    meta: {
-      page,
-      limit,
-      total: responseData.length, // Total parent categories
-      totalPages: Math.ceil(responseData.length / limit),
-    },
-  };
+    return {
+      ...cached,
+      cache: true,
+    };
+  }
+
+  // Fetch fresh data if cache is disabled
+  const response = await fetchCategories();
 
   if (cacheKey) {
-    await redis.setItem(cacheKey, response, { ttl: 60 * 60 * 24 * 60 });
+    await setCacheData(cacheKey, response);
   }
 
   return response;

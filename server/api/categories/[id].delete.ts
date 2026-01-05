@@ -1,6 +1,8 @@
 import { getDB } from "~~/server/db";
 import { requireRole } from "~~/server/utils/permissions";
 import { createError } from "h3";
+import { CACHE_KEY } from "~~/shared/utils/cache";
+import { removeCacheByPattern } from "~~/server/utils/cache";
 
 export default defineEventHandler(async (event) => {
   requireRole(event, "admin");
@@ -14,10 +16,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const redis = useStorage("redis");  
-  const keys = await redis.getKeys(`${CACHE_KEY.category}:`);
+  // const redis = useStorage("redis"); // Commented out - using filesystem cache instead
+  // const keys = await redis.getKeys(`${CACHE_KEY.category}:`);
+  // await Promise.all(keys.map((key) => redis.removeItem(key)));
 
-  await Promise.all(keys.map((key) => redis.removeItem(key)));
+  // Clear cache using filesystem cache
+  await removeCacheByPattern(`${CACHE_KEY.category}:`);
 
   const db = await getDB();
 

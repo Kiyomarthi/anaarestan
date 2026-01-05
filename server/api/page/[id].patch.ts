@@ -2,11 +2,13 @@ import { getDB } from "~~/server/db";
 import { requireRole } from "~~/server/utils/permissions";
 import { validate } from "~~/shared/validation";
 import { validateBody } from "~~/server/utils/validate";
+import { CACHE_KEY } from "~~/shared/utils/cache";
+import { removeCacheData } from "~~/server/utils/cache";
 
 export default defineEventHandler(async (event) => {
   const db = await getDB();
   const user = requireRole(event, "admin");
-  const redis = useStorage("redis");
+  // const redis = useStorage("redis"); // Commented out - using filesystem cache instead
 
   const id = getRouterParam(event, "id");
 
@@ -36,7 +38,12 @@ export default defineEventHandler(async (event) => {
     breadcrumbs,
   } = body;
 
-  await redis.removeItem(`${CACHE_KEY.page}:${slug}`);
+  // await redis.removeItem(`${CACHE_KEY.page}:${slug}`); // Commented out - using filesystem cache instead
+
+  // Clear cache using filesystem cache
+  if (slug) {
+    await removeCacheData(`${CACHE_KEY.page}:${slug}`);
+  }
 
   // Validation - only validate provided fields
   const validationSchema: Record<string, (v: any) => true | string> = {};

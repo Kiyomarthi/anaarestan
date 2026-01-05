@@ -1,8 +1,9 @@
 import { getDB } from "~~/server/db";
+import { getCachedData, setCacheData } from "~~/server/utils/cache";
+import { CACHE_KEY } from "~~/shared/utils/cache";
 
 export default defineEventHandler(async (event) => {
-  const db = await getDB();
-  const redis = useStorage("redis");
+  // const redis = useStorage("redis"); // Commented out - using filesystem cache instead
 
   const query = getQuery(event);
   const search =
@@ -22,74 +23,87 @@ export default defineEventHandler(async (event) => {
         )
       : null;
 
-  if (cacheKey) {
-    const cached = await redis.getItem(cacheKey);
-    if (cached) {
-      return {
-        success: true,
-        ...cached,
-        cache: true,
-      };
+  // Function to fetch attributes from database
+  async function fetchAttributes() {
+    const db = await getDB();
+
+    const params: any[] = [];
+    let whereClause = "1=1";
+    if (search) {
+      whereClause += " AND name LIKE ?";
+      params.push(`%${search}%`);
     }
-  }
 
-  const params: any[] = [];
-  let whereClause = "1=1";
-  if (search) {
-    whereClause += " AND name LIKE ?";
-    params.push(`%${search}%`);
-  }
-
-  // total count
-  const [countRows] = (await db.query(
-    `SELECT COUNT(*) as total FROM attributes WHERE ${whereClause}`,
-    params
-  )) as any[];
-  const total = countRows?.[0]?.total || 0;
-
-  // Paged attributes
-  const [attributesRows] = (await db.query(
-    `SELECT * FROM attributes WHERE ${whereClause} ORDER BY id ASC LIMIT ? OFFSET ?`,
-    [...params, limit, offset]
-  )) as any[];
-
-  const attributeIds = attributesRows.map((a: any) => a.id);
-  let valuesRows: any[] = [];
-  if (attributeIds.length) {
-    const placeholders = attributeIds.map(() => "?").join(",");
-    [valuesRows] = (await db.query(
-      `SELECT id, attribute_id, value FROM attribute_values WHERE attribute_id IN (${placeholders}) ORDER BY attribute_id ASC, id ASC`,
-      attributeIds
+    // total count
+    const [countRows] = (await db.query(
+      `SELECT COUNT(*) as total FROM attributes WHERE ${whereClause}`,
+      params
     )) as any[];
+    const total = countRows?.[0]?.total || 0;
+
+    // Paged attributes
+    const [attributesRows] = (await db.query(
+      `SELECT * FROM attributes WHERE ${whereClause} ORDER BY id ASC LIMIT ? OFFSET ?`,
+      [...params, limit, offset]
+    )) as any[];
+
+    const attributeIds = attributesRows.map((a: any) => a.id);
+    let valuesRows: any[] = [];
+    if (attributeIds.length) {
+      const placeholders = attributeIds.map(() => "?").join(",");
+      [valuesRows] = (await db.query(
+        `SELECT id, attribute_id, value FROM attribute_values WHERE attribute_id IN (${placeholders}) ORDER BY attribute_id ASC, id ASC`,
+        attributeIds
+      )) as any[];
+    }
+
+    const valuesMap = new Map<number, any[]>();
+    valuesRows?.forEach((row: any) => {
+      if (!valuesMap.has(row.attribute_id)) {
+        valuesMap.set(row.attribute_id, []);
+      }
+      valuesMap.get(row.attribute_id)!.push(row);
+    });
+
+    const data =
+      attributesRows?.map((attr: any) => ({
+        ...attr,
+        values: valuesMap.get(attr.id) || [],
+      })) || [];
+
+    return {
+      success: true,
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
-  const valuesMap = new Map<number, any[]>();
-  valuesRows?.forEach((row: any) => {
-    if (!valuesMap.has(row.attribute_id)) {
-      valuesMap.set(row.attribute_id, []);
-    }
-    valuesMap.get(row.attribute_id)!.push(row);
-  });
+  if (cacheKey) {
+    // Use filesystem-based cache with stale-while-revalidate pattern
+    const cached = await getCachedData(
+      event,
+      cacheKey,
+      60 * 60 * 24 * 60, // 60 days TTL
+      fetchAttributes
+    );
 
-  const data =
-    attributesRows?.map((attr: any) => ({
-      ...attr,
-      values: valuesMap.get(attr.id) || [],
-    })) || [];
+    return {
+      success: true,
+      ...cached,
+      cache: true,
+    };
+  }
 
-  const response = {
-    success: true,
-    data,
-    meta: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
+  // Fetch fresh data if cache is disabled
+  const response = await fetchAttributes();
 
   if (cacheKey) {
-    await redis.setItem(cacheKey, response);
+    await setCacheData(cacheKey, response);
   }
 
   return response;

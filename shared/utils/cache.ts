@@ -4,6 +4,7 @@ const BASE = runtime.public?.siteNameEn || "anarestan";
 export const CACHE_KEY = {
   page: `${BASE}:page`,
   category: `${BASE}:category`,
+  attribute: (key: string) => `${BASE}:attribute:${key}`,
 } as const;
 
 export const makeCache = (eightHours: number = 30 * 60) => {

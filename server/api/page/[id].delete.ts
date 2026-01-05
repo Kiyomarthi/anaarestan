@@ -1,9 +1,11 @@
 import { getDB } from "~~/server/db";
 import { requireRole } from "~~/server/utils/permissions";
+import { CACHE_KEY } from "~~/shared/utils/cache";
+import { removeCacheData } from "~~/server/utils/cache";
 
 export default defineEventHandler(async (event) => {
   const user = requireRole(event, "admin");
-  const redis = useStorage("redis");
+  // const redis = useStorage("redis"); // Commented out - using filesystem cache instead
 
   const id = getRouterParam(event, "id");
 
@@ -37,7 +39,10 @@ export default defineEventHandler(async (event) => {
     }
 
     const slug = pageRows?.[0]?.slug;
-    await redis.removeItem(`${CACHE_KEY.page}:${slug}`);
+    // await redis.removeItem(`${CACHE_KEY.page}:${slug}`); // Commented out - using filesystem cache instead
+
+    // Clear cache using filesystem cache
+    await removeCacheData(`${CACHE_KEY.page}:${slug}`);
 
     // Delete related data first (due to foreign key constraints)
     await connection.query(`DELETE FROM media_blocks WHERE page_id = ?`, [id]);

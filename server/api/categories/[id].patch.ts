@@ -3,6 +3,8 @@ import { createSlug } from "~~/server/utils/format";
 import { validate } from "~~/shared/validation";
 import { buildUpdateQuery } from "~~/server/utils/common";
 import { buildAbsoluteUrl } from "~~/server/utils/common";
+import { CACHE_KEY } from "~~/shared/utils/cache";
+import { removeCacheByPattern } from "~~/server/utils/cache";
 
 export default defineEventHandler(async (event) => {
   const user = requireRole(event, "admin");
@@ -18,10 +20,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const redis = useStorage("redis");
-  const keys = await redis.getKeys(`${CACHE_KEY.category}:`);
+  // const redis = useStorage("redis"); // Commented out - using filesystem cache instead
+  // const keys = await redis.getKeys(`${CACHE_KEY.category}:`);
+  // await Promise.all(keys.map((key) => redis.removeItem(key)));
 
-  await Promise.all(keys.map((key) => redis.removeItem(key)));
+  // Clear cache using filesystem cache
+  await removeCacheByPattern(`${CACHE_KEY.category}:`);
 
   const body = await readBody(event);
   const { name, parent_id, status, image } = body;
