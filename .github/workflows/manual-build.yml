@@ -2,21 +2,15 @@ name: Build Nuxt
 
 on:
   workflow_dispatch:
-    inputs:
-      env-file:
-        description: "Path to .env file in repo"
-        default: ".env"
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # چک کردن سورس
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # نصب Node و pnpm
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -26,27 +20,11 @@ jobs:
       - name: Setup pnpm
         run: npm install -g pnpm
 
-      # نصب وابستگی‌ها
       - name: Install dependencies
         run: pnpm install
 
-      # بارگذاری فایل .env که از workflow_dispatch داده می‌شود
-      - name: Load .env
-        run: |
-          if [ -f "${{ github.event.inputs.env-file }}" ]; then
-            cp ${{ github.event.inputs.env-file }} .env
-          else
-            echo ".env file not found: ${{ github.event.inputs.env-file }}"
-            exit 1
-          fi
+      - name: Copy .env
+        run: cp .env .env
 
-      # بیلد Nuxt
       - name: Build Nuxt
         run: pnpm run build
-
-      # آپلود خروجی به عنوان artifact
-      - name: Upload Nuxt build
-        uses: actions/upload-artifact@v4
-        with:
-          name: nuxt-build
-          path: .nuxt
