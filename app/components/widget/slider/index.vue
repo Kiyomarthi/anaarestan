@@ -34,10 +34,10 @@ defineProps<{
       prev-icon="i-lucide-chevron-right"
       :ui="{
         dot: 'w-6 h-2 data-[state=active]:bg-primary cursor-default',
-        prev: 'md:star-[500px] md:ottom-0',
-        next: 'md:en-[500px]',
+        prev: 'sm:start-10 lg:-start-10',
+        next: 'sm:end-10 lg:-end-10',
         arrows:
-          'md:absolute md:bottom-6 md:w-5 md:right-1/2 md:translate-x-1/2',
+          'lg:absolute lg:bottom-6 lg:w-5 lg:right-1/2 lg:translate-x-1/2',
       }"
     >
       <ULink
@@ -49,9 +49,9 @@ defineProps<{
       >
         <baseImage
           src="/tmp/slider.avif"
-          image-class="w-full h-50 md:h-[350px] object-cover"
+          image-class="w-full h-50 lg:h-[400px] object-cover"
           alt="slider-item"
-          :height="200"
+          :height="400"
           width="100dvw"
           sizes="100dvw"
         />

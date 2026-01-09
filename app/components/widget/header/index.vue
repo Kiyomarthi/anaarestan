@@ -14,7 +14,7 @@ const route = useRoute();
 const userStore = useUserStore();
 const config = useRuntimeConfig();
 
-const { smAndDown, mdAndUp } = useBreakpoints();
+const { smAndDown, lgAndUp } = useBreakpoints();
 
 const items = computed<NavigationMenuItem[]>(() =>
   [
@@ -209,7 +209,7 @@ await fetchCategory("/api/categories", {
       <ModelSearch />
 
       <template #right>
-        <div v-if="mdAndUp" class="flex items-center gap-3">
+        <div v-if="lgAndUp" class="flex items-center gap-3">
           <UPopover v-if="userStore.isLoggedIn" mode="hover">
             <UButton
               color="neutral"
@@ -221,7 +221,7 @@ await fetchCategory("/api/categories", {
             </UButton>
 
             <template #content>
-              <div v-if="mdAndUp" class="p-3">
+              <div v-if="lgAndUp" class="p-3">
                 <UNavigationMenu
                   :items="items"
                   orientation="vertical"
@@ -289,35 +289,34 @@ await fetchCategory("/api/categories", {
         </UDrawer>
       </template>
     </UHeader>
-    <nav
-      v-if="mdAndUp"
-      class="py-2 border-b border-default max-w-(--ui-container) w-full mx-auto"
-    >
-      <UPopover
-        v-for="(item, index) in dataCategory?.data as Category[] ?? []"
-        :key="index"
-        arrow
-        :items="dataCategory?.data"
-        labelKey="name"
-        mode="hover"
-        :open-delay="0"
-        :close-delay="0"
-        :ui="{
-          content: [!item?.children?.length && 'hidden'],
-        }"
-      >
-        <UButton
-          :label="item?.name ?? ''"
-          color="default"
-          variant="ghost"
-          :to="`/categories/${item.code}/${item.slug}`"
-        />
-        <template v-if="item?.children?.length" #content>
-          <div class="w-max p-2 px-4">
-            <widget-category-children :categories="item?.children" />
-          </div>
-        </template>
-      </UPopover>
-    </nav>
+    <div>
+      <nav v-if="lgAndUp" class="py-2 max-w-(--ui-container) w-full mx-auto">
+        <UPopover
+          v-for="(item, index) in dataCategory?.data as Category[] ?? []"
+          :key="index"
+          arrow
+          :items="dataCategory?.data"
+          labelKey="name"
+          mode="hover"
+          :open-delay="0"
+          :close-delay="0"
+          :ui="{
+            content: [!item?.children?.length && 'hidden'],
+          }"
+        >
+          <UButton
+            :label="item?.name ?? ''"
+            color="default"
+            variant="ghost"
+            :to="`/categories/${item.code}/${item.slug}`"
+          />
+          <template v-if="item?.children?.length" #content>
+            <div class="w-max p-2 px-4">
+              <widget-category-children :categories="item?.children" />
+            </div>
+          </template>
+        </UPopover>
+      </nav>
+    </div>
   </div>
 </template>

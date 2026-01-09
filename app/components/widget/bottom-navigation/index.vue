@@ -33,7 +33,7 @@ const isActive = (href: string) => {
 
 <template>
   <nav
-    class="fixed bottom-4 left-4 right-4 z-50 md:hidden"
+    class="fixed bottom-4 left-4 right-4 z-50 lg:hidden"
     style="backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.9)"
   >
     <div

@@ -5,14 +5,14 @@ const noFooter = computed(() => route.meta?.noFooter);
 const noBottomNavigation = computed(() => route.meta?.noFooter);
 const noMargin = computed(() => route.meta?.noMargin);
 
-const { hidden } = useHideScroll();
+const { hidden } = useHideScroll(5);
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col">
     <WidgetHeader
       v-if="!noHeader"
-      class="with-transition fixed top-0 w-full bg-white"
+      class="with-transition fixed top-0 w-full bg-white z-100"
       :class="{ '-translate-y-full': hidden }"
     />
     <main

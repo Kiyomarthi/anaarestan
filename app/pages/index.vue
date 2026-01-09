@@ -1,5 +1,6 @@
 <script setup lang="ts">
 ///// imports /////
+import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 import { useConfigSeo } from "~/composables/utils/useConfigSeo";
 import type { ApiResponse, PageResponse } from "~~/shared/types/api";
 
@@ -15,6 +16,8 @@ definePageMeta({
 ///// composables/stores /////
 const { buildMeta, organizationSchema, websiteSchema, webpageSchema } =
   useConfigSeo();
+
+const { lgAndUp } = useBreakpoints();
 
 const { fetch, loading, data } = useCacheFetch<ApiResponse<PageResponse>>();
 
@@ -61,7 +64,44 @@ const mods = {
 <template>
   <div>
     <section>
-      <widget-slider :items="Array.from({ length: 10 }).fill('hello')" />
+      <widgetSlider :items="Array.from({ length: 10 }).fill('hello')" />
+    </section>
+    <section class="mt-14 lg:mt-16">
+      <h3 class="text-center text-h3 mb-1">خرید براساس دسته‌بندی</h3>
+      <div v-if="lgAndUp">
+        <u-carousel
+          align="center"
+          drag-free
+          :ui="{
+            root: 'bg-white',
+            item: 'basis-1/5 py-1 justify-center flex',
+          }"
+          :items="dataCategory?.data"
+          v-slot="{ item }"
+        >
+          <WidgetCategoryCard
+            :name="item.name"
+            :slug="item.slug"
+            :id="item.id"
+            image="/tmp/category.png"
+            class="w-fit"
+          />
+        </u-carousel>
+      </div>
+      <div
+        v-else
+        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 justify-center"
+      >
+        <WidgetCategoryCard
+          v-for="(category, index) in dataCategory?.data"
+          :key="index"
+          :name="category.name"
+          :slug="category.slug"
+          :id="category.id"
+          image="/tmp/category.png"
+          class="w-fit mx-auto"
+        />
+      </div>
     </section>
 
     <!-- Discounts Section -->
