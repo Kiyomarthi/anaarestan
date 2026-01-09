@@ -17,10 +17,12 @@ const props = withDefaults(
     product: Product;
     class?: string;
     showDiscount?: boolean;
+    imageColor?: string;
   }>(),
   {
     class: "",
     showDiscount: true,
+    imageColor: "primary",
   }
 );
 
@@ -64,7 +66,7 @@ const formattedPrice = (value: number) => {
           :loading="'lazy'"
           :width="250"
           :height="250"
-          image-class="size-[250px] object-cover"
+          :image-class="`size-[250px] object-cover ${imageColor}`"
           fetch-priority="low"
           sizes="250px"
         />

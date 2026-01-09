@@ -23,7 +23,7 @@ const props = withDefaults(
   {
     aspect: "",
     wrapperClass: "relative w-full overflow-hidden",
-    imageClass: "w-full h-full object-cover",
+    imageClass: "",
     placeholder: [10, 10, 10, 10],
     format: "avif",
     loading: "lazy",
@@ -56,7 +56,9 @@ const wrapperClasses = computed(() =>
   twMerge(props.wrapperClass, props.aspect, props.class)
 );
 
-const imageClasses = computed(() => twMerge(props.imageClass));
+const imageClasses = computed(() =>
+  twMerge("w-full h-full object-cover", props.imageClass)
+);
 
 watch(
   () => props.src,
@@ -93,7 +95,7 @@ watch(
       :format="props.format"
       :width="props.width"
       :height="props.height"
-      :class="props.imageClass"
+      :class="imageClasses"
       :preload="props.preload"
       :loading="props.loading"
       :fetch-priority="props.fetchPriority"

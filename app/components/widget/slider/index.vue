@@ -28,7 +28,7 @@ defineProps<{
       dots
       :items
       loop
-      v-slot="{ item }"
+      v-slot="{ item, index }"
       :autoplay="{ delay: 3000 }"
       next-icon="i-lucide-chevron-left"
       prev-icon="i-lucide-chevron-right"
@@ -49,11 +49,16 @@ defineProps<{
       >
         <baseImage
           src="/tmp/slider.avif"
-          image-class="w-full h-50 lg:h-[400px] object-cover"
+          :image-class="`w-full h-50 lg:h-[400px] object-cover ${
+            randomColor[index % randomColor.length]
+          }`"
           alt="slider-item"
           :height="400"
           width="100dvw"
           sizes="100dvw"
+          :preload="index == 0"
+          :loading="index == 0 ? 'eager' : 'lazy'"
+          :fetch-priority="index == 0 ? 'high' : 'low'"
         />
       </ULink>
     </UCarousel>

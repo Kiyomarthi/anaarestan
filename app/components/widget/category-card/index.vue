@@ -10,6 +10,7 @@ const props = withDefaults(
     slug?: string;
     image?: string | null;
     class?: string;
+    imageClass?: string;
   }>(),
   {
     class: "",
@@ -26,11 +27,11 @@ const props = withDefaults(
       :src="image"
       :alt="name"
       class="rounded-lg w-max"
-      image-class="size-30 md:size-40"
+      :image-class="`size-30 md:size-34 ${imageClass}`"
       :loading="'lazy'"
-      :width="160"
-      :height="160"
-      sizes="160px"
+      :width="136"
+      :height="136"
+      sizes="136px"
     />
     <h4 class="text-h4 text-center font-medium text-gray-700 line-clamp-2">
       {{ name }}

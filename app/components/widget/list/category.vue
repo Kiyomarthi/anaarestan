@@ -40,19 +40,19 @@ const { lgAndUp } = useBreakpoints();
     </UCarousel>
   </div>
   <section v-else>
-    <h3 class="text-center text-h3 mb-1">{{ title }}</h3>
+    <h3 class="text-h3 text-center lg:text-right lg:pr-8 mb-1">{{ title }}</h3>
     <div v-if="lgAndUp">
       <u-carousel
         align="center"
         drag-free
         :ui="{
           root: 'bg-white',
-          item: 'basis-1/5 py-1 justify-center flex',
+          item: 'basis-1/6 py-1 justify-center flex',
         }"
         :items="items"
-        v-slot="{ item }"
+        v-slot="{ item, index }"
       >
-        <slot name="desktop" :item />
+        <slot name="desktop" :item :index />
       </u-carousel>
     </div>
     <div

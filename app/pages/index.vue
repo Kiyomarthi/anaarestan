@@ -72,6 +72,11 @@ websiteSchema();
 webpageSchema(data.value?.data as PageResponse);
 
 ///// computed /////
+const endTime = computed(() => {
+  const date = new Date();
+  date.setHours(date.getHours() + 24);
+  return date;
+});
 
 ///// functions /////
 
@@ -91,11 +96,17 @@ const mods = {
     </section>
 
     <div class="max-w-(--ui-container) mx-auto">
-      <WidgetSectionsDiscountsSection
+      <WidgetListProduct
         :items="discountedProducts"
         :loading="discountProductLoading"
+        title="تخفیف‌های ویژه"
+        subtitle=" فرصت محدود برای خرید با تخفیف"
         class="mt-14 lg:mt-16"
-      />
+      >
+        <template #header-item>
+          <WidgetTimer :end-time="endTime" />
+        </template>
+      </WidgetListProduct>
 
       <widgetListCategory
         title="خرید براساس دسته‌بندی"
@@ -127,6 +138,12 @@ const mods = {
     </div>
 
     <!-- New Products Section -->
+    <WidgetListProduct
+      :items="discountedProducts"
+      :loading="discountProductLoading"
+      title="محصولات جدید"
+      class="mt-10 from-success-100"
+    />
     <!-- <WidgetSectionsNewProductsSection /> -->
 
     <!-- <WidgetSectionsImageTextSection

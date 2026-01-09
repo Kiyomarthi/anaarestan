@@ -1,17 +1,21 @@
 <script setup lang="ts">
-defineProps<{
+import { twMerge } from "tailwind-merge";
+
+const props = defineProps<{
   loading?: boolean;
   items: unknown[];
+  subtitle?: string;
+  title: string;
+  class?: string;
 }>();
 
 const router = useRouter();
 
+const wrapperClasses = computed(() =>
+  twMerge("bg-linear-to-l from-primary-50 to-white py-5", props.class)
+);
+
 // Calculate end time (24 hours from now)
-const endTime = computed(() => {
-  const date = new Date();
-  date.setHours(date.getHours() + 24);
-  return date;
-});
 </script>
 
 <template>
@@ -27,19 +31,21 @@ const endTime = computed(() => {
       <USkeleton class="w-full lg:w-50 h-62.5 rounded-2xl" />
     </UCarousel>
   </div>
-  <section
-    v-else-if="items.length > 0"
-    class="bg-linear-to-l from-primary-50 to-white py-6"
-  >
+  <section v-else-if="items.length > 0" class="" :class="wrapperClasses">
     <div class="px-4">
       <div
-        class="flex flex-col lg:flex-row items-center justify-between mb-6 px-4"
+        class="flex flex-col lg:flex-row items-center justify-between mb-4 px-4"
       >
-        <div class="mb-3 lg:mb-0 text-center lg:text-start">
-          <h3 class="text-h3 mb-1">تخفیف‌های ویژه</h3>
-          <p class="text-gray-600">فرصت محدود برای خرید با تخفیف</p>
+        <div
+          class="lg:mb-0 text-center lg:text-start"
+          :class="{ 'mb-2': subtitle }"
+        >
+          <h3 class="text-h3">{{ title }}</h3>
+          <p v-if="subtitle" class="text-gray-600 mt-1">
+            {{ subtitle }}
+          </p>
         </div>
-        <WidgetTimer :end-time="endTime" />
+        <slot name="header-item" />
       </div>
 
       <div class="overflow-x-hidden">
