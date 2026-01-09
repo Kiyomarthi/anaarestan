@@ -147,6 +147,9 @@ const uploadImage = async (files: File | File[] | null) => {
       method: "POST",
       body: formData,
       errorTitle: "خطای آپلود تصویر",
+      headers: {
+        Authorization: token,
+      },
     });
 
     // بک‌اند مقدار `files` را به صورت آرایه مسیر برمی‌گرداند

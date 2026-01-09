@@ -89,6 +89,7 @@ const switchToPassword = () => {
             src="/images/logo.avif"
             :width="70"
             sizes="70px"
+            provider="none"
             preload
             class="w-17.5"
             loading="eager"

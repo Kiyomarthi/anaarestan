@@ -197,6 +197,7 @@ await fetchCategory("/api/categories", {
           src="/images/logo.avif"
           :width="50"
           preload
+          provider="none"
           loading="eager"
           fetchPriority="high"
           :alt="config.public.siteNameFa || 'انارستان'"

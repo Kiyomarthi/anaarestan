@@ -74,6 +74,7 @@ export function buildAbsoluteUrl(
   path: string | null | undefined,
   siteUrl?: string
 ) {
+  return path;
   if (!path) return path;
 
   if (ABSOLUTE_URL_REGEX.test(path)) return path;

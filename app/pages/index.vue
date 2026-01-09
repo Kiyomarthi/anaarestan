@@ -4,6 +4,9 @@ import { useConfigSeo } from "~/composables/utils/useConfigSeo";
 import type { ApiResponse, PageResponse } from "~~/shared/types/api";
 
 ///// page meta /////
+definePageMeta({
+  noMargin: true,
+});
 
 ///// props/emits /////
 
@@ -47,27 +50,26 @@ webpageSchema(data.value?.data as PageResponse);
 ///// functions /////
 
 ///// watchers /////
+const mods = {
+  blur: 5,
+  raw: "l-text,i-SALE%2030%25,fs-50,co-FF0000,bg-FFFFFF80,pa-20,l-end",
+};
 
 ///// lifecycle /////
 </script>
 
 <template>
   <div>
-    <!-- Hero Slider -->
-    <!-- Categories Section -->
-    <!-- <WidgetSectionsCategoriesSection /> -->
-    {{ Array.from({ length: 1000 }).fill("lskfdjlskdfjs") }}
+    <section>
+      <widget-slider :items="Array.from({ length: 10 }).fill('hello')" />
+    </section>
 
     <!-- Discounts Section -->
     <!-- <WidgetSectionsDiscountsSection /> -->
 
-    <!-- Banner Grid -->
-    <!-- <WidgetSectionsBannerGrid /> -->
-
     <!-- New Products Section -->
     <!-- <WidgetSectionsNewProductsSection /> -->
 
-    <!-- Image Text Section -->
     <!-- <WidgetSectionsImageTextSection
       title="چرا انارستان؟"
       text="انارستان با سال‌ها تجربه در زمینه فروش آنلاین، بهترین محصولات را با کیفیت بالا و قیمت مناسب به شما ارائه می‌دهد. ما به کیفیت و رضایت مشتریان متعهد هستیم."

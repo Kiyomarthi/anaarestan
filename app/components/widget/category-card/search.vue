@@ -26,11 +26,13 @@ const router = useRouter();
         v-if="category.image"
         :src="category.image"
         :alt="category.name"
-        image-class="size-16 object-cover"
-        class="w-16"
+        image-class="size-16"
+        class="size-16"
         :width="64"
+        :height="64"
         sizes="64px"
         :loading="'lazy'"
+        placeholder
       />
       <div v-else class="w-full h-full flex items-center justify-center">
         <svg

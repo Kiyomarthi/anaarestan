@@ -33,13 +33,14 @@ export const useConfigSeo = () => {
       appleMobileWebAppCapable: "yes",
       ogSiteName: siteConfig.value.public.siteNameFa,
       appleMobileWebAppTitle: siteConfig.value.public.siteNameFa,
-      ogImage:
-        seo?.page?.seo_image ||
-        `${siteConfig.value.public.siteUrl}/images/logo-og.png`,
+      // ogImage:
+      //   seo?.page?.seo_image ||
+      //   `${siteConfig.value.public.siteUrl}/images/logo-og.png`,
+      ogImage: `${siteConfig.value.public.siteUrl}/images/logo-og.png`,
       ogImageAlt: seo?.page?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
       ogImageHeight: "630",
       ogImageWidth: "1200",
-      themeColor: "#e63a33",
+      // themeColor: "#e63a33",
       referrer: "strict-origin-when-cross-origin",
       ogImageType: "image/png",
       ogLocale: "fa_IR",

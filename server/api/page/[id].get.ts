@@ -1,8 +1,5 @@
 import { getDB } from "~~/server/db";
-import {
-  buildCacheKey,
-  buildAbsoluteUrl,
-} from "~~/server/utils/common";
+import { buildCacheKey, buildAbsoluteUrl } from "~~/server/utils/common";
 import { getCachedData, setCacheData } from "~~/server/utils/cache";
 import { CACHE_KEY } from "~~/shared/utils/cache";
 
@@ -21,6 +18,7 @@ export default defineEventHandler(async (event) => {
       statusMessage: "Page slug is required",
     });
   }
+
 
   // Function to fetch page data from database
   async function fetchPageData() {

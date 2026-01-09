@@ -99,7 +99,7 @@ const quickActions = [
     label: "ایجاد صفحه",
     icon: "i-lucide-file-plus",
     to: "/admin/seo/create",
-    color: "secondary" as const,
+    color: "primary" as const,
     description: "افزودن صفحه جدید",
   },
   {
@@ -120,7 +120,7 @@ const quickActions = [
     label: "مشاهده صفحات",
     icon: "i-lucide-files",
     to: "/admin/seo",
-    color: "secondary" as const,
+    color: "primary" as const,
     description: "لیست تمام صفحات",
   },
 ];

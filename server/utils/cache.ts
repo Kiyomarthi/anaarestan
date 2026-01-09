@@ -35,6 +35,7 @@ export async function getCachedData<T>(
   fetchFn: () => Promise<T>
 ): Promise<T> {
   const storage = useStorage("db");
+
   const sanitizedKey = sanitizeFilename(cacheKey);
 
   try {
@@ -150,6 +151,7 @@ export async function getCacheData<T>(
   cacheKey: string
 ): Promise<CacheEntry<T> | null> {
   const storage = useStorage("db");
+
   const sanitizedKey = sanitizeFilename(cacheKey);
 
   try {

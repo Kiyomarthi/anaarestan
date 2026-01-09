@@ -18,6 +18,7 @@ const props = withDefaults(
     height?: number;
     class?: string;
     preload?: boolean;
+    sizes: string;
   }>(),
   {
     aspect: "",
@@ -64,17 +65,17 @@ watch(
   }
 );
 
-if (props.preload)
-  useHead({
-    link: [
-      {
-        rel: "preload",
-        as: "image",
-        href: props.src,
-        fetchpriority: "high",
-      },
-    ],
-  });
+// if (props.preload)
+// useHead({
+//   link: [
+//     {
+//       rel: "preload",
+//       as: "image",
+//       href: props.src,
+//       fetchpriority: "high",
+//     },
+//   ],
+// });
 </script>
 
 <template>
@@ -84,23 +85,18 @@ if (props.preload)
       v-if="isLoading && props.showLoadingOverlay"
       class="absolute inset-0 z-10 bg-gray-300 animate-pulse"
     /> -->
-    <img
+    <nuxt-img
       v-bind="$attrs"
-      :src="props.src"
+      :sr="props.src"
+      :src="props.src ?? '/tmp/category.png'"
       :alt="props.alt"
       :format="props.format"
       :width="props.width"
       :height="props.height"
-      :imgAttrs="{
-        preload: props.preload,
-        fetchPriority: props.fetchPriority,
-        loading: props.loading,
-        class: props.imageClass,
-      }"
+      :class="props.imageClass"
       :preload="props.preload"
       :loading="props.loading"
       :fetch-priority="props.fetchPriority"
-      :class="imageClass"
       @load="handleImageLoad"
       @error="handleImageError"
     />

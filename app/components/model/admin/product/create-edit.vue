@@ -325,6 +325,9 @@ const uploadImage = async (idx: number, file: File) => {
       method: "POST",
       body: formData,
       errorTitle: "خطای آپلود تصویر",
+      headers: {
+        Authorization: token,
+      },
     });
 
     const uploadedUrl =

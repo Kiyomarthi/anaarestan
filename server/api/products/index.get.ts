@@ -128,15 +128,15 @@ export default defineEventHandler(async (event) => {
     total = rows?.length || 0;
   }
 
-  const dataWithAbsoluteImage = (rows || []).map((row: any) => ({
-    ...row,
-    image: buildAbsoluteUrl(row.image, siteUrl),
-  }));
+  // const dataWithAbsoluteImage = (rows || []).map((row: any) => ({
+  //   ...row,
+  //   image: buildAbsoluteUrl(row.image, siteUrl),
+  // }));
 
   // Format response
   const response: any = {
     success: true,
-    data: dataWithAbsoluteImage,
+    data: rows,
   };
 
   if (!noPaginate) {

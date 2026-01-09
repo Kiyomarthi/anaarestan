@@ -63,8 +63,8 @@ const items: NavigationMenuItem[][] = [
       icon: "i-lucide-settings",
       children: [
         {
-          label: "عمومی",
-          to: "/admin/settings/general",
+          label: "مدیریت فایلها - imagekit",
+          to: "/admin/imagekit",
         },
       ],
     },

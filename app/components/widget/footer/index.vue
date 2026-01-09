@@ -21,7 +21,7 @@ const items: NavigationMenuItem[] = [
 </script>
 
 <template>
-  <UFooter>
+  <!-- <UFooter>
     <template #left>
       <p class="text-muted text-sm">
         Copyright © {{ new Date().getFullYear() }}
@@ -69,5 +69,5 @@ const items: NavigationMenuItem[] = [
         aria-label="GitHub"
       />
     </template>
-  </UFooter>
+  </UFooter> -->
 </template>

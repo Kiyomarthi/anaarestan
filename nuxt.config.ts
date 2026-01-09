@@ -33,9 +33,59 @@ export default defineNuxtConfig({
   },
 
   image: {
-    ipx: {
-      maxAge: 2764800,
-    },
+    provider: "none",
+    // provider: "imagekit",
+    // imagekit: {
+    //   baseURL: process.env.IMAGEKIT_URL,
+    // },
+
+    // screens: {
+    //   sm: 320,
+    //   md: 640,
+    //   lg: 1024,
+    //   xl: 1280,
+    //   "2xl": 1536,
+    // },
+
+    // format: ["avif", "webp", "jpg"],
+    // quality: 75,
+
+    // presets: {
+    //   product: {
+    //     modifiers: {
+    //       format: "auto",
+    //       quality: 75,
+    //       fit: "cover",
+    //     },
+    //     sizes: "(max-width: 768px) 100vw, 400px",
+    //   },
+
+    //   thumbnail: {
+    //     modifiers: {
+    //       format: "auto",
+    //       quality: 60,
+    //       width: 150,
+    //       height: 150,
+    //       fit: "cover",
+    //     },
+    //     sizes: "48px",
+    //   },
+
+    //   banner: {
+    //     modifiers: {
+    //       format: "auto",
+    //       quality: 80,
+    //       fit: "cover",
+    //     },
+    //     sizes: "(max-width: 768px) 100vw, 1200px",
+    //   },
+    // },
+
+    // providers: {
+    //   none: {
+    //     provider: "none",
+    //   },
+    // },
   },
 
   app: {
@@ -150,6 +200,9 @@ export default defineNuxtConfig({
     jwtSecret: process.env.JWT_SECRET,
     uploadDir: process.env.UPLOAD_DIR || "/home/anaarest/uploads",
     uploadUrl: process.env.UPLOAD_URL || "/uploads",
+    imagekitUrl: process.env.IMAGEKIT_URL,
+    imagekitPublicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+    imagekitPrivateKey: process.env.IMAGEKIT_PRIVATE_KEY,
   },
 
   nitro: {
@@ -168,15 +221,16 @@ export default defineNuxtConfig({
       // Optional: Configure compression level (1-9, higher is more compression)
       gzipLevel: 6, // Default is 6, balance between speed and compression
     },
-    esbuild: {
-      options: {
-        drop: ["console", "debugger"],
-      },
-    },
+    // esbuild: {
+    //   options: {
+    //     drop: ["console", "debugger"],
+    //   },
+    // },
     storage: {
+      cache: { driver: "memory" },
       // Filesystem-based cache storage (no external dependencies required)
       db: {
-        driver: "fs",
+        driver: "memory",
         base: ".cache",
       },
       // Redis configuration (commented out for shared hosting compatibility)
@@ -258,8 +312,16 @@ export default defineNuxtConfig({
     "/cart/**": { headers: { "Cache-Control": "no-store" } },
 
     // TODO: complete this
-    "/admin/**": { ssr: false, headers: { "Cache-Control": "no-store" } },
-    "/login": { ssr: false, headers: { "Cache-Control": "no-store" } },
+    "/admin/**": {
+      ssr: false,
+      delayHydration: false,
+      headers: { "Cache-Control": "no-store" },
+    },
+    "/login": {
+      ssr: false,
+      delayHydration: false,
+      headers: { "Cache-Control": "no-store" },
+    },
 
     "/**": {
       cache: { maxAge: 60 * 60, swr: 60 * 10 },

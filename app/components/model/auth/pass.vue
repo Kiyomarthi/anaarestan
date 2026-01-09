@@ -105,6 +105,7 @@ const switchToOtp = () => {
             :width="70"
             sizes="70px"
             preload
+            provider="none"
             loading="eager"
             class="w-17.5"
             fetchPriority="high"

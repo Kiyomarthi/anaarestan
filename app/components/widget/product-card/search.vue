@@ -42,11 +42,13 @@ const formattedPrice = (value: number) => {
       <BaseImage
         :src="product.image"
         :alt="product.title"
-        image-class="size-16 object-cover"
-        class="w-16"
+        image-class="size-16"
+        class="size-16"
         :width="64"
+        :height="64"
         sizes="64px"
         :loading="'lazy'"
+        placeholder
       />
       <div
         v-if="discountPercent > 0"

@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const {
     public: { siteUrl },
   } = useRuntimeConfig();
-  
+
   const code = getRouterParam(event, "code");
 
   if (!code) {
@@ -126,7 +126,8 @@ export default defineEventHandler(async (event) => {
           value: row.value,
         })),
         variant_attribute: variantsWithAttrs,
-        image: buildAbsoluteUrl(product.image, siteUrl),
+        // image: buildAbsoluteUrl(product.image, siteUrl),
+        image: product.image,
         gallery: mappedGallery,
       },
     };

@@ -16,10 +16,10 @@ const { hidden } = useHideScroll();
       :class="{ '-translate-y-full': hidden }"
     />
     <main
-      class="w-full lg:px-8"
+      class="w-full"
       :class="{
-        'max-w-(--ui-container) mx-auto': !noMargin,
-        'pt-21.75 md:pt-34.5': !noHeader,
+        'max-w-(--ui-container) mx-auto lg:px-8': !noMargin,
+        'pt-16.75 md:pt-30': !noHeader,
       }"
     >
       <slot />
