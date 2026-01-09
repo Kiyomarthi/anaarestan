@@ -1,4 +1,9 @@
 <script setup lang="ts">
+defineProps<{
+  loading?: boolean;
+  items: unknown[];
+}>();
+
 const router = useRouter();
 
 // Calculate end time (24 hours from now)
@@ -7,31 +12,23 @@ const endTime = computed(() => {
   date.setHours(date.getHours() + 24);
   return date;
 });
-
-const { data, pending } = useApiFetch<{
-  success: boolean;
-  data: any[];
-}>("/api/products", {
-  query: {
-    stock_status: "available",
-    noPaginate: true,
-    limit: 20,
-  },
-});
-
-const discountedProducts = computed(() => {
-  if (!data.value?.data) return [];
-  return data.value.data
-    .filter(
-      (p: any) => p.discount_price && Number(p.discount_price) < Number(p.price)
-    )
-    .slice(0, 10);
-});
 </script>
 
 <template>
+  <div v-if="loading">
+    <UCarousel
+      drag-fre
+      :ui="{
+        root: 'bg-white p-4 rounded-2xl w-full',
+        item: 'basis-1/2 lg:basis-auto py-1',
+      }"
+      :items="10"
+    >
+      <USkeleton class="w-full lg:w-50 h-62.5 rounded-2xl" />
+    </UCarousel>
+  </div>
   <section
-    v-if="!pending && discountedProducts.length > 0"
+    v-else-if="items.length > 0"
     class="bg-linear-to-l from-primary-50 to-white py-6"
   >
     <div class="px-4">
@@ -45,14 +42,7 @@ const discountedProducts = computed(() => {
         <WidgetTimer :end-time="endTime" />
       </div>
 
-      <div v-if="pending" class="flex justify-center py-12">
-        <UIcon
-          name="i-heroicons-arrow-path"
-          class="animate-spin text-4xl text-primary-500"
-        />
-      </div>
-
-      <div v-else class="overflow-x-hidden">
+      <div class="overflow-x-hidden">
         <div class="flex gap-4 pb-4">
           <UCarousel
             drag-fre
@@ -60,7 +50,7 @@ const discountedProducts = computed(() => {
               root: 'bg-white p-4 rounded-2xl w-full',
               item: 'basis-1/2 lg:basis-auto py-1',
             }"
-            :items="discountedProducts"
+            :items="items"
             v-slot="{ item }"
           >
             <WidgetProductCard :product="item" />

@@ -22,26 +22,49 @@ const { lgAndUp } = useBreakpoints();
 const { fetch, loading, data } = useCacheFetch<ApiResponse<PageResponse>>();
 
 const {
+  fetch: fetchDiscountProduct,
+  loading: discountProductLoading,
+  data: discountProductData,
+} = useCacheFetch<ApiResponse<PageResponse>>();
+
+// TODO: refactor product api for discount
+const {
   fetch: fetchCategory,
   loading: loadingCategory,
   data: dataCategory,
 } = useCacheFetch<ApiResponse<PageResponse>>();
 
-await Promise.all([
-  fetch("/api/page/home", {
-    headers: {
-      cache: "true",
-    },
-  }),
-  fetchCategory("/api/categories", {
-    headers: {
-      cache: "true",
-    },
-    params: {
-      noPaginate: "true",
-    },
-  }),
-]);
+fetchCategory("/api/categories", {
+  headers: {
+    cache: "true",
+  },
+  params: {
+    noPaginate: "true",
+  },
+});
+
+fetchDiscountProduct("/api/products", {
+  params: {
+    stock_status: "available",
+    noPaginate: "true",
+    limit: "20",
+  },
+});
+
+const discountedProducts = computed(() => {
+  if (!discountProductData.value?.data) return [];
+  return discountProductData.value?.data
+    ?.filter?.(
+      (p: any) => p.discount_price && Number(p.discount_price) < Number(p.price)
+    )
+    ?.slice(0, 10);
+});
+
+await fetch("/api/page/home", {
+  headers: {
+    cache: "true",
+  },
+});
 
 buildMeta(data.value?.data as PageResponse);
 organizationSchema();
@@ -68,11 +91,16 @@ const mods = {
     </section>
 
     <div class="max-w-(--ui-container) mx-auto">
-      <WidgetSectionsDiscountsSection class="mt-14 lg:mt-16" />
+      <WidgetSectionsDiscountsSection
+        :items="discountedProducts"
+        :loading="discountProductLoading"
+        class="mt-14 lg:mt-16"
+      />
 
       <widgetListCategory
         title="خرید براساس دسته‌بندی"
         :items="dataCategory?.data"
+        :loading="loadingCategory"
         class="mt-4 lg:mt-16"
       >
         <template #desktop="{ item }">
