@@ -66,46 +66,37 @@ const mods = {
     <section>
       <widgetSlider :items="Array.from({ length: 10 }).fill('hello')" />
     </section>
-    <section class="mt-14 lg:mt-16">
-      <h3 class="text-center text-h3 mb-1">خرید براساس دسته‌بندی</h3>
-      <div v-if="lgAndUp">
-        <u-carousel
-          align="center"
-          drag-free
-          :ui="{
-            root: 'bg-white',
-            item: 'basis-1/5 py-1 justify-center flex',
-          }"
-          :items="dataCategory?.data"
-          v-slot="{ item }"
-        >
+
+    <div class="max-w-(--ui-container) mx-auto">
+      <WidgetSectionsDiscountsSection class="mt-14 lg:mt-16" />
+
+      <widgetListCategory
+        title="خرید براساس دسته‌بندی"
+        :items="dataCategory?.data"
+        class="mt-4 lg:mt-16"
+      >
+        <template #desktop="{ item }">
           <WidgetCategoryCard
             :name="item.name"
             :slug="item.slug"
-            :id="item.id"
+            :code="item.code"
             image="/tmp/category.png"
             class="w-fit"
           />
-        </u-carousel>
-      </div>
-      <div
-        v-else
-        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 justify-center"
-      >
-        <WidgetCategoryCard
-          v-for="(category, index) in dataCategory?.data"
-          :key="index"
-          :name="category.name"
-          :slug="category.slug"
-          :id="category.id"
-          image="/tmp/category.png"
-          class="w-fit mx-auto"
-        />
-      </div>
-    </section>
-
-    <!-- Discounts Section -->
-    <!-- <WidgetSectionsDiscountsSection /> -->
+        </template>
+        <template #mobile>
+          <WidgetCategoryCard
+            v-for="(category, index) in dataCategory?.data"
+            :key="index"
+            :name="category.name"
+            :slug="category.slug"
+            :code="category.code"
+            image="/tmp/category.png"
+            class="w-fit mx-auto"
+          />
+        </template>
+      </widgetListCategory>
+    </div>
 
     <!-- New Products Section -->
     <!-- <WidgetSectionsNewProductsSection /> -->

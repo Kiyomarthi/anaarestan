@@ -5,7 +5,7 @@ type Category = {};
 
 const props = withDefaults(
   defineProps<{
-    id?: number;
+    code?: number;
     name: string;
     slug?: string;
     image?: string | null;
@@ -15,18 +15,12 @@ const props = withDefaults(
     class: "",
   }
 );
-
-const emit = defineEmits(["on:click"]);
-
-function handleClick() {
-  emit("on:click");
-}
 </script>
 
 <template>
-  <div
+  <ULink
     :class="twMerge('group cursor-pointer', props.class)"
-    @click="handleClick"
+    :to="`/categories/${code}/${slug}`"
   >
     <BaseImage
       :src="image"
@@ -41,5 +35,5 @@ function handleClick() {
     <h4 class="text-h4 text-center font-medium text-gray-700 line-clamp-2">
       {{ name }}
     </h4>
-  </div>
+  </ULink>
 </template>

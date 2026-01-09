@@ -22,49 +22,51 @@ const { data, pending } = useApiFetch<{
 const discountedProducts = computed(() => {
   if (!data.value?.data) return [];
   return data.value.data
-    .filter((p: any) => p.discount_price && Number(p.discount_price) < Number(p.price))
+    .filter(
+      (p: any) => p.discount_price && Number(p.discount_price) < Number(p.price)
+    )
     .slice(0, 10);
 });
-
-function handleProductClick(product: any) {
-  router.push(`/product/${product.slug}`);
-}
 </script>
 
 <template>
   <section
     v-if="!pending && discountedProducts.length > 0"
-    class="mb-12 bg-gradient-to-l from-primary-50 to-white py-8"
+    class="bg-linear-to-l from-primary-50 to-white py-6"
   >
-    <div class="container mx-auto px-4">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-2xl font-bold mb-2">تخفیف‌های ویژه</h2>
+    <div class="px-4">
+      <div
+        class="flex flex-col lg:flex-row items-center justify-between mb-6 px-4"
+      >
+        <div class="mb-3 lg:mb-0 text-center lg:text-start">
+          <h3 class="text-h3 mb-1">تخفیف‌های ویژه</h3>
           <p class="text-gray-600">فرصت محدود برای خرید با تخفیف</p>
         </div>
         <WidgetTimer :end-time="endTime" />
       </div>
 
       <div v-if="pending" class="flex justify-center py-12">
-        <UIcon name="i-heroicons-arrow-path" class="animate-spin text-4xl text-primary-500" />
+        <UIcon
+          name="i-heroicons-arrow-path"
+          class="animate-spin text-4xl text-primary-500"
+        />
       </div>
 
-      <div v-else class="overflow-x-auto">
-        <div class="flex gap-4 pb-4" style="scroll-snap-type: x mandatory;">
-          <div
-            v-for="(product, index) in discountedProducts"
-            :key="product.id"
-            class="flex-shrink-0 w-[200px] sm:w-[250px]"
-            style="scroll-snap-align: start;"
+      <div v-else class="overflow-x-hidden">
+        <div class="flex gap-4 pb-4">
+          <UCarousel
+            drag-fre
+            :ui="{
+              root: 'bg-white p-4 rounded-2xl w-full',
+              item: 'basis-1/2 lg:basis-auto py-1',
+            }"
+            :items="discountedProducts"
+            v-slot="{ item }"
           >
-            <WidgetProductCard
-              :product="product"
-              @click="handleProductClick"
-            />
-          </div>
+            <WidgetProductCard :product="item" />
+          </UCarousel>
         </div>
       </div>
     </div>
   </section>
 </template>
-

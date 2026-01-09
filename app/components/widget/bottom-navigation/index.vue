@@ -6,22 +6,22 @@ const user = useUserStore();
 const navItems = [
   {
     label: "خانه",
-    icon: "i-heroicons-home",
+    icon: "i-lucide-home",
     href: "/",
   },
   {
     label: "دسته‌بندی",
-    icon: "i-heroicons-squares-2x2",
+    icon: "i-lucide-layout-dashboard",
     href: "/categories",
   },
   {
     label: "سبد خرید",
-    icon: "i-heroicons-shopping-cart",
+    icon: "i-lucide-shopping-cart",
     href: "/cart",
   },
   {
     label: "پروفایل",
-    icon: "i-heroicons-user",
+    icon: "i-lucide-user",
     href: user.isLoggedIn ? "/panel" : "/login",
   },
 ];

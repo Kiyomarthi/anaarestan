@@ -20,15 +20,12 @@ const { hidden } = useHideScroll(5);
       :class="{
         'max-w-(--ui-container) mx-auto lg:px-8': !noMargin,
         'pt-16.75 md:pt-30': !noHeader,
+        'pb-32 lg:pb-0': !noBottomNavigation,
       }"
     >
       <slot />
     </main>
     <WidgetFooter v-if="!noFooter" />
-    <WidgetBottomNavigation
-      class="with-transition"
-      :class="{ 'translate-y-[calc(100%+20px)]': hidden }"
-      v-if="!noBottomNavigation"
-    />
+    <WidgetBottomNavigation v-if="!noBottomNavigation" />
   </div>
 </template>

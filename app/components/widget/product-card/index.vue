@@ -43,16 +43,12 @@ const discountPercent = computed(() => {
 const formattedPrice = (value: number) => {
   return new Intl.NumberFormat("fa-IR").format(value);
 };
-
-function handleClick() {
-  emit("click", props.product);
-}
 </script>
 
 <template>
-  <div
+  <ULink
     :class="twMerge('group cursor-pointer', props.class)"
-    @click="handleClick"
+    :to="`/product/${product?.code}/${product?.slug}`"
   >
     <BaseCard
       class="h-full flex flex-col"
@@ -62,10 +58,15 @@ function handleClick() {
     >
       <div class="relative aspect-square overflow-hidden rounded-t-lg">
         <BaseImage
-          :src="product.image"
+          src="/tmp/product.jpg"
           :alt="product.title"
           class="transition-transform duration-300 group-hover:scale-105"
           :loading="'lazy'"
+          :width="250"
+          :height="250"
+          image-class="size-[250px] object-cover"
+          fetch-priority="low"
+          sizes="250px"
         />
         <div
           v-if="showDiscount && discountPercent > 0"
@@ -76,11 +77,11 @@ function handleClick() {
       </div>
 
       <div class="p-3 flex-1 flex flex-col">
-        <h3
-          class="text-sm font-medium text-gray-800 line-clamp-2 mb-2 min-h-[2.5rem]"
+        <h4
+          class="text-sm font-medium text-gray-800 line-clamp-2 mb-2 min-h-10"
         >
           {{ product.title }}
-        </h3>
+        </h4>
 
         <div class="mt-auto flex items-center gap-2">
           <div class="flex flex-col">
@@ -97,6 +98,5 @@ function handleClick() {
         </div>
       </div>
     </BaseCard>
-  </div>
+  </ULink>
 </template>
-
