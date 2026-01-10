@@ -7,12 +7,13 @@ const props = defineProps<{
   subtitle?: string;
   title: string;
   class?: string;
+  moreLink?: string;
 }>();
 
 const router = useRouter();
 
 const wrapperClasses = computed(() =>
-  twMerge("bg-linear-to-l from-primary-50 to-white py-5", props.class)
+  twMerge("bg-linear-to-l from-primary-50 to-white py-3", props.class)
 );
 
 // Calculate end time (24 hours from now)
@@ -34,7 +35,7 @@ const wrapperClasses = computed(() =>
   <section v-else-if="items.length > 0" class="" :class="wrapperClasses">
     <div class="px-4">
       <div
-        class="flex flex-col lg:flex-row items-center justify-between mb-4 px-4"
+        class="flex flex-col lg:flex-row items-center justify-between mb-2 px-4"
       >
         <div
           class="lg:mb-0 text-center lg:text-start"
@@ -49,17 +50,47 @@ const wrapperClasses = computed(() =>
       </div>
 
       <div class="overflow-x-hidden">
-        <div class="flex gap-4 pb-4">
+        <div class="flex gap-4 pb-2">
           <UCarousel
-            drag-fre
+            arrows
             :ui="{
               root: 'bg-white p-4 rounded-2xl w-full',
-              item: 'basis-1/2 lg:basis-auto py-1',
+              item: 'basis-1/2 lg:basis-auto py-1 h-fill',
+              prev: 'lg:start-8 disabled:opacity-0 with-transition',
+              next: 'lg:end-8 disabled:opacity-0 with-transition',
             }"
-            :items="items"
-            v-slot="{ item }"
+            prev-icon="i-lucide-chevron-right"
+            next-icon="i-lucide-chevron-left"
+            :items="[...items, 'مشاهده همه']"
+            v-slot="{ item, index }"
           >
-            <WidgetProductCard :product="item" />
+            <WidgetProductCard
+              v-if="index != items.length"
+              :product="item"
+              :image-color="randomColor[index % randomColor.length]"
+            />
+            <UButton
+              v-else
+              label=""
+              variant="soft"
+              icon=""
+              :ui="{
+                base: 'borde border-primary lg:border-0 rounded-2xl size-37.5 lg:size-62.5 h-fill flex justify-center items-center',
+              }"
+              :to="moreLink"
+            >
+              <div class="space-y-1 text-center">
+                <div
+                  class="w-fit rounded-full border border-primary p-1 flex mx-auto"
+                >
+                  <UIcon name="i-lucide-arrow-left" class="size-5" />
+                </div>
+                <div class="text-lg lg:text-2xl">مشاهده همه</div>
+                <div class="text-xs font-light">
+                  برای مشاهده موارد بیشتر کلیک کنید.
+                </div>
+              </div>
+            </UButton>
           </UCarousel>
         </div>
       </div>

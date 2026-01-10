@@ -1,5 +1,6 @@
 <script setup lang="ts">
 ///// imports /////
+import Category from "~/components/widget/list/category.vue";
 import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 import { useConfigSeo } from "~/composables/utils/useConfigSeo";
 import type { ApiResponse, PageResponse } from "~~/shared/types/api";
@@ -34,6 +35,12 @@ const {
   data: dataCategory,
 } = useCacheFetch<ApiResponse<PageResponse>>();
 
+const {
+  fetch: fetchNewProduct,
+  loading: newProductLoading,
+  data: newProductData,
+} = useCacheFetch<ApiResponse<PageResponse>>();
+
 fetchCategory("/api/categories", {
   headers: {
     cache: "true",
@@ -47,7 +54,16 @@ fetchDiscountProduct("/api/products", {
   params: {
     stock_status: "available",
     noPaginate: "true",
-    limit: "20",
+    limit: "10",
+  },
+});
+
+fetchNewProduct("/api/products", {
+  params: {
+    stock_status: "available",
+    noPaginate: "true",
+    limit: "10",
+    sort: "newest",
   },
 });
 
@@ -102,6 +118,7 @@ const mods = {
         title="تخفیف‌های ویژه"
         subtitle=" فرصت محدود برای خرید با تخفیف"
         class="mt-14 lg:mt-16"
+        moreLink="/products"
       >
         <template #header-item>
           <WidgetTimer :end-time="endTime" />
@@ -135,34 +152,50 @@ const mods = {
           />
         </template>
       </widgetListCategory>
-    </div>
 
-    <!-- New Products Section -->
-    <WidgetListProduct
-      :items="discountedProducts"
-      :loading="discountProductLoading"
-      title="محصولات جدید"
-      class="mt-10 from-success-100"
-    />
-    <!-- <WidgetSectionsNewProductsSection /> -->
+      <!-- New Products Section -->
+      <WidgetListProduct
+        :items="newProductData?.data"
+        :loading="newProductLoading"
+        title="محصولات جدید"
+        class="mt-10 from-success-100"
+        moreLink="/products?sort=newest"
+      >
+        <template #header-item>
+          <UButton
+            color="primary"
+            variant="ghost"
+            to="/products?sort=newest"
+            :ui="{
+              base: 'py-1',
+            }"
+          >
+            مشاهده همه
+            <template #trailing>
+              <UIcon name="i-heroicons-arrow-left" />
+            </template>
+          </UButton>
+        </template>
+      </WidgetListProduct>
 
-    <!-- <WidgetSectionsImageTextSection
-      title="چرا انارستان؟"
-      text="انارستان با سال‌ها تجربه در زمینه فروش آنلاین، بهترین محصولات را با کیفیت بالا و قیمت مناسب به شما ارائه می‌دهد. ما به کیفیت و رضایت مشتریان متعهد هستیم."
-    /> -->
+      <WidgetInfo
+        title="چرا انارستان؟"
+        text="انارستان با سال‌ها تجربه در زمینه فروش آنلاین، بهترین محصولات را با کیفیت بالا و قیمت مناسب به شما ارائه می‌دهد. ما به کیفیت و رضایت مشتریان متعهد هستیم."
+        class="mt-6 lg:mt-10 lg:px-6"
+      />
 
-    <!-- Best Selling Section -->
-    <!-- <WidgetSectionsBestSellingSection /> -->
+      <!-- Best Selling Section -->
+      <!-- <WidgetSectionsBestSellingSection /> -->
 
-    <!-- Category Products Sections -->
-    <!-- <WidgetSectionsCategoryProductsSection
-      v-for="category in selectedCategories"
-      :key="category.id"
-      :category="category"
-    /> -->
+      <!-- Category Products Sections -->
+      <WidgetListCategoriesProduct
+        v-for="category in dataCategory?.data"
+        :key="category.id"
+        :category="category"
+      />
 
-    <!-- SEO Content Section -->
-    <!-- <WidgetSectionsSeoContentSection
+      <!-- SEO Content Section -->
+      <!-- <WidgetSectionsSeoContentSection
       title="درباره انارستان"
       content="انارستان یک فروشگاه آنلاین معتبر است که با ارائه بهترین محصولات و خدمات، رضایت مشتریان را در اولویت قرار داده است. ما با سال‌ها تجربه در زمینه فروش آنلاین، تلاش می‌کنیم تا بهترین تجربه خرید را برای شما فراهم کنیم.
 
@@ -171,10 +204,11 @@ const mods = {
 ما به کیفیت محصولات و رضایت مشتریان متعهد هستیم و همواره در تلاشیم تا خدمات بهتری ارائه دهیم. با خرید از انارستان، می‌توانید از اطمینان و اعتماد کامل بهره‌مند شوید."
     /> -->
 
-    <!-- FAQ Section -->
-    <!-- <WidgetSectionsFaqSection /> -->
+      <!-- FAQ Section -->
+      <!-- <WidgetSectionsFaqSection /> -->
 
-    <!-- Quick Access Section -->
-    <!-- <WidgetSectionsQuickAccessSection /> -->
+      <!-- Quick Access Section -->
+      <!-- <WidgetSectionsQuickAccessSection /> -->
+    </div>
   </div>
 </template>

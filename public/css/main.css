@@ -137,3 +137,7 @@
 .text-h5 {
   @apply text-sm md:text-lg lg:text-xl;
 }
+
+.h-fill {
+  height: -webkit-fill-available;
+}

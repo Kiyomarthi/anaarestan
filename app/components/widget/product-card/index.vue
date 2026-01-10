@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { twMerge } from "tailwind-merge";
+import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 
 type Product = {
   id: number;
@@ -35,6 +36,8 @@ const discountPrice = computed(() =>
   props.product.discount_price ? Number(props.product.discount_price) : null
 );
 
+const { lgAndUp } = useBreakpoints();
+
 const finalPrice = computed(() => discountPrice.value || price.value);
 
 const discountPercent = computed(() => {
@@ -64,11 +67,11 @@ const formattedPrice = (value: number) => {
           :alt="product.title"
           class="transition-transform duration-300 group-hover:scale-105"
           :loading="'lazy'"
-          :width="250"
-          :height="250"
-          :image-class="`size-[250px] object-cover ${imageColor}`"
+          :width="lgAndUp ? 250 : 150"
+          :height="lgAndUp ? 250 : 150"
+          :image-class="`size-[150px] lg:size-[250px] object-cover ${imageColor}`"
           fetch-priority="low"
-          sizes="250px"
+          sizes="(max-width:600px) 150px ,250px"
         />
         <div
           v-if="showDiscount && discountPercent > 0"

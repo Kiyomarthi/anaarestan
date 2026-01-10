@@ -20,24 +20,23 @@ const props = withDefaults(
     <div class="container mx-auto px-4">
       <div
         :class="[
-          'grid grid-cols-1 md:grid-cols-2 gap-8 items-center',
+          'grid grid-cols-1 md:grid-cols-2 gap-4 items-center',
           reverse ? 'md:flex-row-reverse' : '',
         ]"
       >
         <div :class="[reverse ? 'md:order-2' : 'md:order-1']">
           <BaseImage
-            :src="image"
+            src="/images/logo-og.png"
             :alt="title"
             class="rounded-lg"
             :loading="'lazy'"
           />
         </div>
         <div :class="[reverse ? 'md:order-1' : 'md:order-2']">
-          <h2 class="text-3xl font-bold mb-4">{{ title }}</h2>
+          <h3 class="text-h3 mb-1 lg:mb-3">{{ title }}</h3>
           <p class="text-gray-600 leading-relaxed">{{ text }}</p>
         </div>
       </div>
     </div>
   </section>
 </template>
-

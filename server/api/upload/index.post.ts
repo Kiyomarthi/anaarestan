@@ -1,75 +1,56 @@
 import { readMultipartFormData } from "h3";
-import { requireRole } from "~~/server/utils/permissions";
-import { createError } from "h3";
+import { promises as fs } from "fs";
+import path from "path";
 
-// This is a wrapper API that redirects to ImageKit API
-// Kept for backward compatibility with existing components
 export default defineEventHandler(async (event) => {
-  requireRole(event, "admin");
-
   const config = useRuntimeConfig();
-  const imagekitUrl = config.imagekitUrl;
-  const imagekitPrivateKey = config.imagekitPrivateKey;
-  const imagekitPublicKey = config.imagekitPublicKey;
+  const uploadDir = config.uploadDir;
+  const uploadUrl = config.uploadUrl;
 
-  if (!imagekitUrl || !imagekitPrivateKey || !imagekitPublicKey) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "ImageKit configuration is missing",
-    });
-  }
+  console.log("[UPLOAD] request received");
 
   const form = await readMultipartFormData(event);
   if (!form || !form.length) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "No file uploaded",
-    });
+    console.error("[UPLOAD] no form data");
+    return { success: false, message: "No file uploaded" };
   }
 
-  const fileField = form.find((field) => field.filename);
-  if (!fileField || !fileField.filename || !fileField.data) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "No file found in request",
-    });
+  console.log("[UPLOAD] fields:", form.length);
+  console.log("[UPLOAD] uploadDir:", uploadDir);
+
+  await fs.mkdir(uploadDir, { recursive: true });
+
+  const savedFiles: string[] = [];
+
+  for (const field of form) {
+    if (!field.filename || !field.data) continue;
+
+    console.log("[UPLOAD] processing:", field.filename);
+
+    if (field.data.length > 300 * 1024) {
+      console.error("[UPLOAD] file too large:", field.filename);
+      throw createError({ statusCode: 400, statusMessage: "File too large" });
+    }
+
+    const base = path.basename(field.filename, path.extname(field.filename));
+    const ext = path.extname(field.filename).toLowerCase();
+    const fileName = `${base.slice(0, 40)}-${Date.now()}${ext}`;
+    const filePath = path.join(uploadDir, fileName);
+
+    try {
+      await fs.writeFile(field.filename, field.data);
+      console.log("[UPLOAD] saved:", field.filename);
+      savedFiles.push(`${uploadUrl}/${field.filename}`);
+    } catch (err) {
+      console.error("[UPLOAD] save error:", err);
+      throw createError({
+        statusCode: 500,
+        statusMessage: "File saving failed",
+      });
+    }
   }
 
-  // Prepare form data for ImageKit
-  const formData = new FormData();
-  formData.append("file", new Blob([fileField.data]), fileField.filename);
-  formData.append("fileName", fileField.filename);
-  formData.append("folder", "/");
-  formData.append("useUniqueFileName", "true");
+  console.log("[UPLOAD] done:", savedFiles);
 
-  try {
-    const response = await $fetch("https://api.imagekit.io/v1/files/upload", {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${imagekitPrivateKey}:`).toString(
-          "base64"
-        )}`,
-      },
-      body: formData,
-    });
-
-    // Return in the format expected by existing components
-    // ImageKit returns url or filePath, we need to construct full URL
-    const imagekitUrl = process.env.IMAGEKIT_URL || "";
-    const fileUrl = response?.filePath || "";
-
-    return {
-      success: true,
-      files: fileUrl ? [fileUrl] : [],
-      data: response,
-      url: fileUrl,
-    };
-  } catch (err: any) {
-    console.error("[UPLOAD WRAPPER] error:", err);
-    throw createError({
-      statusCode: err.statusCode || 500,
-      statusMessage: err.message || "Upload failed",
-      data: err.data || err,
-    });
-  }
+  return { success: true, files: savedFiles };
 });
