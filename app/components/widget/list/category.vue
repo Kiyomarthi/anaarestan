@@ -39,32 +39,30 @@ const { lgAndUp } = useBreakpoints();
       <USkeleton class="size-24 rounded-full mx-auto" />
     </UCarousel>
   </div>
-  <section v-else>
+  <section v-else-if="items?.length">
     <h3 class="text-h3 text-center lg:text-right lg:pr-8 mb-1">{{ title }}</h3>
-    <div v-if="lgAndUp">
-      <u-carousel
-        align="center"
-        drag-free
-        :ui="{
-          root: 'bg-white',
-          item: 'basis-1/6 py-1 justify-center flex',
-        }"
-        as="ul"
-        role="list"
-        :items="items"
-        v-slot="{ item, index }"
-      >
-        <li role="listitem">
-          <slot name="desktop" :item :index />
-        </li>
-      </u-carousel>
-    </div>
-    <ul
+    <u-carousel
+      align="center"
+      drag-free
+      :ui="{
+        root: 'bg-white',
+        item: 'basis-1/4 lg:basis-1/6 py-1 justify-center flex',
+      }"
+      as="ul"
+      role="list"
+      :items="items"
+      v-slot="{ item, index }"
+    >
+      <li role="listitem">
+        <slot name="desktop" :item :index />
+      </li>
+    </u-carousel>
+    <!-- <ul
       v-else
       class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 justify-center"
       role="list"
     >
       <slot name="mobile" />
-    </ul>
+    </ul> -->
   </section>
 </template>

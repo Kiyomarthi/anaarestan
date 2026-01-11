@@ -25,11 +25,11 @@ const props = withDefaults(
       :src="image"
       :alt="name"
       class="rounded-lg w-max mx-auto"
-      :image-class="`size-30 md:size-34 ${imageClass}`"
+      :image-class="`size-[70px] md:size-[100px] ${imageClass}`"
       :loading="'lazy'"
-      :width="136"
-      :height="136"
-      sizes="136px"
+      :width="100"
+      :height="100"
+      sizes="100px"
     />
     <h4 class="text-h4 text-center font-medium text-gray-700 line-clamp-2">
       {{ name }}

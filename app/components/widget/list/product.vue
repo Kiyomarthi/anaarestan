@@ -32,7 +32,7 @@ const wrapperClasses = computed(() =>
       <USkeleton class="w-full lg:w-50 h-62.5 rounded-2xl" />
     </UCarousel>
   </div>
-  <section v-else-if="items.length > 0" class="" :class="wrapperClasses">
+  <section v-else-if="items.length" :class="wrapperClasses">
     <div class="px-4">
       <div
         class="flex flex-col lg:flex-row items-center justify-between mb-2 px-4"

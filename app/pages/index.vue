@@ -1,13 +1,15 @@
 <script setup lang="ts">
 ///// imports /////
-import Category from "~/components/widget/list/category.vue";
 import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 import { useConfigSeo } from "~/composables/utils/useConfigSeo";
 import type {
   ApiResponse,
+  Category,
   MediaBlock,
   PageResponse,
 } from "~~/shared/types/api";
+
+import { toDeep2Length } from "~~/shared/utils/array";
 
 ///// page meta /////
 definePageMeta({
@@ -37,7 +39,7 @@ const {
   fetch: fetchCategory,
   loading: loadingCategory,
   data: dataCategory,
-} = useCacheFetch<ApiResponse<PageResponse>>();
+} = useCacheFetch<ApiResponse<CanvasText[]>>();
 
 const {
   fetch: fetchNewProduct,
@@ -145,18 +147,27 @@ const mods = {
 
       <widgetListCategory
         title="خرید براساس دسته‌بندی"
-        :items="dataCategory?.data"
+        :items="toDeep2Length(dataCategory?.data as Category[] ?? [])"
         :loading="loadingCategory"
-        class="mt-4 lg:mt-16"
+        class="mt-4 lg:mt-8 px-4"
       >
         <template #desktop="{ item }">
-          <WidgetCategoryCard
-            :name="item.name"
-            :slug="item.slug"
-            :code="item.code"
-            image="/tmp/category.png"
-            class="w-fit"
-          />
+          <div class="flex flex-col gap-3 items-center justify-center">
+            <WidgetCategoryCard
+              :name="item?.[0]?.name"
+              :slug="item?.[0]?.slug"
+              :code="item?.[0]?.code"
+              image="/tmp/category.png"
+              class="w-fit"
+            />
+            <WidgetCategoryCard
+              :name="item?.[1]?.name"
+              :slug="item?.[1]?.slug"
+              :code="item?.[1]?.code"
+              image="/tmp/category.png"
+              class="w-fit"
+            />
+          </div>
         </template>
         <template #mobile>
           <li
@@ -225,6 +236,7 @@ const mods = {
       <!-- SEO Content Section -->
       <section class="mb-10 lg:mb-14 mt-2">
         <WidgetTextMore
+          :loading="loading"
           :content="data?.data?.contents?.[0]?.body"
           class="px-4"
         />

@@ -45,7 +45,7 @@ const props = withDefaults(
     </template>
     <ul v-if="category?.children?.length" class="space-y-1" role="list">
       <li
-        v-for="(item, index) in category?.children"
+        v-for="(item, index) in category?.children?.slice(0, 5)"
         :key="index"
         role="listitem"
       >

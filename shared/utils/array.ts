@@ -50,3 +50,16 @@ export function getBannerAndSlider(media: MediaBlock[]) {
 
   return { banners: sortedBanners, sliders: sortedGroupedSliders };
 }
+
+export function toDeep2Length(arr: any[]) {
+  if (!arr.length) return;
+  const deep: unknown[] = [];
+
+  for (let i = 0; i < arr.length; i += 2) {
+    let child = [arr[i], i + 1 != arr.length ? arr[i + 1] : []];
+    deep.push(child);
+    console.log(child);
+  }
+
+  return deep;
+}
