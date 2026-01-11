@@ -9,7 +9,7 @@ import type {
   PageResponse,
 } from "~~/shared/types/api";
 
-import { toDeep2Length } from "~~/shared/utils/array";
+import { toDeep2Length, toDeep3Length } from "~~/shared/utils/array";
 
 ///// page meta /////
 definePageMeta({
@@ -47,6 +47,12 @@ const {
   data: newProductData,
 } = useCacheFetch<ApiResponse<PageResponse>>();
 
+const {
+  fetch: fetchBestProduct,
+  loading: bestProductLoading,
+  data: bestProductData,
+} = useCacheFetch<ApiResponse<PageResponse>>();
+
 fetchCategory("/api/categories", {
   headers: {
     cache: "true",
@@ -60,7 +66,7 @@ fetchDiscountProduct("/api/products", {
   params: {
     stock_status: "available",
     noPaginate: "true",
-    limit: "10",
+    limit: "20",
   },
 });
 
@@ -68,8 +74,17 @@ fetchNewProduct("/api/products", {
   params: {
     stock_status: "available",
     noPaginate: "true",
-    limit: "10",
+    limit: "20",
     sort: "newest",
+  },
+});
+
+fetchBestProduct("/api/products", {
+  params: {
+    stock_status: "available",
+    noPaginate: "true",
+    limit: "20",
+    sort: "best-selling",
   },
 });
 
@@ -100,12 +115,7 @@ const endTime = computed(() => {
   return date;
 });
 
-const faqs = computed(() =>
-  data.value?.data?.faqs?.map((q) => ({
-    label: q?.question,
-    content: q?.answer,
-  }))
-);
+
 ///// functions /////
 
 const media = computed(() =>
@@ -127,8 +137,8 @@ const mods = {
       <widgetSlider :items="media.sliders?.[0]" />
     </section>
 
-    <div class="max-w-(--ui-container) mx-auto">
-      <h1 class="text-h1 text-primary mt-6 lg:mt-8 px-4">
+    <div class="max-w-(--ui-container) mx-auto px-4">
+      <h1 class="text-h1 text-primary mt-6 lg:mt-8">
         {{ data?.data?.page?.title }}
       </h1>
 
@@ -137,7 +147,7 @@ const mods = {
         :loading="discountProductLoading"
         title="تخفیف‌های ویژه"
         subtitle=" فرصت محدود برای خرید با تخفیف"
-        class="mt-2"
+        class="mt-2 -mx-4"
         moreLink="/products/list"
       >
         <template #header-item>
@@ -149,7 +159,7 @@ const mods = {
         title="خرید براساس دسته‌بندی"
         :items="toDeep2Length(dataCategory?.data as Category[] ?? [])"
         :loading="loadingCategory"
-        class="mt-4 lg:mt-8 px-4"
+        class="mt-4 lg:mt-8"
       >
         <template #desktop="{ item }">
           <div class="flex flex-col gap-3 items-center justify-center">
@@ -159,6 +169,7 @@ const mods = {
               :code="item?.[0]?.code"
               image="/tmp/category.png"
               class="w-fit"
+              label-class="h-10"
             />
             <WidgetCategoryCard
               :name="item?.[1]?.name"
@@ -166,6 +177,7 @@ const mods = {
               :code="item?.[1]?.code"
               image="/tmp/category.png"
               class="w-fit"
+              label-class="h-10"
             />
           </div>
         </template>
@@ -191,7 +203,7 @@ const mods = {
         :items="newProductData?.data"
         :loading="newProductLoading"
         title="محصولات جدید"
-        class="mt-10 from-success-100"
+        class="mt-10 from-success-100 -mx-4"
         moreLink="/products/list?sort=newest"
       >
         <template #header-item>
@@ -214,23 +226,45 @@ const mods = {
       <WidgetInfo
         title="چرا انارستان؟"
         text="انارستان با سال‌ها تجربه در زمینه فروش آنلاین، بهترین محصولات را با کیفیت بالا و قیمت مناسب به شما ارائه می‌دهد. ما به کیفیت و رضایت مشتریان متعهد هستیم."
-        class="mt-6 lg:mt-10 lg:px-6"
+        class="mt-6 lg:mt-10 lg:px-3"
       />
 
-      <!-- Best Selling Section -->
-      <!-- <WidgetSectionsBestSellingSection /> -->
+      <WidgetListProduct2
+        :items="toDeep3Length(bestProductData?.data)"
+        :loading="bestProductLoading"
+        title="پرفروش‌‌ترین‌ها"
+        class="my-10 from-success-100"
+        moreLink="/products/list?sort=best-selling"
+      >
+        <template #header-item>
+          <UButton
+            color="primary"
+            variant="ghost"
+            to="/products/list?sort=best-selling"
+            :ui="{
+              base: 'py-1',
+            }"
+          >
+            مشاهده همه
+            <template #trailing>
+              <UIcon name="i-lucide-arrow-left" />
+            </template>
+          </UButton>
+        </template>
+      </WidgetListProduct2>
 
       <!-- Category Products Sections -->
       <WidgetListCategoriesProduct
         v-for="category in dataCategory?.data"
         :key="category.id"
         :category="category"
+        class="-mx-4"
       />
 
       <WidgetListBannerGrid4
         :banners="media.banners"
         :loading="loading"
-        class="my-5 px-4"
+        class="my-5"
       />
 
       <!-- SEO Content Section -->
@@ -238,54 +272,28 @@ const mods = {
         <WidgetTextMore
           :loading="loading"
           :content="data?.data?.contents?.[0]?.body"
-          class="px-4"
         />
       </section>
 
       <WidgetListBannerGrid2
         :banners="media.banners?.splice(6, 2)"
         :loading="loading"
-        class="mt-5 mb-10 lg:mb-16 px-4"
+        class="mt-5 mb-10 lg:mb-16"
       />
 
-      <WidgetListService class="px-4 mt-10 lg:mt-14" />
+      <WidgetListService class="mt-10" />
 
-      <section class="mt-10">
-        <h3 class="text-h3 text-center mb-2">سوالات متداول</h3>
+      <WidgetListCategoryAction
+        :items="dataCategory?.data"
+        :loading="loadingCategory"
+        class="mt-10"
+      />
 
-        <UAccordion
-          :items="faqs"
-          :ui="{
-            label: 'font-bold',
-          }"
-          class="px-4 lg:px-10 lg:max-w-200 mx-auto"
-        >
-          <template #content="{ item }">
-            <div class="text-container" v-html="item?.content" />
-          </template>
-        </UAccordion>
-      </section>
-
-      <section class="px-4 mt-10 lg:mt-14">
-        <h3 class="text-h3 mb-2 lg:mb-4 text-center">دسترسی سریع</h3>
-        <UCarousel
-          arrows
-          drag-free
-          :ui="{
-            root: 'rounded-2xl w-full',
-            item: 'basis-1/2 lg:basis-auto py-1 h-fill',
-            prev: 'lg:start-8 disabled:opacity-0 with-transition',
-            next: 'lg:end-8 disabled:opacity-0 with-transition',
-            viewport: 'px-1',
-          }"
-          prev-icon="i-lucide-chevron-right"
-          next-icon="i-lucide-chevron-left"
-          :items="dataCategory?.data"
-          v-slot="{ item }"
-        >
-          <WidgetCategoryCardAction :category="item" />
-        </UCarousel>
-      </section>
+      <WidgetListFaq
+        :loading="loading"
+        :items="data?.data?.faqs"
+        class="mt-10"
+      />
     </div>
   </div>
 </template>

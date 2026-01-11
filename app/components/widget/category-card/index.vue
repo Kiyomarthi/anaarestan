@@ -9,6 +9,7 @@ const props = withDefaults(
     image: string | null;
     class?: string;
     imageClass?: string;
+    labelClass?: string;
   }>(),
   {
     class: "",
@@ -31,7 +32,10 @@ const props = withDefaults(
       :height="100"
       sizes="100px"
     />
-    <h4 class="text-h4 text-center font-medium text-gray-700 line-clamp-2">
+    <h4
+      class="text-h4 text-center font-medium text-gray-700 line-clamp-2"
+      :class="labelClass"
+    >
       {{ name }}
     </h4>
   </ULink>

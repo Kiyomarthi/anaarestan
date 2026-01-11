@@ -56,9 +56,24 @@ export function toDeep2Length(arr: any[]) {
   const deep: unknown[] = [];
 
   for (let i = 0; i < arr.length; i += 2) {
-    let child = [arr[i], i + 1 != arr.length ? arr[i + 1] : []];
+    let child = [arr[i], i + 1 != arr.length && arr[i + 1]];
     deep.push(child);
-    console.log(child);
+  }
+
+  return deep;
+}
+
+export function toDeep3Length(arr: any[]) {
+  if (!arr.length) return;
+  const deep: unknown[] = [];
+
+  for (let i = 0; i < arr.length; i += 3) {
+    let child = [
+      arr[i],
+      i + 1 != arr.length && arr[i + 1],
+      i + 2 != arr.length && arr[i + 2],
+    ];
+    deep.push(child);
   }
 
   return deep;

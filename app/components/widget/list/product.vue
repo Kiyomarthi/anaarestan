@@ -35,7 +35,7 @@ const wrapperClasses = computed(() =>
   <section v-else-if="items.length" :class="wrapperClasses">
     <div class="px-4">
       <div
-        class="flex flex-col lg:flex-row items-center justify-between mb-2 px-4"
+        class="flex flex-col lg:flex-row items-center justify-between mb-2 lg:mb-4 px-4"
       >
         <div
           class="lg:mb-0 text-center lg:text-start"

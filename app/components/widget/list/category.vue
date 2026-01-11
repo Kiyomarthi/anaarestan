@@ -36,10 +36,13 @@ const { lgAndUp } = useBreakpoints();
       }"
       :items="10"
     >
-      <USkeleton class="size-24 rounded-full mx-auto" />
+      <USkeleton class="size-24 rounded-lg mx-auto" />
     </UCarousel>
   </div>
-  <section v-else-if="items?.length">
+  <section
+    v-else-if="items?.length"
+    class="border border-default rounded-2xl p-4 pb-7"
+  >
     <h3 class="text-h3 text-center lg:text-right lg:pr-8 mb-1">{{ title }}</h3>
     <u-carousel
       align="center"
@@ -47,8 +50,14 @@ const { lgAndUp } = useBreakpoints();
       :ui="{
         root: 'bg-white',
         item: 'basis-1/4 lg:basis-1/6 py-1 justify-center flex',
+        dots: '-bottom-4',
+        dot: 'w-6 h-2 data-[state=active]:bg-primary cursor-default',
+        prev: 'start-0 lg:start-1 disabled:opacity-0 with-transition',
+        next: 'end-0 lg:end-1 disabled:opacity-0 with-transition',
       }"
       as="ul"
+      arrows
+      dots
       role="list"
       :items="items"
       v-slot="{ item, index }"
