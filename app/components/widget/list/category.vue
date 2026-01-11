@@ -49,17 +49,22 @@ const { lgAndUp } = useBreakpoints();
           root: 'bg-white',
           item: 'basis-1/6 py-1 justify-center flex',
         }"
+        as="ul"
+        role="list"
         :items="items"
         v-slot="{ item, index }"
       >
-        <slot name="desktop" :item :index />
+        <li role="listitem">
+          <slot name="desktop" :item :index />
+        </li>
       </u-carousel>
     </div>
-    <div
+    <ul
       v-else
       class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 justify-center"
+      role="list"
     >
       <slot name="mobile" />
-    </div>
+    </ul>
   </section>
 </template>

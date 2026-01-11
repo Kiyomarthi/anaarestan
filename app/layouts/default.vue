@@ -12,7 +12,7 @@ const { hidden } = useHideScroll(5);
   <div class="min-h-screen flex flex-col">
     <WidgetHeader
       v-if="!noHeader"
-      class="with-transition fixed top-0 w-full bg-white z-100"
+      class="with-transition fixed top-0 w-full lg:bg-white z-100"
       :class="{ '-translate-y-full': hidden }"
     />
     <main

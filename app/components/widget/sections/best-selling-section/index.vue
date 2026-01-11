@@ -13,7 +13,7 @@ const { data, pending } = useApiFetch<{
 });
 
 function handleProductClick(product: any) {
-  router.push(`/product/${product.slug}`);
+  router.push(`/products/${product.slug}`);
 }
 </script>
 
@@ -23,25 +23,24 @@ function handleProductClick(product: any) {
       <h2 class="text-2xl font-bold mb-6">پرفروش‌ترین‌ها</h2>
 
       <div v-if="pending" class="flex justify-center py-12">
-        <UIcon name="i-heroicons-arrow-path" class="animate-spin text-4xl text-primary-500" />
+        <UIcon
+          name="i-lucide-refresh-ccw"
+          class="animate-spin text-4xl text-primary-500"
+        />
       </div>
 
       <div v-else class="overflow-x-auto">
-        <div class="flex gap-4 pb-4" style="scroll-snap-type: x mandatory;">
+        <div class="flex gap-4 pb-4" style="scroll-snap-type: x mandatory">
           <div
             v-for="product in data.data"
             :key="product.id"
             class="flex-shrink-0 w-[200px] sm:w-[250px]"
-            style="scroll-snap-align: start;"
+            style="scroll-snap-align: start"
           >
-            <WidgetProductCard
-              :product="product"
-              @click="handleProductClick"
-            />
+            <WidgetProductCard :product="product" @click="handleProductClick" />
           </div>
         </div>
       </div>
     </div>
   </section>
 </template>
-

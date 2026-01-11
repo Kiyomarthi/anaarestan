@@ -232,7 +232,7 @@ watch(open, (isOpen) => {
                 color="default"
                 :autofocus="false"
                 class="cursor-pointer focus:outline-none focus:ring-0 w-max p-2 border border-default rounded-2xl text-center hover:bg-gray-200"
-                :to="`/products?search=${item}`"
+                :to="`/categories?search=${item}`"
               >
                 {{ item }}
               </UButton>

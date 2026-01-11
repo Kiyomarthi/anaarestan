@@ -135,9 +135,210 @@
   @apply text-sm md:text-lg lg:text-xl;
 }
 .text-h5 {
-  @apply text-sm md:text-lg lg:text-xl;
+  @apply text-sm md:text-lg;
 }
 
 .h-fill {
   height: -webkit-fill-available;
+}
+
+.text-container {
+  max-width: 100%;
+  color: var(--color-gray-900);
+  line-height: 30px;
+  font-size: 15px;
+  overflow-x: hidden;
+}
+.text-container h1 {
+  font-size: 25px;
+  font-weight: 900;
+}
+.text-container h2 {
+  @apply text-xl font-bold md:text-2xl lg:text-3xl;
+
+  margin: 32px 0 2px;
+}
+.text-container h3 {
+  @apply text-lg font-bold md:text-xl lg:text-2xl;
+
+  margin: 18px 0 0;
+}
+.text-container h4 {
+  font-size: 1.25rem;
+  @apply text-sm md:text-lg lg:text-xl;
+  margin: 16px 0 2px;
+}
+.text-container h5 {
+  @apply text-sm md:text-lg lg:text-xl;
+
+  margin: 14px 0 2px;
+}
+.text-container h6 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 13px 0 2px;
+}
+.text-container p {
+  font-size: 16px;
+  line-height: 32px;
+}
+.text-container a {
+  color: var(--color-primary-500);
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+}
+.text-container a:hover {
+  color: var(--color-primary-700);
+  text-decoration: underline;
+}
+.text-container ul {
+  list-style: disc !important;
+  padding-right: 30px;
+}
+.text-container ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+  font-size: 15px;
+  padding-right: 30px;
+}
+
+.text-container ul,
+.text-container ol {
+  line-height: 29px;
+  margin: 7px 0 16px;
+}
+
+.text-container li {
+  font-size: 15px;
+}
+.text-container hr {
+  border-top: 1px solid #d1d5db;
+  margin: 1.5rem 0;
+}
+.text-container blockquote {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  border-right: 5px solid var(--color-primary-500);
+  color: #333;
+  font-style: italic;
+  line-height: 1.8;
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  position: relative;
+}
+.text-container pre {
+  background-color: #f3f4f6;
+  border-radius: 0.25rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+  font-size: 15px;
+}
+.text-container code {
+  background-color: #f3f4f6;
+  border-radius: 0.125rem;
+  padding: 0.125rem 0.25rem;
+  font-family: monospace;
+  font-size: 15px;
+}
+.text-container table {
+  display: table;
+  border: 1px solid #ccc !important;
+  border-collapse: separate;
+  border-radius: 12px;
+  border-spacing: 0;
+  margin: 25px 0;
+  overflow: hidden;
+  text-align: center;
+  width: 100%;
+  overflow-x: auto;
+  min-width: 0 !important;
+}
+
+.text-container tbody {
+  border-radius: 5px;
+  margin: 25px 0;
+}
+
+.text-container table tr:first-child {
+  background: #e6e6e6;
+  border-bottom: 3px solid #666;
+  text-align: center;
+}
+
+.text-container th,
+.text-container td {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d1d5db;
+}
+
+.text-container thead th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  font-size: 15px;
+}
+.text-container img {
+  max-width: 100%;
+  height: auto;
+  margin: 1rem auto;
+  border-radius: 12px;
+}
+.text-container strong {
+  font-weight: 700;
+}
+.text-container em {
+  font-style: italic;
+  font-size: 15px;
+}
+.text-container del {
+  text-decoration: line-through;
+  font-size: 15px;
+}
+.text-container sub {
+  vertical-align: sub;
+  font-size: 12px;
+}
+.text-container sup {
+  vertical-align: super;
+  font-size: 12px;
+}
+.text-container mark {
+  background-color: #fde68a;
+  font-size: 15px;
+}
+.text-container small {
+  font-size: 15px;
+}
+.text-container u {
+  text-decoration: underline;
+  font-size: 15px;
+}
+@media (max-width: 768px) {
+  .text-container {
+    font-size: 15px;
+  }
+}
+
+/* Make tables responsive: keep table layout on desktop/tablet, switch to block on mobile */
+@media (max-width: 768px) {
+  .text-container table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent cells from wrapping too aggressively when scrolling */
+  .text-container th,
+  .text-container td {
+    white-space: nowrap;
+  }
 }

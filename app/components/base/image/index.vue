@@ -14,8 +14,8 @@ const props = withDefaults(
     loading?: "lazy" | "eager";
     fetchPriority?: "low" | "high";
     showLoadingOverlay?: boolean;
-    width?: number;
-    height?: number;
+    width?: number | string;
+    height?: number | string;
     class?: string;
     preload?: boolean;
     sizes: string;

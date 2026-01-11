@@ -34,6 +34,7 @@ defineProps<{
       prev-icon="i-lucide-chevron-right"
       :ui="{
         dot: 'w-6 h-2 data-[state=active]:bg-primary cursor-default',
+        dots: '-bottom-4',
         prev: 'sm:start-10 lg:-start-10',
         next: 'sm:end-10 lg:-end-10',
         arrows:

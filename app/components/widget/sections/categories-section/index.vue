@@ -21,7 +21,7 @@ function handleCategoryClick(category: any) {
         v-if="pending"
         class="flex justify-center py-12"
       >
-        <UIcon name="i-heroicons-arrow-path" class="animate-spin text-4xl text-primary-500" />
+        <UIcon name="i-lucide-refresh-ccw" class="animate-spin text-4xl text-primary-500" />
       </div>
       <div
         v-else

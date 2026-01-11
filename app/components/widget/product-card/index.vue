@@ -53,7 +53,7 @@ const formattedPrice = (value: number) => {
 <template>
   <ULink
     :class="twMerge('group cursor-pointer', props.class)"
-    :to="`/product/${product?.code}/${product?.slug}`"
+    :to="`/products/${product?.code}/${product?.slug}`"
   >
     <BaseCard
       class="h-full flex flex-col"
@@ -65,11 +65,11 @@ const formattedPrice = (value: number) => {
         <BaseImage
           src="/tmp/product.jpg"
           :alt="product.title"
-          class="transition-transform duration-300 group-hover:scale-105"
+          class="transition-transform duration-300 group-hover:scale-105 h-full"
           :loading="'lazy'"
-          :width="lgAndUp ? 250 : 150"
+          :width="lgAndUp ? 250 : '100%'"
           :height="lgAndUp ? 250 : 150"
-          :image-class="`size-[150px] lg:size-[250px] object-cover ${imageColor}`"
+          :image-class="`min-h-[150px] h-full w-full lg:size-[250px] object-cover ${imageColor}`"
           fetch-priority="low"
           sizes="(max-width:600px) 150px ,250px"
         />

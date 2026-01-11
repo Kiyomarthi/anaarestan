@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { twMerge } from "tailwind-merge";
 
-type Category = {};
-
 const props = withDefaults(
   defineProps<{
-    code?: number;
+    code: string;
     name: string;
-    slug?: string;
-    image?: string | null;
+    slug: string;
+    image: string | null;
     class?: string;
     imageClass?: string;
   }>(),
@@ -21,12 +19,12 @@ const props = withDefaults(
 <template>
   <ULink
     :class="twMerge('group cursor-pointer', props.class)"
-    :to="`/categories/${code}/${slug}`"
+    :to="`/products/list/${code}/${slug}`"
   >
     <BaseImage
       :src="image"
       :alt="name"
-      class="rounded-lg w-max"
+      class="rounded-lg w-max mx-auto"
       :image-class="`size-30 md:size-34 ${imageClass}`"
       :loading="'lazy'"
       :width="136"

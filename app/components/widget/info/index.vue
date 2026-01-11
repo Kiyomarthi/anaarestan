@@ -30,6 +30,7 @@ const props = withDefaults(
             :alt="title"
             class="rounded-lg"
             :loading="'lazy'"
+            sizes="(max-width:600px) 400px, 500px"
           />
         </div>
         <div :class="[reverse ? 'md:order-1' : 'md:order-2']">

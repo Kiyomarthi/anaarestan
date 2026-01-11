@@ -53,6 +53,8 @@ const wrapperClasses = computed(() =>
         <div class="flex gap-4 pb-2">
           <UCarousel
             arrows
+            drag-free
+            as="ul"
             :ui="{
               root: 'bg-white p-4 rounded-2xl w-full',
               item: 'basis-1/2 lg:basis-auto py-1 h-fill',
@@ -63,19 +65,21 @@ const wrapperClasses = computed(() =>
             next-icon="i-lucide-chevron-left"
             :items="[...items, 'مشاهده همه']"
             v-slot="{ item, index }"
+            role="list"
           >
-            <WidgetProductCard
-              v-if="index != items.length"
-              :product="item"
-              :image-color="randomColor[index % randomColor.length]"
-            />
+            <li v-if="index != items.length" role="listitem" class="h-full">
+              <WidgetProductCard
+                :product="item"
+                :image-color="randomColor[index % randomColor.length]"
+              />
+            </li>
             <UButton
               v-else
               label=""
               variant="soft"
               icon=""
               :ui="{
-                base: 'borde border-primary lg:border-0 rounded-2xl size-37.5 lg:size-62.5 h-fill flex justify-center items-center',
+                base: 'borde border-primary lg:border-0 rounded-lg size-37.5 lg:size-62.5 h-fill flex justify-center items-center',
               }"
               :to="moreLink"
             >

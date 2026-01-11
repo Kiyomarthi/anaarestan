@@ -1,16 +1,7 @@
-<template>
-  <div>
-    <UIcon v-for="(item, index) in icons" :key="index" name="square-activity" />
-  </div>
-</template>
-
 <script setup lang="ts">
 ///// imports /////
 
 ///// page meta /////
-definePageMeta({
-  middleware: "desktop-only-client",
-});
 
 ///// props/emits /////
 
@@ -20,9 +11,15 @@ definePageMeta({
 
 ///// computed /////
 
-///// watchers /////
-
 ///// functions /////
+
+///// watchers /////
 
 ///// lifecycle /////
 </script>
+
+<template>
+  <div>
+    <!-- list -->
+  </div>
+</template>
