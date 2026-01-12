@@ -52,7 +52,7 @@ export function getBannerAndSlider(media: MediaBlock[]) {
 }
 
 export function toDeep2Length(arr: any[]) {
-  if (!arr.length) return;
+  if (!arr?.length) return;
   const deep: unknown[] = [];
 
   for (let i = 0; i < arr.length; i += 2) {
@@ -64,7 +64,7 @@ export function toDeep2Length(arr: any[]) {
 }
 
 export function toDeep3Length(arr: any[]) {
-  if (!arr.length) return;
+  if (!arr?.length) return;
   const deep: unknown[] = [];
 
   for (let i = 0; i < arr.length; i += 3) {

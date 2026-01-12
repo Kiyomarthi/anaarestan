@@ -115,7 +115,6 @@ const endTime = computed(() => {
   return date;
 });
 
-
 ///// functions /////
 
 const media = computed(() =>
@@ -123,10 +122,6 @@ const media = computed(() =>
 );
 
 ///// watchers /////
-const mods = {
-  blur: 5,
-  raw: "l-text,i-SALE%2030%25,fs-50,co-FF0000,bg-FFFFFF80,pa-20,l-end",
-};
 
 ///// lifecycle /////
 </script>

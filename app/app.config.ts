@@ -7,6 +7,7 @@ export default defineAppConfig({
     colors: {
       primary: "primary",
       default: "gray",
+      gray: "gray",
     },
 
     selectMenu: {

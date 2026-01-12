@@ -67,17 +67,17 @@ watch(
   }
 );
 
-// if (props.preload)
-// useHead({
-//   link: [
-//     {
-//       rel: "preload",
-//       as: "image",
-//       href: props.src,
-//       fetchpriority: "high",
-//     },
-//   ],
-// });
+if (props.preload)
+  useHead({
+    link: [
+      {
+        rel: "preload",
+        as: "image",
+        href: props.src,
+        fetchpriority: "high",
+      },
+    ],
+  });
 </script>
 
 <template>

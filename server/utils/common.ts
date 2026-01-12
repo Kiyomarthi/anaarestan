@@ -105,3 +105,5 @@ export function buildCacheKey(event: H3Event, prefix: string): string {
 
   return `${prefix}:${normalizedQuery}`;
 }
+
+

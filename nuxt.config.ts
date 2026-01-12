@@ -158,7 +158,15 @@ export default defineNuxtConfig({
     fonts: true,
     colorMode: false,
     theme: {
-      colors: ["primary", "info", "success", "warning", "error", "default"],
+      colors: [
+        "primary",
+        "info",
+        "success",
+        "warning",
+        "error",
+        "default",
+        "gray",
+      ],
     },
   },
 
