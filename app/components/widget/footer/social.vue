@@ -60,7 +60,7 @@ function validateForm(state: FormState) {
         <UFormField
           label="ایمیل یا شماره تلفن"
           name="value"
-          :ui="{ root: 'flex-1' }"
+          :ui="{ root: 'flex-1 sm:max-w-50' }"
         >
           <UInput v-model="value" />
         </UFormField>

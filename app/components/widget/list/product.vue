@@ -57,7 +57,7 @@ const wrapperClasses = computed(() =>
             as="ul"
             :ui="{
               root: 'bg-white p-4 rounded-2xl w-full',
-              item: 'basis-1/2 lg:basis-auto py-1 h-fill',
+              item: 'basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-auto py-1 h-fill',
               prev: 'lg:start-8 disabled:opacity-0 with-transition',
               next: 'lg:end-8 disabled:opacity-0 with-transition',
             }"

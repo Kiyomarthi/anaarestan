@@ -52,8 +52,8 @@ const { lgAndUp } = useBreakpoints();
         item: 'basis-1/4 lg:basis-1/6 py-1 justify-center flex',
         dots: '-bottom-4',
         dot: 'w-6 h-2 data-[state=active]:bg-primary cursor-default',
-        prev: 'start-0 lg:start-1 disabled:opacity-0 with-transition',
-        next: 'end-0 lg:end-1 disabled:opacity-0 with-transition',
+        prev: 'start-0 sm:start-6 lg:start-1 disabled:opacity-0 with-transition',
+        next: 'end-0 sm:end-6 lg:end-1 disabled:opacity-0 with-transition',
       }"
       as="ul"
       arrows

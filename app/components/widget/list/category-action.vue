@@ -48,9 +48,9 @@ withDefaults(
       drag-free
       :ui="{
         root: 'rounded-2xl w-full',
-        item: 'basis-1/2 lg:basis-auto py-1 h-fill',
-        prev: 'lg:start-8 disabled:opacity-0 with-transition',
-        next: 'lg:end-8 disabled:opacity-0 with-transition',
+        item: 'basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-auto py-1 h-fill',
+        prev: 'sm:start-10 lg:start-8 disabled:opacity-0 with-transition',
+        next: 'sm:end-10 lg:end-8 disabled:opacity-0 with-transition',
         viewport: 'px-1',
       }"
       prev-icon="i-lucide-chevron-right"

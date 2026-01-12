@@ -19,7 +19,7 @@ const { hidden } = useHideScroll(5);
       class="w-full"
       :class="{
         'max-w-(--ui-container) mx-auto lg:px-8': !noMargin,
-        'pt-16.75 md:pt-30': !noHeader,
+        'pt-16.75 lg:pt-30': !noHeader,
       }"
     >
       <slot />
@@ -27,7 +27,7 @@ const { hidden } = useHideScroll(5);
     <div v-if="!noFooter" class="border-t border-neutral-300 mt-10">
       <WidgetFooter
         class="max-w-(--ui-container) mx-auto px-4"
-        :class="{ 'mb-32 lg:mb-2 pt-4': !noBottomNavigation }"  
+        :class="{ 'mb-32 lg:mb-2 pt-4': !noBottomNavigation }"
       />
     </div>
 

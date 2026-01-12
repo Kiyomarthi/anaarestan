@@ -23,7 +23,7 @@ const wrapperClasses = computed(() => twMerge("", props.class));
       drag-fre
       :ui="{
         root: 'bg-white p-4 rounded-2xl w-full',
-        item: 'basis-1/2 lg:basis-auto py-1',
+        item: 'basis-1/2 sm:basis-1/3 lg:basis-auto py-1',
       }"
       :items="10"
     >
@@ -54,7 +54,7 @@ const wrapperClasses = computed(() => twMerge("", props.class));
             as="ul"
             :ui="{
               root: 'bg-white rounded-2xl w-full',
-              item: 'basis-1/1 lg:basis-auto py-1 h-fill',
+              item: 'basis-1/1 sm:basis-1/2 md:basis-1/3 lg:basis-auto py-1 h-fill',
               prev: 'start-0 lg:start-1 disabled:opacity-0 with-transition',
               next: 'end-0 lg:end-1 disabled:opacity-0 with-transition',
               dots: '-bottom-2',
