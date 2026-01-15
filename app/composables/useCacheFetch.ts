@@ -21,7 +21,7 @@ export function useCacheFetch<T>() {
 
     if (import.meta.client && state.value) {
       data.value = state.value;
-      return;
+      return data.value;
     }
 
     try {
@@ -45,6 +45,7 @@ export function useCacheFetch<T>() {
         data.value = fetchedData.value as T;
       }
       loading.value = false;
+      return fetchedData;
     } catch (err: unknown) {
       loading.value = false;
       console.error(`[useCacheFetch] Exception during fetch:`, err);

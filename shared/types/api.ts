@@ -5,12 +5,20 @@ export interface Options {
   isCache?: boolean;
 }
 
+export interface Meta {
+  limit?: number;
+  page?: number;
+  total?: number;
+  totalPages?: number;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   status: number;
   message: string;
   data: T | null;
   cache: boolean;
+  meta: Meta;
 }
 
 type ID = number;

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 import { useConfigSeo } from "~/composables/utils/useConfigSeo";
+import { useViewCounter } from "~/composables/utils/useViewCounter";
 import type { ProductRes } from "~~/shared/types/api";
 
 ///// imports /////
@@ -38,15 +39,7 @@ const {
   data: productData,
 } = useCacheFetch<ApiResponse<ProductRes[]>>();
 
-fetchProduct("/api/products", {
-  params: {
-    limit: "50",
-    sort: "newest",
-    category_id: route.params?.id,
-  },
-});
-
-await fetch("/api/page/16", {
+await fetch(`/api/page/${route.params?.id}`, {
   headers: {
     cache: "true",
   },
@@ -66,7 +59,36 @@ const breadCrumbs = computed(() => {
   });
 });
 
+const productTotalPage = computed(() => productData.value?.meta?.totalPages);
+
+const {
+  target: scrollTarget,
+  count,
+  items,
+  load,
+} = useViewCounter<ProductRes[]>(
+  { current: 1, max: productTotalPage },
+  {
+    threshold: 0.1,
+    rootMargin: "100px",
+  },
+  fetchProductRes
+);
+
 ///// functions /////
+async function fetchProductRes() {
+  await fetchProduct("/api/products", {
+    params: {
+      limit: "50",
+      sort: "newest",
+      page: count.value,
+      category_id: route.params?.id,
+    },
+  });
+
+  return productData.value;
+}
+load();
 
 ///// watchers /////
 
@@ -100,10 +122,15 @@ const breadCrumbs = computed(() => {
         class="col-span-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
       >
         <WidgetProductCard
-          v-for="(item, index) in productData?.data"
+          v-for="(item, index) in items"
           :key="index"
           :product="item"
           :image-color="randomColor[index % randomColor.length]"
+        />
+        <div
+          v-if="!loading && items"
+          ref="scrollTarget"
+          class="h-20 w-full flex items-center justify-center py-4"
         />
       </div>
     </div>
