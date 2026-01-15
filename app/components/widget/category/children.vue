@@ -27,7 +27,7 @@ const props = defineProps<{
       <div v-for="child in categories" :key="child.name" class="w-full">
         <h3 class="font-semibold">
           <UButton
-            :to="`/categories/${child.code}/${child?.slug}`"
+            :to="`/products/list/${child.id}/${child?.slug}`"
             variant="ghost"
             color="default"
             class="size-full text-start px-0 py-1.5"

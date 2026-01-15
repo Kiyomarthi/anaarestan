@@ -308,7 +308,7 @@ await fetchCategory("/api/categories", {
             :label="item?.name ?? ''"
             color="default"
             variant="ghost"
-            :to="`/categories/${item.code}/${item.slug}`"
+            :to="`/products/list/${item.id}/${item.slug}`"
           />
           <template v-if="item?.children?.length" #content>
             <div class="w-max p-2 px-4">

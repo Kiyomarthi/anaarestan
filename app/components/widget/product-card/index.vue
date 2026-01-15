@@ -69,7 +69,7 @@ const formattedPrice = (value: number) => {
           :loading="'lazy'"
           :width="lgAndUp ? 250 : '100%'"
           :height="lgAndUp ? 250 : 150"
-          :image-class="`min-h-[150px] h-full w-full lg:size-[250px] object-cover ${imageColor}`"
+          :image-class="`min-h-[150px] h-full w-full lg:max-w-[250px] lg:max-h-[250px] object-cover ${imageColor}`"
           fetch-priority="low"
           sizes="(max-width:600px) 150px ,250px"
         />

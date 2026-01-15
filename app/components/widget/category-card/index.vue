@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 
 const props = withDefaults(
   defineProps<{
-    code: string;
+    id: string;
     name: string;
     slug: string;
     image: string | null;
@@ -20,7 +20,7 @@ const props = withDefaults(
 <template>
   <ULink
     :class="twMerge('group cursor-pointer', props.class)"
-    :to="`/products/list/${code}/${slug}`"
+    :to="`/products/list/${id}/${slug}`"
   >
     <BaseImage
       :src="image"

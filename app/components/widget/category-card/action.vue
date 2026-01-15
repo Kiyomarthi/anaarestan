@@ -36,7 +36,7 @@ const props = withDefaults(
   >
     <template #header>
       <WidgetCategoryCard
-        :code="category?.code"
+        :id="category?.id"
         :name="category?.name"
         :slug="category?.slug"
         image="/tmp/category.png"
@@ -49,11 +49,11 @@ const props = withDefaults(
         :key="index"
         role="listitem"
       >
-        <ULink :to="`/products/list/${item.code}/${item.slug}`">
-          <h4 class="text-h5 flex items-center gap-1">
+        <ULink :to="`/products/list/${item.id}/${item.slug}`">
+          <h5 class="text-h5 flex items-center gap-1">
             <UIcon name="i-lucide-link" />
             {{ item?.name }}
-          </h4>
+          </h5>
         </ULink>
       </li>
     </ul>

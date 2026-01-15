@@ -214,13 +214,13 @@ const handleCopy = () => {
         />
       </div>
       <div
-        class="flex items-center w-full lg:w-auto justify-between sm:justify-center lg:justify-between gap-2"
+        class="flex items-center w-full lg:w-max justify-between sm:justify-center lg:justify-between gap-2"
       >
         <ClientOnly class="flex-1">
           <template #fallback>
             <ULink
               to="/"
-              class="p-1.5 lg:p-4 border border-neutral-200 rounded-md w-max block flex-1 max-w-18.75"
+              class="p-1.5 lg:p-4 border border-neutral-200 rounded-md w-max block flex-1 max-w-30"
             >
               <BaseImage
                 src="/tmp/enamad.png"
@@ -236,7 +236,7 @@ const handleCopy = () => {
             referrerpolicy="origin"
             target="_blank"
             href="https://trustseal.enamad.ir/?id=689420&Code=TYwmi73C2FCMfKGzrnyFyy4dZ35kJLZd"
-            class="p-1.5 lg:p-4 border border-neutral-200 rounded-md w-max block aspect-square max-w-18.75"
+            class="p-1.5 lg:p-4 border border-neutral-200 rounded-md w-max block aspect-square max-w-30"
             ><img
               referrerpolicy="origin"
               src="https://trustseal.enamad.ir/logo.aspx?id=689420&Code=TYwmi73C2FCMfKGzrnyFyy4dZ35kJLZd"
@@ -256,7 +256,7 @@ const handleCopy = () => {
           to="/"
           v-for="i in 3"
           :key="i"
-          class="p-1.5 lg:p-4 border max-w-18.75 aspect-square border-neutral-200 rounded-md w-max block flex-1"
+          class="p-1.5 lg:p-4 border max-w-30 aspect-square border-neutral-200 rounded-md w-max block flex-1"
         >
           <BaseImage
             src="/tmp/enamad.png"

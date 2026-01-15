@@ -24,13 +24,13 @@ fetch("/api/products", {
     :title="category?.name"
     :items="data?.data"
     :loading="loading"
-    :moreLink="`/products/list/${category.code}/${category.slug}`"
+    :moreLink="`/products/list/${category.id}/${category.slug}`"
   >
     <template #header-item>
       <UButton
         color="primary"
         variant="ghost"
-        :to="`/products/list/${category.code}/${category.slug}`"
+        :to="`/products/list/${category.id}/${category.slug}`"
         :ui="{
           base: 'py-1',
         }"

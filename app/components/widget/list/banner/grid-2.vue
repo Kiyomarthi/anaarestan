@@ -29,7 +29,7 @@ defineProps<{
     v-if="loading"
     class="grid grid-cols-2 gap-2 items-stretch justify-stretch mb-2"
   >
-    <h3 class="sr-only">بنر</h3>
+    <h3 class="sr-only">بنرهای سایت</h3>
     <USkeleton
       v-for="i in 2"
       :key="i"

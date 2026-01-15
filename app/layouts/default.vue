@@ -18,7 +18,7 @@ const { hidden } = useHideScroll(5);
     <main
       class="w-full"
       :class="{
-        'max-w-(--ui-container) mx-auto lg:px-8': !noMargin,
+        'max-w-(--ui-container) mx-auto px-4': !noMargin,
         'pt-16.75 lg:pt-30': !noHeader,
       }"
     >

@@ -59,9 +59,9 @@ const formattedPrice = (value: number) => {
     </div>
 
     <div class="flex-1 min-w-0">
-      <h3 class="text-sm font-medium text-gray-800 line-clamp-1 mb-1">
+      <h4 class="text-sm font-medium text-gray-800 line-clamp-1 mb-1">
         {{ product.title }}
-      </h3>
+      </h4>
       <div class="flex items-center gap-2">
         <span v-if="discountPrice" class="text-xs text-gray-400 line-through">
           {{ formattedPrice(price) }}

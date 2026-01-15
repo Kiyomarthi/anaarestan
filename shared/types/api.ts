@@ -111,3 +111,19 @@ export interface Category {
   updated_at: string; // ISO Date
   children?: Category[];
 }
+
+export interface ProductRes {
+  id: number;
+  title: string;
+  slug: string;
+  short_description: string;
+  price: string;
+  discount_price: string;
+  image: string;
+  code: string;
+  stock: number;
+  status: 1 | 0;
+  category_id: number;
+  created_at: string;
+  updated_at: string;
+}

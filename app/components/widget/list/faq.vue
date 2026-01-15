@@ -51,6 +51,11 @@ const faqs = computed(() =>
       }"
       class="lg:px-10 lg:max-w-200 mx-auto"
     >
+      <template #default="{ item }">
+        <h4>
+          {{ item?.label }}
+        </h4>
+      </template>
       <template #content="{ item }">
         <div class="text-container" v-html="item?.content" />
       </template>

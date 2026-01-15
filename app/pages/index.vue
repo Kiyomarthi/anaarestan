@@ -161,7 +161,7 @@ const media = computed(() =>
             <WidgetCategoryCard
               :name="item?.[0]?.name"
               :slug="item?.[0]?.slug"
-              :code="item?.[0]?.code"
+              :id="item?.[0]?.id"
               image="/tmp/category.png"
               class="w-fit"
               label-class="h-10"
@@ -169,7 +169,7 @@ const media = computed(() =>
             <WidgetCategoryCard
               :name="item?.[1]?.name"
               :slug="item?.[1]?.slug"
-              :code="item?.[1]?.code"
+              :id="item?.[1]?.id"
               image="/tmp/category.png"
               class="w-fit"
               label-class="h-10"
@@ -185,7 +185,7 @@ const media = computed(() =>
             <WidgetCategoryCard
               :name="category.name"
               :slug="category.slug"
-              :code="category.code"
+              :id="category.id"
               image="/tmp/category.png"
               class="w-fit mx-auto"
             />

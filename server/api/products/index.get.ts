@@ -1,5 +1,6 @@
 import { getDB } from "~~/server/db";
 import { buildAbsoluteUrl } from "~~/server/utils/common";
+import { ApiResponse, Category } from "~~/shared/types/api";
 
 export default defineEventHandler(async (event) => {
   const db = await getDB();
@@ -35,8 +36,32 @@ export default defineEventHandler(async (event) => {
 
   // Category filter
   if (categoryId !== null && !isNaN(categoryId)) {
-    whereClause += " AND category_id = ?";
+    const categories = await $fetch<ApiResponse<Category>>(
+      `/api/categories/${categoryId}`,
+      {
+        method: "GET",
+        headers: {
+          cache: "true",
+        },
+      }
+    );
+
     params.push(categoryId);
+
+    whereClause += " AND ";
+    let ids: string = "";
+
+    const pushId = (categories: Category[]) => {
+      categories.forEach((category) => {
+        ids += " or category_id = ?";
+        params.push(category?.id);
+        if (category.children?.length) pushId(category.children);
+      });
+    };
+
+    pushId(categories?.data?.children as Category[]);
+
+    whereClause += `(category_id = ?${ids})`;
   }
 
   // Stock status filter
