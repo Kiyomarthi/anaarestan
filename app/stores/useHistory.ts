@@ -16,9 +16,14 @@ export const useHistoryStore = defineStore(
       }
     }
 
+    function deleteAllSearch() {
+      searches.value = [];
+    }
+
     return {
       searches,
       addSearch,
+      deleteAllSearch,
     };
   },
   {

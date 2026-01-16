@@ -239,7 +239,7 @@ watch(
     <UBreadcrumb
       v-if="breadCrumbs?.length"
       :items="breadCrumbs"
-      class="pb-3 pt-1"
+      class="pb-3 pt-3 lg:pt-1"
     />
     <div class="lg:flex gap-4 justify-between items-center mb-3">
       <h1 class="text-h1 w-max text-nowrap whitespace-nowrap">

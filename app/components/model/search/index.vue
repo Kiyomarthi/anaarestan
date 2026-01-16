@@ -95,6 +95,19 @@ const performSearch = async (query: string) => {
   ]);
 };
 
+const {
+  fetch: fetchDiscountProduct,
+  loading: discountProductLoading,
+  data: discountProductData,
+} = useCacheFetch<ApiResponse<PageResponse>>();
+
+fetchDiscountProduct("/api/products", {
+  params: {
+    stock_status: "available",
+    limit: "3",
+  },
+});
+
 const handleSearch = () => {
   const trimmedQuery = searchQuery.value.trim();
   open.value = false;
@@ -196,6 +209,7 @@ watch(
           v-if="searchQuery?.length"
           icon="i-lucide-x"
           variant="soft"
+          :autofocus="false"
           color="gray"
           :ui="{
             base: 'p-1 rounded-full h-fit w-fit absolute z-3 left-2 top-1/2 -translate-y-1/2',
@@ -252,11 +266,42 @@ watch(
 
       <div
         v-else-if="!searchQuery?.trim() && historyStore.searches?.length > 0"
+        class="space-y-3"
       >
         <div>
-          <h4 class="text-sm font-semibold text-gray-700 mb-2">
-            جستجوهای اخیر
-          </h4>
+          <div class="pb-2">
+            <div v-if="discountProductLoading">
+              <BaseLoader variant="spinner" />
+            </div>
+            <div v-else-if="discountProductData?.data?.length">
+              <h4 class="text-sm font-semibold text-gray-700 mb-2">
+                جدیدترین محصولات
+              </h4>
+              <WidgetProductCardSearch
+                v-for="product in discountProductData?.data"
+                :key="product.id"
+                :product="product"
+                @click="() => toProduct(product)"
+              />
+            </div>
+          </div>
+          <div
+            class="flex items-center gap-3 justify-between mb-3 border-t border-default pt-2"
+          >
+            <h4 class="text-sm font-semibold text-gray-700">جستجوهای اخیر</h4>
+            <button
+              icon="i-lucide-trash"
+              variant="soft"
+              class="p-2 bg-neutral-100 hover:bg-neutral-200 inline-flex rounded-lg"
+              color="neutral"
+              :autofocus="false"
+              :watch-focus="false"
+              aria-label="پاک کردن جستجوهای اخیر"
+              @click="historyStore.deleteAllSearch()"
+            >
+              <UIcon name="i-lucide-trash" />
+            </button>
+          </div>
           <div class="px-5 md:px-10">
             <UCarousel
               v-slot="{ item }"
@@ -292,8 +337,24 @@ watch(
         </div>
       </div>
 
-      <div v-else class="py-8 text-center text-gray-400">
-        برای جستجو حداقل 2 کاراکتر وارد کنید
+      <div v-else class="text-gray-400">
+        <div v-if="discountProductLoading">
+          <BaseLoader variant="spinner" />
+        </div>
+        <div v-else-if="discountProductData?.data?.length">
+          <h4 class="text-sm font-semibold text-gray-700 mb-2">
+            جدیدترین محصولات
+          </h4>
+          <WidgetProductCardSearch
+            v-for="product in discountProductData?.data"
+            :key="product.id"
+            :product="product"
+            @click="() => toProduct(product)"
+          />
+        </div>
+        <div class="text-center border-t border-default pt-2">
+          برای جستجو حداقل 2 کاراکتر وارد کنید
+        </div>
       </div>
     </template>
   </UPopover>
