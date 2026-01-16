@@ -3,6 +3,8 @@ import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 import { useConfigSeo } from "~/composables/utils/useConfigSeo";
 import { useViewCounter } from "~/composables/utils/useViewCounter";
 import type { ProductRes } from "~~/shared/types/api";
+import type { ItemType } from "~~/shared/types/common";
+import { debounce } from "~~/shared/utils/common";
 
 ///// imports /////
 
@@ -12,8 +14,53 @@ import type { ProductRes } from "~~/shared/types/api";
 
 ///// refs /////
 const route = useRoute();
+const mobileFilterModal = ref<boolean>();
+const filters = ref({
+  rangePrice: [0, 100000000],
+  onlyAvailable: false,
+});
+const sortModel = ref<ItemType>({
+  label: "جدیدترین",
+  key: "newest",
+});
+const filterField = ref<string | null>(null);
+
+const sortItems = [
+  {
+    label: "جدیدترین",
+    key: "newest",
+  },
+  {
+    label: "پرفروش‌ترین",
+    key: "best-selling",
+  },
+  {
+    label: "ارزان‌ترین",
+    key: "cheapest",
+  },
+
+  {
+    label: "گران‌ترین",
+    key: "most-expensive",
+  },
+];
+
+const mobileFilterFields = [
+  {
+    label: "فیلترها",
+    value: "all",
+    icon: "i-lucide-filter",
+  },
+  {
+    label: "مرتب سازی",
+    value: "sort",
+    icon: "i-lucide-list",
+  },
+];
 
 ///// composables/stores /////
+const { hidden, scrollY } = useHideScroll(5);
+
 const { buildMeta, organizationSchema, websiteSchema, webpageSchema } =
   useConfigSeo();
 
@@ -80,9 +127,12 @@ async function fetchProductRes() {
   await fetchProduct("/api/products", {
     params: {
       limit: "50",
-      sort: "newest",
+      sort: sortModel.value?.key,
       page: count.value,
       category_id: route.params?.id,
+      stock_status: filters.value?.onlyAvailable && "available",
+      min_price: filters.value?.rangePrice?.[0] ?? 0,
+      max_price: filters.value?.rangePrice?.[1] ?? 100000000,
     },
   });
 
@@ -90,14 +140,40 @@ async function fetchProductRes() {
 }
 load();
 
+const debouncedFetch = debounce(async () => {
+  count.value = 1;
+  items.value = await fetchProductRes().then((res) => res.data);
+}, 400);
+
+const resetFilters = () => {
+  filters.value = {
+    rangePrice: [0, 100000000],
+    onlyAvailable: false,
+  };
+
+  sortModel.value = {
+    label: "جدیدترین",
+    key: "newest",
+  };
+
+  mobileFilterModal.value = false;
+};
+
 ///// watchers /////
 
 ///// lifecycle /////
+watch(
+  [sortModel, filters],
+  () => {
+    debouncedFetch();
+  },
+  { deep: true }
+);
 </script>
 
 <template>
   <div>
-    <UBreadcrumb :items="breadCrumbs" class="py-5" />
+    <UBreadcrumb v-if="breadCrumbs?.length" :items="breadCrumbs" class="py-5" />
     <h1 class="text-h1 mb-2">
       {{ data?.data?.page?.title }}
     </h1>
@@ -116,22 +192,114 @@ load();
         />
       </template>
     </WidgetListCategory>
-    <div class="lg:grid grid-cols-4 mt-6">
-      <div class="col-span-1"></div>
-      <div
-        class="col-span-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+    <div class="lg:grid grid-cols-4 mt-2 lg:mt-6 gap-3">
+      <aside
+        class="col-span-1 lg:sticky lg:top-3 lg:border border-default rounded-2xl py-4 lg:p-4 h-fit with-transition"
+        :class="{ 'translate-y-28': !hidden && scrollY > 520 }"
       >
-        <WidgetProductCard
-          v-for="(item, index) in items"
-          :key="index"
-          :product="item"
-          :image-color="randomColor[index % randomColor.length]"
+        <template v-if="lgAndUp">
+          <div class="text-sm lg:text-lg font-bold mb-5">فیلترها</div>
+          <WidgetFilterProduct v-model="filters" />
+        </template>
+        <u-slideover
+          v-else
+          v-model:open="mobileFilterModal"
+          side="bottom"
+          :ui="{
+            overlay: 'bg-black/35 backdrop-blur-xs',
+            header: 'hidden!',
+            body: 'relative',
+            content: 'rounded-t-[10px]',
+          }"
+        >
+          <div class="px-3 flex gap-2 overflow-auto w-[97%] scroll-hidden">
+            <u-button
+              v-for="(filed, index) in mobileFilterFields"
+              :key="index"
+              variant="outline"
+              color="neutral"
+              :icon="filed.icon"
+              :label="filed.label"
+              :ui="{
+                label: 'text-[12px] text-gray',
+              }"
+              @click="filterField = filed.value"
+            />
+          </div>
+          <template #body>
+            <template v-if="filterField === 'all'">
+              <div class="text-sm lg:text-lg font-bold mb-5">فیلترها</div>
+              <WidgetFilterProduct v-model="filters" />
+            </template>
+            <WidgetBoxSort
+              v-else-if="filterField === 'sort' && !lgAndUp"
+              v-model="sortModel"
+              :items="sortItems"
+            />
+            <div class="flex gap-3 items-center justify-stretch my-5">
+              <UButton
+                label="اعمال فیلتر"
+                :loading="productLoading"
+                :ui="{
+                  base: 'flex-1 h-12.5',
+                  label: 'text-center justify-center w-full',
+                }"
+                @click="mobileFilterModal = false"
+              />
+              <UButton
+                :loading="productLoading"
+                label="لغو فیلتر"
+                variant="outline"
+                :ui="{
+                  base: 'flex-1 h-12.5',
+                  label: 'text-center justify-center w-full',
+                }"
+                @click="resetFilters"
+              />
+            </div>
+          </template>
+        </u-slideover>
+      </aside>
+      <div class="col-span-3">
+        <WidgetBoxSort
+          v-if="lgAndUp"
+          v-model="sortModel"
+          :items="sortItems"
+          class="mb-4"
         />
         <div
-          v-if="!loading && items"
-          ref="scrollTarget"
-          class="h-20 w-full flex items-center justify-center py-4"
-        />
+          v-if="productLoading && !items?.length"
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+        >
+          <USkeleton
+            v-for="i in 20"
+            :key="i"
+            class="w-full h-62.5 rounded-2xl"
+          />
+        </div>
+        <div
+          v-else="items?.length"
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+        >
+          <WidgetProductCard
+            v-for="(item, index) in items"
+            :key="index"
+            :product="item"
+            :image-color="randomColor[index % randomColor.length]"
+          />
+          <template v-if="productLoading">
+            <USkeleton
+              v-for="i in 20"
+              :key="i"
+              class="w-full h-62.5 rounded-2xl"
+            />
+          </template>
+          <div
+            v-else-if="items?.length"
+            ref="scrollTarget"
+            class="h-20 w-full flex items-center justify-center py-4"
+          />
+        </div>
       </div>
     </div>
   </div>

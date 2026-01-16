@@ -170,7 +170,7 @@ export default defineNuxtConfig({
     },
   },
 
-  css: ["~~/public/css/main.css"],
+  css: ["~~/public/css/main.css", "~~/public/css/custom.css"],
 
   runtimeConfig: {
     public: {
