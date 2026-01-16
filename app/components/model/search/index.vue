@@ -39,6 +39,7 @@ const searchQuery = ref("");
 
 const historyStore = useHistoryStore();
 const router = useRouter();
+const route = useRoute();
 
 const {
   fetch: fetchProducts,
@@ -97,7 +98,8 @@ const handleSearch = () => {
   const trimmedQuery = searchQuery.value.trim();
   historyStore.addSearch(trimmedQuery);
 
-  router.push(`/products?search=${trimmedQuery}`);
+  router.push(`/products/list?search=${trimmedQuery}`);
+  open.value = false;
 };
 
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -109,6 +111,27 @@ const debouncedSearch = (query: string) => {
   searchTimeout = setTimeout(() => {
     performSearch(query);
   }, 300);
+};
+
+const toCategory = (category: Category) => {
+  router.push(`/products/list/${category.id}/${category.slug}`);
+  open.value = false;
+};
+
+const toProduct = (product: Product) => {
+  router.push(`/products/${product.code}/${product.slug}`);
+  open.value = false;
+};
+
+const searchHistory = (query: string) => {
+  router.push(`/products/list?search=${query}`);
+  searchQuery.value = query;
+  open.value = false;
+};
+
+const clearSearch = () => {
+  searchQuery.value = "";
+  router.push({ path: route.path, query: {} });
 };
 
 watch(searchQuery, (newQuery) => {
@@ -130,12 +153,20 @@ onUnmounted(() => {
   }
 });
 
-watch(open, (isOpen) => {
-  if (!isOpen) {
-    // Clear search when popover closes
-    searchQuery.value = "";
-  }
-});
+// watch(open, (isOpen) => {
+//   if (!isOpen) {
+//     // Clear search when popover closes
+//     searchQuery.value = "";
+//   }
+// });
+
+watch(
+  () => route.query?.search,
+  (val) => {
+    searchQuery.value = val as string;
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -147,16 +178,30 @@ watch(open, (isOpen) => {
     }"
   >
     <template #anchor>
+      <!-- <div class="relative"> -->
       <UInput
         v-model="searchQuery"
         placeholder="جستجو..."
         icon="i-lucide-search"
         :ui="{
-          base: 'h-11 max-w-150',
+          base: 'h-11 max-w-125 lg:min-w-100 w-full relative',
         }"
         @click="open = true"
         @keyup.enter="handleSearch"
-      />
+      >
+        <UButton
+          v-if="searchQuery?.length"
+          icon="i-lucide-x"
+          variant="soft"
+          color="gray"
+          :ui="{
+            base: 'p-1 rounded-full h-fit w-fit absolute z-3 left-2 top-1/2 -translate-y-1/2',
+          }"
+          aria-label="پاک کردن جستجو"
+          @click="clearSearch"
+        />
+      </UInput>
+      <!-- </div> -->
     </template>
 
     <template #content>
@@ -168,7 +213,7 @@ watch(open, (isOpen) => {
       </div>
 
       <div
-        v-else-if="!hasResults && searchQuery.trim().length >= 2"
+        v-else-if="!hasResults && searchQuery?.trim?.().length >= 2"
         class="py-8 text-center text-gray-500"
       >
         نتیجه‌ای یافت نشد
@@ -183,6 +228,7 @@ watch(open, (isOpen) => {
               v-for="category in categories"
               :key="category.id"
               :category="category"
+              @click="() => toCategory(category)"
             />
           </div>
         </div>
@@ -195,6 +241,7 @@ watch(open, (isOpen) => {
               v-for="product in products"
               :key="product.id"
               :product="product"
+              @click="() => toProduct(product)"
             />
           </div>
         </div>
@@ -207,7 +254,7 @@ watch(open, (isOpen) => {
           <h4 class="text-sm font-semibold text-gray-700 mb-2">
             جستجوهای اخیر
           </h4>
-          <div class="px-5 md:px-10"> 
+          <div class="px-5 md:px-10">
             <UCarousel
               v-slot="{ item }"
               arrows
@@ -232,7 +279,8 @@ watch(open, (isOpen) => {
                 color="default"
                 :autofocus="false"
                 class="cursor-pointer focus:outline-none focus:ring-0 w-max p-2 border border-default rounded-2xl text-center hover:bg-gray-200"
-                :to="`/categories?search=${item}`"
+                :to="`/products/list?search=${item}`"
+                @click="() => searchHistory(item)"
               >
                 {{ item }}
               </UButton>

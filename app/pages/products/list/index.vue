@@ -19,7 +19,5 @@
 </script>
 
 <template>
-  <div>
-    <!-- list -->
-  </div>
+  <ModelProductList noCategory />
 </template>

@@ -17,7 +17,7 @@ const router = useRouter();
 <template>
   <ULink
     class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-    :to="`/categories/${props.category.code}/${props.category.slug}`"
+    :to="`/products/list/${props.category.id}/${props.category.slug}`"
   >
     <div
       class="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden bg-gray-100"
