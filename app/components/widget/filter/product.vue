@@ -28,8 +28,10 @@ const model = defineModel({
   <div>
     <div>
       <div class="text-sm font-bold">محدوده قیمت</div>
-      <div class="divide-y divide-default px-3">
-        <div class="flex justify-between items-center gap-3 py-3">
+      <div class="px-3">
+        <div
+          class="flex justify-between items-center gap-3 py-3 border-b border-default"
+        >
           از
           <div class="">
             <span class="font-bold text-2xl"

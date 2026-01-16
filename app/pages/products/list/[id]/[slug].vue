@@ -122,6 +122,10 @@ const {
   fetchProductRes
 );
 
+const media = computed(() =>
+  getBannerAndSlider((data.value?.data?.media_blocks as MediaBlock[]) || [])
+);
+
 ///// functions /////
 async function fetchProductRes() {
   await fetchProduct("/api/products", {
@@ -143,6 +147,8 @@ load();
 const debouncedFetch = debounce(async () => {
   count.value = 1;
   items.value = await fetchProductRes().then((res) => res.data);
+
+  if (lgAndUp.value) scrollToTop();
 }, 400);
 
 const resetFilters = () => {
@@ -157,6 +163,13 @@ const resetFilters = () => {
   };
 
   mobileFilterModal.value = false;
+
+  scrollToTop();
+};
+
+const setFilter = () => {
+  mobileFilterModal.value = false;
+  scrollToTop();
 };
 
 ///// watchers /////
@@ -173,7 +186,11 @@ watch(
 
 <template>
   <div>
-    <UBreadcrumb v-if="breadCrumbs?.length" :items="breadCrumbs" class="py-5" />
+    <UBreadcrumb
+      v-if="breadCrumbs?.length"
+      :items="breadCrumbs"
+      class="py-3 lg:py-5"
+    />
     <h1 class="text-h1 mb-2">
       {{ data?.data?.page?.title }}
     </h1>
@@ -194,8 +211,10 @@ watch(
     </WidgetListCategory>
     <div class="lg:grid grid-cols-4 mt-2 lg:mt-6 gap-3">
       <aside
-        class="col-span-1 lg:sticky lg:top-3 lg:border border-default rounded-2xl py-4 lg:p-4 h-fit with-transition"
-        :class="{ 'translate-y-28': !hidden && scrollY > 520 }"
+        class="col-span-1 sticky bg-default/75 backdrop-blur z-1 lg:z-1 top-0 lg:top-3 border-b -mx-4 lg:mx-0 lg:border border-default lg:rounded-2xl py-3 lg:p-4 h-fit with-transition mb-2 lg:mb-0"
+        :class="{
+          'translate-y-16.75 lg:translate-y-28': !hidden && scrollY > 520,
+        }"
       >
         <template v-if="lgAndUp">
           <div class="text-sm lg:text-lg font-bold mb-5">فیلترها</div>
@@ -244,7 +263,7 @@ watch(
                   base: 'flex-1 h-12.5',
                   label: 'text-center justify-center w-full',
                 }"
-                @click="mobileFilterModal = false"
+                @click="setFilter"
               />
               <UButton
                 :loading="productLoading"
@@ -302,5 +321,35 @@ watch(
         </div>
       </div>
     </div>
+    <WidgetListBannerGrid4
+      :banners="media.banners"
+      :loading="loading"
+      class="mb-5 mt-10"
+    />
+
+    <!-- SEO Content Section -->
+    <section class="mb-10 lg:mb-14 mt-2">
+      <WidgetTextMore
+        :loading="loading"
+        :content="data?.data?.contents?.[0]?.body"
+        :max-lines="20"
+      />
+    </section>
+
+    <WidgetListBannerGrid2
+      :banners="media.banners?.slice(6, 8)"
+      :loading="loading"
+      class="mt-5 mb-10 lg:mb-16"
+    />
+
+    <WidgetListService class="mt-10" />
+
+    <WidgetListCategoryAction
+      :items="categoryData?.data?.children"
+      :loading="categoryLoading"
+      class="mt-10"
+    />
+
+    <WidgetListFaq :loading="loading" :items="data?.data?.faqs" class="mt-10" />
   </div>
 </template>
