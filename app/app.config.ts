@@ -8,6 +8,9 @@ export default defineAppConfig({
       primary: "primary",
       default: "gray",
       gray: "gray",
+      info: "info",
+      success: "success",
+      warning: "warning",
     },
 
     selectMenu: {

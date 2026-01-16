@@ -23,10 +23,7 @@ const filters = ref({
   rangePrice: [0, 100000000],
   onlyAvailable: false,
 });
-const sortModel = ref<ItemType>({
-  label: "جدیدترین",
-  key: "newest",
-});
+
 const filterField = ref<string | null>(null);
 
 const sortItems = [
@@ -48,6 +45,15 @@ const sortItems = [
     key: "most-expensive",
   },
 ];
+
+const sortModel = ref<ItemType>(
+  route.query?.sort
+    ? (sortItems?.find((item) => item.key === route.query?.sort) as ItemType)
+    : {
+        label: "جدیدترین",
+        key: "newest",
+      }
+);
 
 const mobileFilterFields = [
   {
@@ -182,7 +188,7 @@ const resetFilters = () => {
 
   mobileFilterModal.value = false;
 
-  scrollToTop();
+  if (scrollY.value > 600) scrollToTop();
 };
 
 const setFilter = () => {
@@ -201,6 +207,7 @@ watch(
   [sortModel, filters],
   () => {
     debouncedFetch();
+    router.push({ path: route.path, query: { sort: sortModel.value?.key } });
   },
   { deep: true }
 );
