@@ -208,6 +208,7 @@ watch(
   () => route.query?.search,
   async () => {
     count.value = 1;
+    items.value = [];
 
     fetchCategory(
       `/api/categories${!!categoryURL.value ? `/${route.params?.id}` : ""}`,
@@ -231,9 +232,9 @@ watch(
     <UBreadcrumb
       v-if="breadCrumbs?.length"
       :items="breadCrumbs"
-      class="py-3 lg:py-5"
+      class="pb-3 pt-1"
     />
-    <div class="lg:flex gap-4 justify-between items-center mb-2">
+    <div class="lg:flex gap-4 justify-between items-center mb-3">
       <h1 class="text-h1 w-max text-nowrap whitespace-nowrap">
         {{ data?.data?.page?.title }}
       </h1>
@@ -301,7 +302,7 @@ watch(
             content: 'rounded-t-[10px]',
           }"
         >
-          <div class="px-3 flex gap-2 overflow-auto w-[97%] scroll-hidden">
+          <div class="px-4 flex gap-2 overflow-auto w-[97%] scroll-hidden">
             <u-button
               v-for="(filed, index) in mobileFilterFields"
               :key="index"
@@ -401,7 +402,11 @@ watch(
             :actions="[
               {
                 label: 'پاک کردن فیلترها',
-                onClick: resetFilters,
+                onClick: () => {
+                  resetFilters();
+                  clearSearch();
+                },
+                loading: productLoading,
               },
             ]"
           />

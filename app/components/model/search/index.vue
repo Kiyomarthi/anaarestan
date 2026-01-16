@@ -36,6 +36,7 @@ type CategoriesResponse = {
 
 const open = ref(false);
 const searchQuery = ref("");
+const inputEl = ref(null);
 
 const historyStore = useHistoryStore();
 const router = useRouter();
@@ -96,10 +97,10 @@ const performSearch = async (query: string) => {
 
 const handleSearch = () => {
   const trimmedQuery = searchQuery.value.trim();
-  historyStore.addSearch(trimmedQuery);
-
-  router.push(`/products/list?search=${trimmedQuery}`);
   open.value = false;
+  historyStore.addSearch(trimmedQuery);
+  router.push(`/products/list?search=${trimmedQuery}`);
+  inputEl.value?.inputRef?.blur();
 };
 
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -124,9 +125,10 @@ const toProduct = (product: Product) => {
 };
 
 const searchHistory = (query: string) => {
-  router.push(`/products/list?search=${query}`);
   searchQuery.value = query;
   open.value = false;
+  router.push(`/products/list?search=${query}`);
+  inputEl.value?.inputRef?.blur();
 };
 
 const clearSearch = () => {
@@ -181,10 +183,11 @@ watch(
       <!-- <div class="relative"> -->
       <UInput
         v-model="searchQuery"
+        ref="inputEl"
         placeholder="جستجو..."
         icon="i-lucide-search"
         :ui="{
-          base: 'h-11 max-w-125 lg:min-w-100 w-full relative',
+          base: 'h-11 max-w-125 lg:min-w-100 w-full relative pl-12',
         }"
         @click="open = true"
         @keyup.enter="handleSearch"
@@ -278,7 +281,7 @@ watch(
                 variant="outline"
                 color="default"
                 :autofocus="false"
-                class="cursor-pointer focus:outline-none focus:ring-0 w-max p-2 border border-default rounded-2xl text-center hover:bg-gray-200"
+                class="cursor-pointer w-max p-2 border border-default rounded-2xl text-center hover:bg-gray-200"
                 :to="`/products/list?search=${item}`"
                 @click="() => searchHistory(item)"
               >

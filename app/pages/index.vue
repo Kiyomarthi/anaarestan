@@ -82,7 +82,6 @@ fetchNewProduct("/api/products", {
 fetchBestProduct("/api/products", {
   params: {
     stock_status: "available",
-    noPaginate: "true",
     limit: "20",
     sort: "best-selling",
   },
