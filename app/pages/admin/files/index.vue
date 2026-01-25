@@ -9,25 +9,9 @@ definePageMeta({
   layout: "admin",
 });
 
-type ImageKitFile = {
-  fileId: string;
-  name: string;
-  url: string;
-  thumbnailUrl?: string;
-  filePath: string;
-  size: number;
-  fileType: string;
-  height?: number;
-  width?: number;
-  tags?: string[];
-  createdAt: string;
-  updatedAt: string;
-  customMetadata?: Record<string, any>;
-};
-
 type ImageKitListResponse = {
   success: boolean;
-  data: ImageKitFile[];
+  data: unknown[];
   meta?: {
     page: number;
     limit: number;
@@ -59,7 +43,7 @@ const { data, pending, error, refresh } = useApiFetch<ImageKitListResponse>(
   }
 );
 
-const rows = computed<ImageKitFile[]>(() => {
+const rows = computed<unknown[]>(() => {
   return data.value?.Contents || [];
 });
 
@@ -118,10 +102,6 @@ watch(
   }
 );
 
-const goEdit = async (fileId: string) => {
-  await router.push(`/admin/imagekit/${fileId}`);
-};
-
 const handleRefresh = async () => {
   await refresh();
   toast.add({ title: "لیست فایل‌ها بروزرسانی شد", color: "success" });
@@ -176,7 +156,7 @@ const copyPath = (path: string, message?: string) => {
     <UPage>
       <UPageHeader
         title="مدیریت فایل‌ها"
-        description="مدیریت و مشاهده فایل‌های آپلود شده در ImageKit"
+        description="مدیریت و مشاهده فایل‌های آپلود شده در  آروان"
         :ui="{
           root: 'pt-0 pb-4',
         }"
@@ -187,7 +167,7 @@ const copyPath = (path: string, message?: string) => {
             color="primary"
             variant="solid"
             label="آپلود فایل"
-            @click="router.push('/admin/imagekit/upload')"
+            @click="router.push('/admin/files/upload')"
           />
           <UButton
             icon="i-lucide-refresh-cw"
@@ -287,10 +267,7 @@ const copyPath = (path: string, message?: string) => {
                     color="success"
                     @click="
                       () =>
-                        copyPath(
-                          `${config.public?.arvanBucketEndpoint}/${row.original?.Key}`,
-                          'نام با موفقیت کپی شد'
-                        )
+                        copyPath(`${row.original?.Key}`, 'نام با موفقیت کپی شد')
                     "
                   />
                 </UTooltip>

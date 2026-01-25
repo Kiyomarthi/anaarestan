@@ -63,8 +63,8 @@ const items: NavigationMenuItem[][] = [
       icon: "i-lucide-settings",
       children: [
         {
-          label: "مدیریت فایلها - imagekit",
-          to: "/admin/imagekit",
+          label: "مدیریت فایلها - آروان",
+          to: "/admin/files",
         },
       ],
     },
@@ -87,7 +87,7 @@ const items: NavigationMenuItem[][] = [
         <UDashboardSidebar
           collapsible
           :ui="{
-            root: 'min-w-[250px]',
+            root: 'min-w-62.5',
             overlay: 'hidden',
           }"
         >

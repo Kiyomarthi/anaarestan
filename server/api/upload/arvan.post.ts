@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   const fileName = fileItem?.filename;
 
-  const key = `${fileName}-${Date.now()}`;
+  const key = `${Date.now()}-${fileName}`;
   const contentType = getContentType(fileName);
 
   const uploadParams = {

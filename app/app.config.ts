@@ -34,5 +34,11 @@ export default defineAppConfig({
         root: "w-full",
       },
     },
+
+    modal: {
+      slots: {
+        overlay: "bg-black/35! backdrop-blur-xs",
+      },
+    },
   },
 });

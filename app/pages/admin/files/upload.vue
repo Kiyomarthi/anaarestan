@@ -60,24 +60,20 @@ const uploadImage = async (files: File | File[] | null) => {
       },
     });
 
-    if (res.success && res.data) {
+    if (res.success) {
       toast.add({
         title: "فایل با موفقیت آپلود شد",
         color: "success",
       });
       // Reset form
-      imageFile.value = [];
       folder.value = "/";
       fileName.value = "";
       tags.value = "";
       useUniqueFileName.value = true;
 
       // Redirect to file list or edit page
-      if (res.data.fileId) {
-        router.push(`/admin/imagekit/${res.data.fileId}`);
-      } else {
-        router.push("/admin/imagekit");
-      }
+
+      router.push("/admin/files");
     }
   } catch (err: any) {
     imageFile.value = [];
@@ -105,7 +101,7 @@ const uploadImage = async (files: File | File[] | null) => {
             variant="ghost"
             label="بازگشت"
             icon="i-lucide-arrow-right"
-            @click="router.push('/admin/imagekit')"
+            @click="router.push('/admin/files')"
           />
         </template>
       </UPageHeader>
@@ -118,7 +114,7 @@ const uploadImage = async (files: File | File[] | null) => {
               <label class="block text-sm font-medium mb-2">فایل</label>
               <UFileUpload
                 v-model="imageFile"
-                accept="*/*"
+                accept="image/*"
                 :max-files="1"
                 label="فایل را انتخاب کنید"
                 description="حداکثر حجم: 10MB"
@@ -142,6 +138,7 @@ const uploadImage = async (files: File | File[] | null) => {
               <UInput
                 v-model="folder"
                 placeholder="/"
+                disabled
                 description="مسیر پوشه در ImageKit (مثال: /products)"
               />
             </div>
@@ -153,6 +150,7 @@ const uploadImage = async (files: File | File[] | null) => {
               </label>
               <UInput
                 v-model="fileName"
+                disabled
                 placeholder="نام فایل سفارشی"
                 description="اگر خالی باشد، از نام اصلی فایل استفاده می‌شود"
               />
@@ -165,6 +163,7 @@ const uploadImage = async (files: File | File[] | null) => {
               >
               <UInput
                 v-model="tags"
+                disabled
                 placeholder="تگ1, تگ2, تگ3"
                 description="تگ‌ها را با کاما جدا کنید"
               />
@@ -174,13 +173,27 @@ const uploadImage = async (files: File | File[] | null) => {
             <div>
               <UCheckbox
                 v-model="useUniqueFileName"
+                disabled
                 label="استفاده از نام یکتا برای فایل"
-                description="اگر فعال باشد، ImageKit نام یکتایی برای فایل ایجاد می‌کند"
+                description="اگر فعال باشد،  نام یکتایی برای فایل ایجاد می‌کند"
               />
             </div>
           </div>
         </UCard>
       </UPageBody>
     </UPage>
+    <UModal
+      v-model:open="uploading"
+      :ui="{ content: 'w-max' }"
+      :dismissible="false"
+    >
+      <template #content>
+        <div class="p-8 text-center space-y-3">
+          <BaseLoader size="lg" />
+          <div class="font-bold">در حال بارگزاری عکس</div>
+          <div>لطفا شکیبا باشید</div>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>

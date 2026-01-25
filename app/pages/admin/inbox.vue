@@ -8,6 +8,7 @@ definePageMeta({
 ///// props/emits /////
 
 ///// refs /////
+const file = ref(null);
 
 ///// composables/stores /////
 
@@ -21,5 +22,7 @@ definePageMeta({
 </script>
 
 <template>
-  <div>inbox</div>
+  <div>
+    <BaseUploader v-model="file" />
+  </div>
 </template>
