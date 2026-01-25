@@ -5,6 +5,13 @@ export const useConfigSeo = () => {
   const siteConfig = computed(() => useRuntimeConfig());
   const route = useRoute();
 
+  const absoluteUrl = (url?: string) => {
+    if (!url) return siteConfig.value.public.siteUrl;
+    if (/^https?:\/\//i.test(url)) return url;
+    const normalized = url.startsWith("/") ? url : `/${url}`;
+    return `${siteConfig.value.public.siteUrl}${normalized}`;
+  };
+
   const buildMeta = (seo: PageResponse) => {
     useSeoMeta({
       title:
@@ -65,11 +72,7 @@ export const useConfigSeo = () => {
       link: [
         {
           rel: "canonical",
-          href: seo?.page?.seo_canonical
-            ? `${
-                siteConfig.value.public.siteUrl
-              }/${seo?.page?.seo_canonical.toLowerCase()}`
-            : siteConfig.value.public.siteUrl.toLowerCase(),
+          href: absoluteUrl(seo?.page?.seo_canonical),
         },
       ],
     });

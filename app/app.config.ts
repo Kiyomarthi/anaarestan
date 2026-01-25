@@ -25,6 +25,10 @@ export default defineAppConfig({
       },
     },
 
+    skeleton: {
+      base: "animate-pulse rounded-md bg-gray-200",
+    },
+
     textarea: {
       slots: {
         root: "w-full",

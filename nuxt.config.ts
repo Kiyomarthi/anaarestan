@@ -211,6 +211,12 @@ export default defineNuxtConfig({
     imagekitUrl: process.env.IMAGEKIT_URL,
     imagekitPublicKey: process.env.IMAGEKIT_PUBLIC_KEY,
     imagekitPrivateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+
+    arvanEndpoint: process.env.ARVAN_ENDPOINT,
+    arvanBucketEndpoint: process.env.ARVAN_BUCKET_ENDPOINT,
+    arvanAccessKey: process.env.ARVAN_ACCESS_KEY, 
+    arvanSecretKey: process.env.ARVAN_SECRET_KEY,
+    arvanBucket: process.env.ARVAN_BUCKET,
   },
 
   nitro: {

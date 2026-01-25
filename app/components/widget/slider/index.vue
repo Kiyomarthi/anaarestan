@@ -1,5 +1,7 @@
 <script setup lang="ts">
 ///// imports /////
+import { randomColor } from "~/constants/common";
+
 
 ///// page meta /////
 

@@ -7,7 +7,7 @@ import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 
 ///// props/emits /////
 defineProps<{
-  title: string;
+  title?: string;
   items: unknown[];
   loading?: boolean;
 }>();

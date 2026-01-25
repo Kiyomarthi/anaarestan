@@ -2,6 +2,7 @@
 import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 import { useConfigSeo } from "~/composables/utils/useConfigSeo";
 import { useViewCounter } from "~/composables/utils/useViewCounter";
+import { randomColor } from "~/constants/common";
 import type { ProductRes } from "~~/shared/types/api";
 import type { ItemType } from "~~/shared/types/common";
 import { debounce } from "~~/shared/utils/common";
@@ -86,7 +87,7 @@ const {
 
 const categoryURL = computed(() => !props.noCategory && route.params?.id);
 
-fetchCategory(
+await fetchCategory(
   `/api/categories${!!categoryURL.value ? `/${route.params?.id}` : ""}`,
   {
     headers: {
@@ -98,6 +99,17 @@ fetchCategory(
     },
   }
 );
+
+// TODO: check this => 301, ...
+// TODO: if code X not exsist if error api
+if (categoryData.value?.data?.slug !== route.params?.slug && !props.noCategory)
+  await navigateTo(
+    `/products/list/${categoryData.value?.data?.id}/${categoryData.value?.data?.slug}`,
+    {
+      redirectCode: 301,
+      replace: true,
+    }
+  );
 
 const {
   fetch: fetchProduct,
@@ -115,6 +127,7 @@ await fetch(`/api/page/${pageURL.value}`, {
   },
 });
 
+// TODO: add faqs, breadcrumbs, ... search nuxt seo
 buildMeta(data.value?.data as PageResponse);
 organizationSchema();
 websiteSchema();
@@ -149,11 +162,19 @@ const media = computed(() =>
   getBannerAndSlider((data.value?.data?.media_blocks as MediaBlock[]) || [])
 );
 
+const hasFilter = computed(() => {
+  const isChangedMinPrice = filters.value?.rangePrice?.[0] != 0;
+  const isChangedMaxPrice = filters.value?.rangePrice?.[1] != 100000000;
+  const isChangedOnlyAvailable = !!filters.value?.onlyAvailable;
+
+  return !!(isChangedMinPrice || isChangedMaxPrice || isChangedOnlyAvailable);
+});
+
 ///// functions /////
 async function fetchProductRes() {
   await fetchProduct("/api/products", {
     params: {
-      limit: "50",
+      limit: "30",
       sort: sortModel.value?.key,
       page: count.value,
       category_id: categoryURL.value ?? "",
@@ -170,6 +191,7 @@ load();
 
 const debouncedFetch = debounce(async () => {
   count.value = 1;
+  items.value = [];
   items.value = await fetchProductRes().then((res) => res.data);
 
   if (lgAndUp.value && scrollY.value > 600) scrollToTop();
@@ -232,6 +254,8 @@ watch(
     items.value = await fetchProductRes().then((res) => res.data);
   }
 );
+
+
 </script>
 
 <template>
@@ -295,7 +319,18 @@ watch(
         }"
       >
         <template v-if="lgAndUp">
-          <div class="text-sm lg:text-lg font-bold mb-5">فیلترها</div>
+          <div class="flex justify-between items-center mb-5">
+            <div class="text-sm lg:text-lg font-bold">فیلترها</div>
+            <UTooltip v-if="hasFilter" text="لغو فیلترهای اعمال شده">
+              <UButton
+                label="حذف فیلترها"
+                color="neutral"
+                variant="soft"
+                size="xs"
+                @click="resetFilters"
+              />
+            </UTooltip>
+          </div>
           <WidgetFilterProduct v-model="filters" />
         </template>
         <u-slideover
@@ -309,16 +344,31 @@ watch(
             content: 'rounded-t-[10px]',
           }"
         >
-          <div class="px-4 flex gap-2 overflow-auto w-[97%] scroll-hidden">
+          <div class="px-4 flex gap-2 overflow-auto scroll-hidden w-fit">
             <u-button
               v-for="(filed, index) in mobileFilterFields"
               :key="index"
-              variant="outline"
-              color="neutral"
+              :variant="
+                (hasFilter && filed.value === 'all') ||
+                (sortModel.key !== 'newest' && filed.value === 'sort')
+                  ? 'soft'
+                  : 'outline'
+              "
+              :color="
+                (hasFilter && filed.value === 'all') ||
+                (sortModel.key !== 'newest' && filed.value === 'sort')
+                  ? 'primary'
+                  : 'neutral'
+              "
               :icon="filed.icon"
-              :label="filed.label"
+              :label="
+                filed.value === 'sort'
+                  ? sortItems?.find?.((item) => item.key === sortModel.key)
+                      ?.label
+                  : filed.label
+              "
               :ui="{
-                label: 'text-[12px] text-gray',
+                label: 'text-[12px]',
               }"
               @click="filterField = filed.value"
             />
@@ -371,7 +421,7 @@ watch(
           <USkeleton
             v-for="i in 20"
             :key="i"
-            class="w-full h-62.5 rounded-2xl"
+            class="w-full h-62.5 rounded-2xl bg-gray-200"
           />
         </div>
         <div

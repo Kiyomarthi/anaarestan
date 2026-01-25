@@ -51,7 +51,7 @@ const uploadImage = async (files: File | File[] | null) => {
   formData.append("useUniqueFileName", useUniqueFileName.value.toString());
 
   try {
-    const res = await sendRequest("/api/imagekit", {
+    const res = await sendRequest("/api/upload/arvan", {
       method: "POST",
       body: formData,
       errorTitle: "خطای آپلود فایل",
@@ -71,7 +71,7 @@ const uploadImage = async (files: File | File[] | null) => {
       fileName.value = "";
       tags.value = "";
       useUniqueFileName.value = true;
-      
+
       // Redirect to file list or edit page
       if (res.data.fileId) {
         router.push(`/admin/imagekit/${res.data.fileId}`);
@@ -136,7 +136,9 @@ const uploadImage = async (files: File | File[] | null) => {
 
             <!-- Folder -->
             <div>
-              <label class="block text-sm font-medium mb-2">پوشه (اختیاری)</label>
+              <label class="block text-sm font-medium mb-2"
+                >پوشه (اختیاری)</label
+              >
               <UInput
                 v-model="folder"
                 placeholder="/"
@@ -158,7 +160,9 @@ const uploadImage = async (files: File | File[] | null) => {
 
             <!-- Tags -->
             <div>
-              <label class="block text-sm font-medium mb-2">تگ‌ها (اختیاری)</label>
+              <label class="block text-sm font-medium mb-2"
+                >تگ‌ها (اختیاری)</label
+              >
               <UInput
                 v-model="tags"
                 placeholder="تگ1, تگ2, تگ3"
@@ -180,4 +184,3 @@ const uploadImage = async (files: File | File[] | null) => {
     </UPage>
   </div>
 </template>
-

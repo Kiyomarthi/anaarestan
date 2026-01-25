@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { twMerge } from "tailwind-merge";
+import { randomColor } from "~/constants/common";
 
 const props = defineProps<{
   loading?: boolean;

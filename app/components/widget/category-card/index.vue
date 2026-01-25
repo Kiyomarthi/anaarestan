@@ -3,11 +3,11 @@ import { twMerge } from "tailwind-merge";
 
 const props = withDefaults(
   defineProps<{
-    id: string;
+    id: string | number;
     name: string;
     slug: string;
     image: string | null;
-    class?: string;
+  class?: string;
     imageClass?: string;
     labelClass?: string;
   }>(),

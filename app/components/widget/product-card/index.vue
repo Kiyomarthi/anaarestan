@@ -63,7 +63,7 @@ const formattedPrice = (value: number) => {
     >
       <div class="relative aspect-square overflow-hidden rounded-t-lg">
         <BaseImage
-          src="/tmp/product.jpg"
+          src="https://anaarestan-image-upload.s3.ir-thr-at1.arvanstorage.ir/test.jpg"
           :alt="product.title"
           class="transition-transform duration-300 group-hover:scale-105 h-full"
           :loading="'lazy'"

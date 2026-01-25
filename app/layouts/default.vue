@@ -2,7 +2,7 @@
 const route = useRoute();
 const noHeader = computed(() => route.meta?.noHeader);
 const noFooter = computed(() => route.meta?.noFooter);
-const noBottomNavigation = computed(() => route.meta?.noFooter);
+const noBottomNavigation = computed(() => route.meta?.noBottomNavigation);
 const noMargin = computed(() => route.meta?.noMargin);
 
 const { hidden } = useHideScroll(5);
@@ -26,8 +26,8 @@ const { hidden } = useHideScroll(5);
     </main>
     <div v-if="!noFooter" class="border-t border-neutral-300 mt-10">
       <WidgetFooter
-        class="max-w-(--ui-container) mx-auto px-4"
-        :class="{ 'mb-32 lg:mb-2 pt-4': !noBottomNavigation }"
+        class="max-w-(--ui-container) mx-auto px-4 pt-4"
+        :class="{ 'mb-32 lg:mb-2': !noBottomNavigation }"
       />
     </div>
 

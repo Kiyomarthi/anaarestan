@@ -65,17 +65,21 @@ fetchCategory("/api/categories", {
 fetchDiscountProduct("/api/products", {
   params: {
     stock_status: "available",
-    noPaginate: "true",
     limit: "20",
+  },
+  headers: {
+    cache: "true",
   },
 });
 
 fetchNewProduct("/api/products", {
   params: {
     stock_status: "available",
-    noPaginate: "true",
     limit: "20",
     sort: "newest",
+  },
+  headers: {
+    cache: "true",
   },
 });
 
@@ -84,6 +88,9 @@ fetchBestProduct("/api/products", {
     stock_status: "available",
     limit: "20",
     sort: "best-selling",
+  },
+  headers: {
+    cache: "true",
   },
 });
 

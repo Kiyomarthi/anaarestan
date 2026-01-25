@@ -37,6 +37,7 @@ type CategoriesResponse = {
 const open = ref(false);
 const searchQuery = ref("");
 const inputEl = ref(null);
+const isAfterOpen = ref<boolean>(false);
 
 const historyStore = useHistoryStore();
 const router = useRouter();
@@ -168,12 +169,15 @@ onUnmounted(() => {
   }
 });
 
-// watch(open, (isOpen) => {
-//   if (!isOpen) {
-//     // Clear search when popover closes
-//     searchQuery.value = "";
-//   }
-// });
+const debouncedAfterOpen = debounce((isAfter: boolean) => {
+  isAfterOpen.value = isAfter;
+}, 500);
+
+watch(open, async (isOpen) => {
+  if (isOpen) {
+    debouncedAfterOpen(true);
+  } else debouncedAfterOpen(false);
+});
 
 watch(
   () => route.query?.search,
@@ -289,18 +293,22 @@ watch(
             class="flex items-center gap-3 justify-between mb-3 border-t border-default pt-2"
           >
             <h4 class="text-sm font-semibold text-gray-700">جستجوهای اخیر</h4>
-            <button
-              icon="i-lucide-trash"
-              variant="soft"
-              class="p-2 bg-neutral-100 hover:bg-neutral-200 inline-flex rounded-lg"
-              color="neutral"
-              :autofocus="false"
-              :watch-focus="false"
-              aria-label="پاک کردن جستجوهای اخیر"
-              @click="historyStore.deleteAllSearch()"
-            >
-              <UIcon name="i-lucide-trash" />
-            </button>
+            <UTooltip text="پاک کردن جستجوهای اخیر" :delay-duration="0">
+              <button
+                icon="i-lucide-trash"
+                variant="soft"
+                class="p-2 bg-neutral-100 hover:bg-neutral-200 inline-flex rounded-lg"
+                color="neutral"
+                :autofocus="false"
+                watch-focus="false"
+                type="button"
+                :disabled="!isAfterOpen"
+                aria-label="پاک کردن جستجوهای اخیر"
+                @click="historyStore.deleteAllSearch()"
+              >
+                <UIcon name="i-lucide-trash" />
+              </button>
+            </UTooltip>
           </div>
           <div class="px-5 md:px-10">
             <UCarousel

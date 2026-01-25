@@ -122,7 +122,7 @@
 }
 
 .text-h1 {
-  @apply text-2xl font-bold md:text-3xl lg:text-4xl;
+  @apply text-xl font-bold md:text-3xl lg:text-3xl;
 }
 
 .text-h2 {
