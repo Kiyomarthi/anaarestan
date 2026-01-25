@@ -106,4 +106,27 @@ export function buildCacheKey(event: H3Event, prefix: string): string {
   return `${prefix}:${normalizedQuery}`;
 }
 
-
+export function getContentType(fileName: string) {
+  const ext = fileName.split(".").pop()?.toLowerCase();
+  switch (ext) {
+    case "jpg":
+    case "jpeg":
+      return "image/jpeg";
+    case "png":
+      return "image/png";
+    case "gif":
+      return "image/gif";
+    case "webp":
+      return "image/webp";
+    case "svg":
+      return "image/svg+xml";
+    case "pdf":
+      return "application/pdf";
+    case "txt":
+      return "text/plain";
+    case "html":
+      return "text/html";
+    default:
+      return "application/octet-stream"; // fallback
+  }
+}

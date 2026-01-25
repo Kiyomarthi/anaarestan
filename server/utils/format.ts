@@ -22,3 +22,4 @@ export const generateCode = () => {
   const rnd = Math.floor(100 + Math.random() * 900).toString();
   return now + rnd;
 };
+

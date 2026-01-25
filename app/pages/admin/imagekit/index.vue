@@ -3,6 +3,7 @@
 import { computed, ref } from "vue";
 import { useApiFetch } from "~/composables/useApiFetch";
 import { useApiRequest } from "~/composables/useApiRequest";
+import { formatFileSize } from "~~/shared/utils/format";
 
 definePageMeta({
   layout: "admin",
@@ -42,6 +43,7 @@ const page = ref(1);
 const perPage = ref(10);
 const openModal = ref<boolean>(false);
 const itemClicked = ref<string | null>(null);
+const config = useRuntimeConfig();
 const userStore = useUserStore();
 const token = userStore.token;
 
@@ -49,16 +51,8 @@ const { loading, fetch } = useApiRequest();
 // const { loading: loadingFiles, fetch: fetchFiles } = useApiRequest();
 
 const { data, pending, error, refresh } = useApiFetch<ImageKitListResponse>(
-  "/api/imagekit",
+  "/api/upload/arvan",
   {
-    query: computed(() => ({
-      page: page.value,
-      limit: perPage.value,
-      searchQuery: globalFilter.value || undefined,
-    })),
-    // No cache for admin panel
-    cacheKey: null,
-    server: false,
     headers: {
       Authorization: token,
     },
@@ -66,7 +60,7 @@ const { data, pending, error, refresh } = useApiFetch<ImageKitListResponse>(
 );
 
 const rows = computed<ImageKitFile[]>(() => {
-  return data.value?.data || [];
+  return data.value?.Contents || [];
 });
 
 const meta = computed(() => data.value?.meta);
@@ -139,8 +133,11 @@ const confirmDelete = (fileId: string) => {
 };
 
 const deleteItem = async () => {
-  const res = await fetch(`/api/imagekit/${itemClicked.value}`, {
+  const res = await fetch(`/api/upload/arvan`, {
     method: "delete",
+    body: {
+      key: itemClicked.value,
+    },
     headers: {
       Authorization: token,
     },
@@ -154,14 +151,6 @@ const deleteItem = async () => {
   handleRefresh();
 };
 
-const formatFileSize = (bytes: number) => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
-};
-
 const formatDate = (dateString: string) => {
   if (!dateString) return "-";
   return new Date(dateString).toLocaleDateString("fa-IR", {
@@ -170,6 +159,14 @@ const formatDate = (dateString: string) => {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  });
+};
+
+const copyPath = (path: string, message?: string) => {
+  copyText(path);
+  toast.add({
+    title: message ?? "آدرس تصویر کپی شد",
+    color: "success",
   });
 };
 </script>
@@ -257,10 +254,10 @@ const formatDate = (dateString: string) => {
           >
             <template #thumbnail-cell="{ row }: { row: any }">
               <div class="flex items-center justify-center">
-                <img
-                  v-if="row?.original?.thumbnailUrl || row?.original?.url"
-                  :src="row?.original?.thumbnailUrl || row?.original?.url"
-                  :alt="row?.original?.name"
+                <nuxt-img
+                  v-if="row.original?.Key"
+                  :src="`${config.public?.arvanBucketEndpoint}/${row.original?.Key}`"
+                  :alt="row.original?.Key"
                   class="w-16 h-16 object-cover rounded"
                 />
                 <div
@@ -275,26 +272,50 @@ const formatDate = (dateString: string) => {
             <template #name-cell="{ row }: { row: any }">
               <div class="flex flex-col">
                 <span class="text-sm font-medium text-gray-900">
-                  {{ row?.original?.name || "-" }}
-                </span>
-                <span
-                  v-if="row?.original?.fileId"
-                  class="text-xs text-gray-500"
-                >
-                  ID: {{ row?.original?.fileId }}
+                  {{ row.original?.Key || "-" }}
                 </span>
               </div>
             </template>
 
             <template #filePath-cell="{ row }: { row: any }">
-              <span class="text-xs text-gray-600 font-mono">
-                {{ row?.original?.filePath || "-" }}
-              </span>
+              <div class="text-xs flex flex-col gap-2 text-gray-600">
+                <UTooltip text="برای استفاده در سایت از این استفاده شود">
+                  <UButton
+                    label="کپی نام"
+                    icon="i-lucide-copy"
+                    variant="subtle"
+                    color="success"
+                    @click="
+                      () =>
+                        copyPath(
+                          `${config.public?.arvanBucketEndpoint}/${row.original?.Key}`,
+                          'نام با موفقیت کپی شد'
+                        )
+                    "
+                  />
+                </UTooltip>
+                <UTooltip
+                  text="صرفا جهت دانلود، مشاهده از این استفاده شود نه برای استفاده در سایت"
+                >
+                  <UButton
+                    label="کپی آدرس کامل"
+                    icon="i-lucide-copy"
+                    variant="soft"
+                    color="warning"
+                    @click="
+                      () =>
+                        copyPath(
+                          `${config.public?.arvanBucketEndpoint}/${row.original?.Key}`
+                        )
+                    "
+                  />
+                </UTooltip>
+              </div>
             </template>
 
             <template #size-cell="{ row }: { row: any }">
               <span class="text-xs text-gray-600">
-                {{ formatFileSize(row?.original?.size || 0) }}
+                {{ formatFileSize(row.original?.Size || 0) }}
               </span>
             </template>
 
@@ -308,7 +329,7 @@ const formatDate = (dateString: string) => {
 
             <template #createdAt-cell="{ row }: { row: any }">
               <span class="text-xs text-gray-600">
-                {{ formatDate(row?.original?.createdAt) }}
+                {{ formatDate(row.original?.LastModified) }}
               </span>
             </template>
 
@@ -319,19 +340,10 @@ const formatDate = (dateString: string) => {
                   variant="ghost"
                   icon="i-lucide-external-link"
                   size="xs"
-                  :to="row?.original?.url"
+                  :to="`${config.public?.arvanBucketEndpoint}/${row.original?.Key}`"
                   target="_blank"
                 >
                   مشاهده
-                </UButton>
-                <UButton
-                  color="warning"
-                  variant="ghost"
-                  icon="i-lucide-pencil"
-                  size="xs"
-                  @click="goEdit(row?.original?.fileId)"
-                >
-                  ویرایش
                 </UButton>
               </div>
             </template>
@@ -343,7 +355,7 @@ const formatDate = (dateString: string) => {
                   variant="ghost"
                   icon="i-lucide-trash"
                   size="xs"
-                  @click="confirmDelete(row?.original?.fileId)"
+                  @click="confirmDelete(row?.original?.Key)"
                 >
                   حذف
                 </UButton>

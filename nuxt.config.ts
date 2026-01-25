@@ -174,6 +174,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
+      arvanBucketEndpoint: process.env.NUXT_PUBLIC_ARVAN_BUCKET_ENDPOINT,
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL,
       siteNameFa: process.env.NUXT_PUBLIC_SITE_NAME_FA,
       siteNameEn: process.env.NUXT_PUBLIC_SITE_NAME_EN,
@@ -213,8 +214,7 @@ export default defineNuxtConfig({
     imagekitPrivateKey: process.env.IMAGEKIT_PRIVATE_KEY,
 
     arvanEndpoint: process.env.ARVAN_ENDPOINT,
-    arvanBucketEndpoint: process.env.ARVAN_BUCKET_ENDPOINT,
-    arvanAccessKey: process.env.ARVAN_ACCESS_KEY, 
+    arvanAccessKey: process.env.ARVAN_ACCESS_KEY,
     arvanSecretKey: process.env.ARVAN_SECRET_KEY,
     arvanBucket: process.env.ARVAN_BUCKET,
   },

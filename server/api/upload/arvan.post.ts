@@ -1,6 +1,9 @@
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getContentType } from "~~/server/utils/common";
 
 export default defineEventHandler(async (event) => {
+  requireRole(event, "admin");
+
   const body = await readMultipartFormData(event);
   const config = useRuntimeConfig();
 
@@ -9,15 +12,17 @@ export default defineEventHandler(async (event) => {
     return { success: false, message: "فایلی دریافت نشد" };
   }
 
-  const fileName = fileItem.filename;
+  const fileName = fileItem?.filename;
 
   const key = `${fileName}-${Date.now()}`;
+  const contentType = getContentType(fileName);
 
   const uploadParams = {
     Bucket: config.arvanBucket,
     Key: key,
     Body: fileItem?.data,
     ACL: "public-read",
+    ContentType: contentType,
   };
 
   try {
@@ -25,7 +30,7 @@ export default defineEventHandler(async (event) => {
     return {
       success: true,
       key: key,
-      url: `${config.arvanBucketEndpoint}/${fileName}`,
+      url: `${config.public?.arvanBucketEndpoint}/${key}`,
     };
   } catch (err) {
     return { success: false, message: err?.message };
