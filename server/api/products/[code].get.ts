@@ -111,7 +111,8 @@ export default defineEventHandler(async (event) => {
 
     const mappedGallery = imageRows.map((img: any) => ({
       ...img,
-      url: buildAbsoluteUrl(img.url, siteUrl),
+      url: buildAbsoluteUrlArvan(img.url),
+      key: img.url,
     }));
 
     return {

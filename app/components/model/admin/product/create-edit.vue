@@ -191,9 +191,9 @@ watch(
 
     formState.images = [];
     (data.gallery || []).forEach((img: any) => {
-      if (img.url) {
+      if (img.key) {
         formState.images.push({
-          url: img.url,
+          url: img.key,
           alt_text: img.alt_text,
           position: img.position,
         });
@@ -217,11 +217,11 @@ watch(
       formState.images = [{ url: data.image || "", alt_text: "", position: 1 }];
     }
 
-    imageFiles.value = await Promise.all(
-      data.gallery.map(async (img) => {
-        return await urlToFile(img.url, "image");
-      })
-    );
+    // imageFiles.value = await Promise.all(
+    //   data.gallery.map(async (img) => {
+    //     return await urlToFile(img.url, "image");
+    //   })
+    // );
   },
   { immediate: true }
 );
@@ -663,11 +663,7 @@ const isSlugDisabled = computed(() => props.mode === "edit");
                   </div>
 
                   <div class="grid grid-cols-1 gap-3">
-                    <UFormField
-                      :name="`image-${idx}-url`"
-                      label="آدرس عکس"
-                      required
-                    >
+                    <!-- <UFormField>
                       <div class="relative">
                         <UFileUpload
                           v-model="imageFiles[idx]"
@@ -695,7 +691,25 @@ const isSlugDisabled = computed(() => props.mode === "edit");
                       >
                         آپلود شد
                       </p>
-                    </UFormField>
+                    </UFormField> -->
+
+                    <BaseUploader
+                      v-model:url="formState.images[idx].url"
+                      :filedAttrs="{
+                        name: `image-${idx}-url`,
+                        label: 'آدرس عکس',
+                        required: true,
+                      }"
+                      :file-attrs="{
+                        accept: 'image/*',
+                        maxFiles: 1,
+                        label: `عکس ${idx + 1}`,
+                        description:
+                          'عکس خود را با فرمت .avif و در حداقلی ترین حجم آپلود کنید',
+                        class: 'w-full min-h-48',
+                        interactive: true,
+                      }"
+                    />
 
                     <UFormField
                       :name="`image-${idx}-alt`"

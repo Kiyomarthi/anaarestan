@@ -23,6 +23,6 @@ const file = ref(null);
 
 <template>
   <div>
-    <BaseUploader v-model="file" />
+    <BaseUploader v-model="file" class="p-5 max-w-100" />
   </div>
 </template>

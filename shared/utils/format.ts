@@ -66,3 +66,11 @@ export const formatFileSize = (bytes: number) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 };
+
+export const buildAbsoluteUrlArvan = (key: string) => {
+  const config = useRuntimeConfig();
+
+  if (key.startsWith(config.public?.arvanBucketEndpoint)) return key;
+
+  return `${config.public?.arvanBucketEndpoint}/${key}`;
+};

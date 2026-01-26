@@ -5,7 +5,7 @@
   >
     <span
       class="loading"
-      :class="[sizeClasses, colorClasses, loaderClasses]"
+      :class="[sizeClasses, colorClasses, loaderClasses, props.class]"
     />
   </div>
 </template>
@@ -31,6 +31,7 @@ const props = defineProps({
     validator: (value) =>
       ["spinner", "dots", "ring", "ball", "bars"].includes(value),
   },
+  class: "",
 });
 
 const sizeClasses = computed(
