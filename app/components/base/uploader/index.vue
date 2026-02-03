@@ -183,7 +183,7 @@ const clear = () => {
     <UModal
       v-if="lgAndUp"
       v-model:open="galleryModal"
-      :ui="{ content: 'min-w-150 min-h-150 h-[90dvh] w-[90dvw] max-w-none' }"
+      :ui="{ content: 'min-w-150 min-h-100 h-[90dvh] w-[90dvw] max-w-none' }"
       title="گالری"
     >
       <template #body>
