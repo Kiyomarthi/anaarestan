@@ -14,7 +14,7 @@ const props = defineProps<{
 const router = useRouter();
 
 const wrapperClasses = computed(() =>
-  twMerge("bg-linear-to-l from-primary-50 to-white py-3", props.class)
+  twMerge("bg-linear-to-l from-primary-50 to-white py-3", props.class),
 );
 
 // Calculate end time (24 hours from now)
@@ -80,7 +80,7 @@ const wrapperClasses = computed(() =>
               variant="soft"
               icon=""
               :ui="{
-                base: 'borde border-primary lg:border-0 rounded-lg size-37.5 lg:size-62.5 h-fill flex justify-center items-center',
+                base: 'max-w-50 lg:border-0 rounded-lg size-37.5 lg:size-62.5 h-fill flex justify-center items-center',
               }"
               :to="moreLink"
             >

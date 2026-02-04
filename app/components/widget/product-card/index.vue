@@ -24,7 +24,7 @@ const props = withDefaults(
     class: "",
     showDiscount: true,
     imageColor: "bg-primary-300",
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -33,7 +33,7 @@ const emit = defineEmits<{
 
 const price = computed(() => Number(props.product.price));
 const discountPrice = computed(() =>
-  props.product.discount_price ? Number(props.product.discount_price) : null
+  props.product.discount_price ? Number(props.product.discount_price) : null,
 );
 
 const { lgAndUp } = useBreakpoints();
@@ -61,17 +61,17 @@ const formattedPrice = (value: number) => {
       :padding="false"
       :rounded="true"
     >
-      <div class="relative aspect-square overflow-hidden rounded-t-lg">
+      <div class="relative overflow-hidden rounded-t-lg">
         <BaseImage
-          src="https://anaarestan-image-upload.s3.ir-thr-at1.arvanstorage.ir/test.jpg"
+          :src="product?.image"
           :alt="product.title"
           class="transition-transform duration-300 group-hover:scale-105 h-full"
           :loading="'lazy'"
-          :width="lgAndUp ? 250 : '100%'"
-          :height="lgAndUp ? 250 : 150"
-          :image-class="`min-h-[150px] h-full w-full lg:max-w-[250px] lg:max-h-[250px]   object-cover ${imageColor}`"
+          :width="lgAndUp ? 150 : '100%'"
+          :height="150"
+          :image-class="`min-h-[150px] h-full w-full lg:max-h-[150px]   object-cover ${imageColor}`"
           fetch-priority="low"
-          sizes="(max-width:600px) 150px ,250px"
+          sizes="(max-width:600px) 150px"
         />
         <div
           v-if="showDiscount && discountPercent > 0"

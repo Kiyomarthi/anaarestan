@@ -1,5 +1,6 @@
 import { getDB } from "~~/server/db";
 import { buildAbsoluteUrl } from "~~/server/utils/common";
+import { getOptionalAuth } from "~~/server/utils/auth";
 
 export default defineEventHandler(async (event) => {
   const {
@@ -7,6 +8,7 @@ export default defineEventHandler(async (event) => {
   } = useRuntimeConfig();
 
   const code = getRouterParam(event, "code");
+  const auth = getOptionalAuth(event) as any | null;
 
   if (!code) {
     throw createError({
@@ -115,6 +117,29 @@ export default defineEventHandler(async (event) => {
       key: img.url,
     }));
 
+    // Ratings + comments count (approved only)
+    const [ratingRows] = (await db.query(
+      `SELECT avg_rating, rating_count FROM product_ratings WHERE product_id = ? LIMIT 1`,
+      [productId]
+    )) as any[];
+    const ratingInfo = ratingRows?.[0] || { avg_rating: 0.0, rating_count: 0 };
+
+    const [countRows] = (await db.query(
+      `SELECT COUNT(*) AS comments_count FROM comments WHERE product_id = ? AND status = 1`,
+      [productId]
+    )) as any[];
+    const comments_count = Number(countRows?.[0]?.comments_count || 0);
+
+    // is_favorite (only if authenticated)
+    let is_favorite = false;
+    if (auth?.id) {
+      const [favRows] = (await db.query(
+        `SELECT id FROM favorites WHERE user_id = ? AND product_id = ? LIMIT 1`,
+        [auth.id, productId]
+      )) as any[];
+      is_favorite = !!favRows?.length;
+    }
+
     return {
       success: true,
       data: {
@@ -130,6 +155,10 @@ export default defineEventHandler(async (event) => {
         // image: buildAbsoluteUrl(product.image, siteUrl),
         image: product.image,
         gallery: mappedGallery,
+        avg_rating: Number(ratingInfo.avg_rating || 0),
+        rating_count: Number(ratingInfo.rating_count || 0),
+        comments_count,
+        is_favorite,
       },
     };
   } catch (error: any) {

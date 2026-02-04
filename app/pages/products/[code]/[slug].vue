@@ -53,7 +53,7 @@ if (data.value?.data?.slug !== route.params?.slug)
     {
       redirectCode: 301,
       replace: true,
-    }
+    },
   );
 
 ///// computed /////
@@ -87,7 +87,7 @@ const share = async () => {
           <div class="col-span-2 -mx-4 lg:mx-0">
             <BaseCursorTooltip v-if="lgAndUp">
               <WidgetSliderProduct
-                :items="20"
+                :items="data?.data?.gallery"
                 class="max-h-100 lg:max-h-none"
               />
               <template #content>

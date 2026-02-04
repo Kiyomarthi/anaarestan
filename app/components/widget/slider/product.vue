@@ -6,7 +6,7 @@ import { randomColor } from "~/constants/common";
 
 ///// props/emits /////
 defineProps<{
-  items: unknown[];
+  items: { url: string; alt_text: string; alt: string; image: string }[];
   noTimeline?: boolean;
 }>();
 
@@ -32,7 +32,6 @@ function onSelect(index: number) {
 
 function select(index: number) {
   activeIndex.value = index;
-
   galleryCarouselTimeline.value?.emblaApi?.scrollTo(index);
   galleryCarousel.value?.emblaApi?.scrollTo(index);
   carouselTimeline.value?.emblaApi?.scrollTo(index);
@@ -63,7 +62,7 @@ watch(
     } else {
       modal.value = false;
     }
-  }
+  },
 );
 
 ///// lifecycle /////
@@ -90,10 +89,10 @@ watch(
       @select="select($event)"
     >
       <baseImage
-        :src="index % 2 ? '/tmp/slider.avif' : '/tmp/product.jpg'"
+        :src="item?.url ?? item?.image"
         image-class="max-h-[300px] lg:max-h-[400px] object-contain aspect-auto"
         class="aspect-auto"
-        alt="slider-item"
+        :alt="item?.alt_text ?? item?.alt"
         :height="400"
         width="300px"
         sizes="200px"
@@ -118,16 +117,13 @@ watch(
         }"
       >
         <baseImage
-          :src="index % 2 ? '/tmp/slider.avif' : '/tmp/product.jpg'"
+          :src="item?.url ?? item?.image"
           image-class="size-12 object-cover aspect-square"
           class="aspect-square rounded-md overflow-hidden"
-          alt="slider-item"
+          :alt="item?.alt_text ?? item?.alt"
           :height="48"
           width="48px"
           sizes="48px"
-          :preload="index == 0"
-          :loading="index == 0 ? 'eager' : 'lazy'"
-          :fetch-priority="index == 0 ? 'high' : 'low'"
           @click="showGallery"
         />
       </UCarousel>
@@ -177,11 +173,9 @@ watch(
                 @select="select($event)"
               >
                 <nuxt-img
-                  :src="index % 2 ? '/tmp/slider.avif' : '/tmp/product.jpg'"
+                  :src="item?.url ?? item?.image"
                   class="object-contain aspect-auto w-[90dvw] h-[70dvh] sm:size-20 lg:w-[50dvw] lg:h-[70dvh]"
-                  alt="slider-item"
-                  :loading="index == 0 ? 'eager' : 'lazy'"
-                  :fetch-priority="index == 0 ? 'high' : 'low'"
+                  :alt="item?.alt_text ?? item?.alt"
                 />
               </UCarousel>
             </div>
@@ -198,7 +192,7 @@ watch(
               :ui="{
                 prev: 'sm:start-10 lg:-start-10',
                 next: 'sm:end-10 lg:-end-10',
-                item: 'basis-auto with-transition ps-1',
+                item: 'basis-auto with-transition',
               }"
             >
               <div
@@ -210,10 +204,10 @@ watch(
                 "
               >
                 <BaseImage
-                  :src="index % 2 ? '/tmp/slider.avif' : '/tmp/product.jpg'"
+                  :src="item?.url ?? item?.image"
+                  :alt="item?.alt_text ?? item?.alt"
                   image-class="size-18 object-cover aspect-square"
                   class="aspect-square rounded-md overflow-hidden with-transition"
-                  alt="slider-item"
                   loading="lazy"
                   sizes="72px"
                   fetch-priority="low"

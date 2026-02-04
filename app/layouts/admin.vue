@@ -44,6 +44,14 @@ const items: NavigationMenuItem[][] = [
           to: "/admin/products",
         },
         {
+          label: "نظرات و امتیازها",
+          to: "/admin/comments",
+        },
+        {
+          label: "علاقه‌مندی‌ها",
+          to: "/admin/favorites",
+        },
+        {
           label: "دسته بندی‌ها",
           to: "/admin/categories",
         },
