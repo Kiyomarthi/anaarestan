@@ -48,6 +48,10 @@ const items: NavigationMenuItem[][] = [
           to: "/admin/comments",
         },
         {
+          label: "سبد خرید",
+          to: "/admin/carts",
+        },
+        {
           label: "علاقه‌مندی‌ها",
           to: "/admin/favorites",
         },

@@ -16,14 +16,14 @@ const code = computed(() => route.params.code as string);
 const { fetch: sendRequest, loading } = useApiRequest();
 const activeTab = ref<"edit" | "comments" | "favorites">("edit");
 const tabs = [
-  { label: "ویرایش", value: "edit" },
-  { label: "نظرات", value: "comments" },
-  { label: "علاقه‌مندی‌ها", value: "favorites" },
+  { label: "ویرایش", value: "edit", slot: "edit" },
+  { label: "نظرات", value: "comments", slot: "comments" },
+  { label: "علاقه‌مندی‌ها", value: "favorites", slot: "favorites" },
 ];
 
 const { data: productRes, pending: productPending } = useApiFetch<any>(
   computed(() => `/api/products/${code.value}`),
-  { cacheKey: computed(() => `product-${code.value}`) }
+  { cacheKey: computed(() => `product-${code.value}`) },
 );
 const userStore = useUserStore();
 const token = userStore.token;
@@ -74,126 +74,130 @@ const handleSubmit = async (payload: any) => {
 
 <template>
   <div class="md:p-4 space-y-4">
-    <UTabs v-model="activeTab" :items="tabs" />
+    <UTabs v-model="activeTab" :items="tabs">
+      <template #edit>
+        <ModelAdminProductCreateEdit
+          mode="edit"
+          :name="productRes?.data?.title"
+          :product-code="code"
+          :initial-data="productRes"
+          :product-pending="productPending"
+          :saving="loading"
+          @submit="handleSubmit"
+        />
+      </template>
 
-    <div v-if="activeTab === 'edit'">
-      <ModelAdminProductCreateEdit
-        mode="edit"
-        :name="productRes?.data?.title"
-        :product-code="code"
-        :initial-data="productRes"
-        :product-pending="productPending"
-        :saving="loading"
-        @submit="handleSubmit"
-      />
-    </div>
-
-    <div v-else-if="activeTab === 'comments'">
-      <UCard>
-        <div class="flex items-center justify-between mb-3">
-          <div class="font-medium">نظرات این محصول</div>
-          <div class="flex items-center gap-2">
-            <UButton
-              icon="i-lucide-plus"
-              size="xs"
-              color="primary"
-              variant="solid"
-              @click="router.push(`/admin/comments/create?product_code=${code}`)"
-            >
-              ایجاد نظر
-            </UButton>
-            <UButton
-              icon="i-lucide-refresh-cw"
-              size="xs"
-              variant="outline"
-              :loading="productCommentsPending"
-              @click="refreshProductComments"
-            >
-              تازه سازی
-            </UButton>
+      <template #comments>
+        <UCard>
+          <div class="flex items-center justify-between mb-3">
+            <div class="font-medium">نظرات این محصول</div>
+            <div class="flex items-center gap-2">
+              <UButton
+                icon="i-lucide-plus"
+                size="xs"
+                color="primary"
+                variant="solid"
+                @click="
+                  router.push(`/admin/comments/create?product_code=${code}`)
+                "
+              >
+                ایجاد نظر
+              </UButton>
+              <UButton
+                icon="i-lucide-refresh-cw"
+                size="xs"
+                variant="outline"
+                :loading="productCommentsPending"
+                @click="refreshProductComments"
+              >
+                تازه سازی
+              </UButton>
+            </div>
           </div>
-        </div>
 
-        <UTable
-          :data="productCommentsRes?.data || []"
-          :loading="productCommentsPending"
-          :columns="[
-            { accessorKey: 'id', header: 'ID' },
-            { accessorKey: 'user_full_name', header: 'کاربر' },
-            { accessorKey: 'rating', header: 'امتیاز' },
-            { accessorKey: 'status', header: 'وضعیت' },
-            { accessorKey: 'created_at', header: 'تاریخ' },
-            { accessorKey: 'edit', header: 'ویرایش' },
-          ]"
-          empty-state-icon="i-lucide-message-circle-off"
-          empty-state-title="نظری یافت نشد"
-        >
-          <template #edit-cell="{ row }">
-            <UButton
-              size="xs"
-              color="warning"
-              variant="ghost"
-              icon="i-lucide-pencil"
-              @click="router.push(`/admin/comments/${row.original.id}`)"
-            >
-              ویرایش
-            </UButton>
-          </template>
-        </UTable>
-      </UCard>
-    </div>
+          <UTable
+            :data="productCommentsRes?.data || []"
+            :loading="productCommentsPending"
+            :columns="[
+              { accessorKey: 'id', header: 'ID' },
+              { accessorKey: 'user_full_name', header: 'کاربر' },
+              { accessorKey: 'rating', header: 'امتیاز' },
+              { accessorKey: 'status', header: 'وضعیت' },
+              { accessorKey: 'created_at', header: 'تاریخ' },
+              { accessorKey: 'edit', header: 'ویرایش' },
+            ]"
+            empty-state-icon="i-lucide-message-circle-off"
+            empty-state-title="نظری یافت نشد"
+          >
+            <template #edit-cell="{ row }">
+              <UButton
+                size="xs"
+                color="warning"
+                variant="ghost"
+                icon="i-lucide-pencil"
+                @click="router.push(`/admin/comments/${row.original.id}`)"
+              >
+                ویرایش
+              </UButton>
+            </template>
+          </UTable>
+        </UCard>
+      </template>
 
-    <div v-else>
-      <UCard>
-        <div class="flex items-center justify-between mb-3">
-          <div class="font-medium">افرادی که این محصول را پسندیده‌اند</div>
-          <div class="flex items-center gap-2">
-            <UButton
-              icon="i-lucide-plus"
-              size="xs"
-              color="primary"
-              variant="solid"
-              @click="router.push(`/admin/favorites/create?product_id=${productId}`)"
-            >
-              ایجاد علاقه‌مندی
-            </UButton>
-            <UButton
-              icon="i-lucide-refresh-cw"
-              size="xs"
-              variant="outline"
-              :loading="productFavoritesPending"
-              @click="refreshProductFavorites"
-            >
-              تازه سازی
-            </UButton>
+      <template #favorites>
+        <UCard>
+          <div class="flex items-center justify-between mb-3">
+            <div class="font-medium">افرادی که این محصول را پسندیده‌اند</div>
+            <div class="flex items-center gap-2">
+              <UButton
+                icon="i-lucide-plus"
+                size="xs"
+                color="primary"
+                variant="solid"
+                @click="
+                  router.push(`/admin/favorites/create?product_id=${productId}`)
+                "
+              >
+                ایجاد علاقه‌مندی
+              </UButton>
+              <UButton
+                icon="i-lucide-refresh-cw"
+                size="xs"
+                variant="outline"
+                :loading="productFavoritesPending"
+                @click="refreshProductFavorites"
+              >
+                تازه سازی
+              </UButton>
+            </div>
           </div>
-        </div>
 
-        <UTable
-          :data="productFavoritesRes?.data || []"
-          :loading="productFavoritesPending"
-          :columns="[
-            { accessorKey: 'id', header: 'ID' },
-            { accessorKey: 'user_full_name', header: 'کاربر' },
-            { accessorKey: 'created_at', header: 'تاریخ' },
-            { accessorKey: 'edit', header: 'ویرایش' },
-          ]"
-          empty-state-icon="i-lucide-heart-off"
-          empty-state-title="موردی یافت نشد"
-        >
-          <template #edit-cell="{ row }">
-            <UButton
-              size="xs"
-              color="warning"
-              variant="ghost"
-              icon="i-lucide-pencil"
-              @click="router.push(`/admin/favorites/${row.original.id}`)"
-            >
-              ویرایش
-            </UButton>
-          </template>
-        </UTable>
-      </UCard>
-    </div>
+          <UTable
+            :data="productFavoritesRes?.data || []"
+            :loading="productFavoritesPending"
+            :columns="[
+              { accessorKey: 'id', header: 'ID' },
+              { accessorKey: 'user_full_name', header: 'کاربر' },
+              { accessorKey: 'created_at', header: 'تاریخ' },
+              { accessorKey: 'edit', header: 'ویرایش' },
+            ]"
+            empty-state-icon="i-lucide-heart-off"
+            empty-state-title="موردی یافت نشد"
+          >
+            <template #edit-cell="{ row }">
+              <UButton
+                size="xs"
+                color="warning"
+                variant="ghost"
+                icon="i-lucide-pencil"
+                @click="router.push(`/admin/favorites/${row.original.id}`)"
+              >
+                ویرایش
+              </UButton>
+            </template>
+          </UTable>
+        </UCard>
+      </template>
+    </UTabs>
   </div>
 </template>

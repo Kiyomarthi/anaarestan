@@ -1,3 +1,4 @@
+import { header } from "#build/ui";
 import type { FetchOptions } from "ofetch";
 
 type Method =
@@ -28,17 +29,25 @@ export function useApiRequest<TResponse = any>() {
   const loading = ref(false);
   const response = ref<TResponse | null>(null);
   const error = ref<any>(null);
+  const userStore = useUserStore();
+  const token = userStore.token;
 
   const fetch = async (
     url: string,
-    options: ApiRequestOptions = {}
+    options: ApiRequestOptions = {},
   ): Promise<TResponse> => {
     const { errorTitle, errorDescription, ...fetchOptions } = options;
     loading.value = true;
     error.value = null;
 
     try {
-      const result = await $fetch<any>(url, fetchOptions as any);
+      const result = await $fetch<any>(url, {
+        ...fetchOptions,
+        headers: {
+          ...fetchOptions.headers,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      } as any);
       response.value = result as TResponse;
       return result as TResponse;
     } catch (err: any) {
@@ -61,4 +70,4 @@ export function useApiRequest<TResponse = any>() {
   };
 
   return { loading, response, error, fetch };
-} 
+}

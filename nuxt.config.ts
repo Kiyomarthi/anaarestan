@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     "@nuxt/hints",
     "@vite-pwa/nuxt",
     "nuxt-schema-org",
+    "nuxt-cron",
   ],
 
   routeRules: {
@@ -86,6 +87,12 @@ export default defineNuxtConfig({
     //     provider: "none",
     //   },
     // },
+  },
+
+  cron: {
+    runOnInit: true,
+    timeZone: "Asia/Tehran",
+    jobsDir: "cron",
   },
 
   app: {

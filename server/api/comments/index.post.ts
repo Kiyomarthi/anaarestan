@@ -56,6 +56,10 @@ export default defineEventHandler(async (event) => {
       [productId, targetUserId, rating, comment, status],
     )) as any[];
 
+    if (status == 1) {
+      await recalculateProductRatings(db as any, productId);
+    }
+
     return {
       success: true,
       message: "نظر شما ثبت شد و پس از بررسی نمایش داده می‌شود",

@@ -6,7 +6,6 @@ export default defineEventHandler(async (event) => {
 
   const config = useRuntimeConfig();
   const imagekitPrivateKey = config.imagekitPrivateKey;
-  console.log("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk", imagekitPrivateKey);
 
   if (!imagekitPrivateKey) {
     throw createError({

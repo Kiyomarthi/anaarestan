@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
        FROM products p
        LEFT JOIN categories c ON c.id = p.category_id
        WHERE p.code = ?`,
-      [code]
+      [code],
     )) as any[];
 
     if (!productRows || productRows.length === 0) {
@@ -52,6 +52,35 @@ export default defineEventHandler(async (event) => {
         }
       : null;
 
+    // Build full breadcrumbs path based on category hierarchy
+    let breadcrumbs: { title: string; slug: string; code: string }[] = [];
+
+    if (category?.id) {
+      const [categoryRows] = (await db.query(
+        `SELECT id, name, slug, parent_id FROM categories`,
+      )) as any[];
+
+      const categoryMap = new Map<number, any>();
+      categoryRows.forEach((row: any) => {
+        categoryMap.set(row.id, row);
+      });
+
+      const chain: { title: string; slug: string; code: string }[] = [];
+      let currentId: number | null = category.id;
+
+      while (currentId && categoryMap.has(currentId)) {
+        const cat = categoryMap.get(currentId);
+        chain.push({
+          title: cat.name,
+          slug: cat.slug,
+          code: product.code,
+        });
+        currentId = cat.parent_id ?? null;
+      }
+
+      breadcrumbs = chain.reverse();
+    }
+
     // Remove category fields from product object
     delete product.category_id_full;
     delete product.category_name;
@@ -69,13 +98,13 @@ export default defineEventHandler(async (event) => {
        JOIN attribute_values av ON av.id = pav.attribute_value_id
        JOIN attributes a ON a.id = av.attribute_id
        WHERE pav.product_id = ?`,
-      [productId]
+      [productId],
     )) as any[];
 
     // Fetch variants with their attributes
     const [variantRows] = (await db.query(
       `SELECT * FROM product_variants WHERE product_id = ? ORDER BY id ASC`,
-      [productId]
+      [productId],
     )) as any[];
 
     const variantsWithAttrs = await Promise.all(
@@ -90,7 +119,7 @@ export default defineEventHandler(async (event) => {
            JOIN attribute_values av ON av.id = vav.attribute_value_id
            JOIN attributes a ON a.id = av.attribute_id
            WHERE vav.variant_id = ?`,
-          [variant.id]
+          [variant.id],
         )) as any[];
 
         return {
@@ -102,13 +131,13 @@ export default defineEventHandler(async (event) => {
             value: row.value,
           })),
         };
-      })
+      }),
     );
 
     // Fetch images
     const [imageRows] = (await db.query(
       `SELECT * FROM product_images WHERE product_id = ? ORDER BY position ASC`,
-      [productId]
+      [productId],
     )) as any[];
 
     const mappedGallery = imageRows.map((img: any) => ({
@@ -120,13 +149,13 @@ export default defineEventHandler(async (event) => {
     // Ratings + comments count (approved only)
     const [ratingRows] = (await db.query(
       `SELECT avg_rating, rating_count FROM product_ratings WHERE product_id = ? LIMIT 1`,
-      [productId]
+      [productId],
     )) as any[];
     const ratingInfo = ratingRows?.[0] || { avg_rating: 0.0, rating_count: 0 };
 
     const [countRows] = (await db.query(
       `SELECT COUNT(*) AS comments_count FROM comments WHERE product_id = ? AND status = 1`,
-      [productId]
+      [productId],
     )) as any[];
     const comments_count = Number(countRows?.[0]?.comments_count || 0);
 
@@ -135,7 +164,7 @@ export default defineEventHandler(async (event) => {
     if (auth?.id) {
       const [favRows] = (await db.query(
         `SELECT id FROM favorites WHERE user_id = ? AND product_id = ? LIMIT 1`,
-        [auth.id, productId]
+        [auth.id, productId],
       )) as any[];
       is_favorite = !!favRows?.length;
     }
@@ -145,6 +174,7 @@ export default defineEventHandler(async (event) => {
       data: {
         ...product,
         category: category,
+        breadcrumbs,
         products_attribute: productAttrRows.map((row: any) => ({
           id: row.id,
           attribute_id: row.attribute_id,
