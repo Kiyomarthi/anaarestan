@@ -1,5 +1,5 @@
 type UserPayload = Record<string, any>;
-const TTL_MS = 48 * 60 * 60 * 1000; // 48 hours
+const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const useUserStore = defineStore(
   "user",
@@ -8,17 +8,20 @@ export const useUserStore = defineStore(
     const createdAt = ref<number | null>(null);
 
     const token = computed<string | null>(() => {
-      const tokenCookie = useCookie<string | null>("auth_token", {
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
-      });
-      return tokenCookie.value ?? null;
+      const tokenCookie = useCookie<string | null>("auth_token");
+      return tokenCookie.value;
     });
 
     const isExpired = computed(
-      () => !!createdAt.value && Date.now() - createdAt.value > TTL_MS
+      () => !!createdAt.value && Date.now() - createdAt.value > TTL_MS,
     );
+
+    function logOut() {
+      const tokenCookie = useCookie<string | null>("auth_token");
+      tokenCookie.value = null;
+      user.value = null;
+      createdAt.value = null;
+    }
 
     const isLoggedIn = computed(() => {
       if (createdAt.value && Date.now() - createdAt.value > TTL_MS) {
@@ -27,11 +30,14 @@ export const useUserStore = defineStore(
         });
         return false;
       }
-      return Boolean(token.value) && !isExpired.value;
+
+      const tokenCookie = useCookie<string | null>("auth_token");
+
+      return Boolean(tokenCookie.value) && !isExpired.value;
     });
 
     const isAdmin = computed(
-      () => isLoggedIn.value && user.value?.role === "admin"
+      () => isLoggedIn.value && user.value?.role === "admin",
     );
 
     function setUser(userData: UserPayload | null) {
@@ -40,11 +46,7 @@ export const useUserStore = defineStore(
     }
 
     function setAuth(newToken: string | null, userData?: UserPayload | null) {
-      const tokenCookie = useCookie<string | null>("auth_token", {
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
-      });
+      const tokenCookie = useCookie<string | null>("auth_token");
       tokenCookie.value = newToken;
       if (userData !== undefined) {
         setUser(userData);
@@ -64,7 +66,7 @@ export const useUserStore = defineStore(
             headers: {
               Authorization: `Bearer ${token.value}`,
             },
-          }
+          },
         );
 
         setUser(result?.user ?? null);
@@ -73,17 +75,6 @@ export const useUserStore = defineStore(
         logOut();
         return null;
       }
-    }
-
-    function logOut() {
-      const tokenCookie = useCookie<string | null>("auth_token", {
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
-        path: "/",
-      });
-      tokenCookie.value = null;
-      user.value = null;
-      createdAt.value = null;
     }
 
     return {
@@ -106,5 +97,5 @@ export const useUserStore = defineStore(
       paths: ["user", "createdAt"],
       encrypt: true,
     },
-  }
+  },
 );

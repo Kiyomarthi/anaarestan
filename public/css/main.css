@@ -2,8 +2,9 @@
 @import "@nuxt/ui";
 
 @theme {
-  --font-sans: YekanBakh, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans Arabic", "Noto Sans", sans-serif;
+  --font-sans:
+    YekanBakh, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans Arabic", "Noto Sans", sans-serif;
 
   /* Gray Colors */
   --color-gray-50: #f9fafb;
@@ -122,11 +123,11 @@
 }
 
 .text-h1 {
-  @apply text-xl font-bold md:text-3xl lg:text-3xl;
+  @apply text-xl font-bold md:text-2xl lg:text-3xl;
 }
 
 .text-h2 {
-  @apply text-xl font-bold md:text-2xl lg:text-3xl;
+  @apply text-xl font-bold md:text-2xl;
 }
 .text-h3 {
   @apply text-lg font-bold md:text-xl lg:text-2xl;

@@ -39,6 +39,7 @@
   "packageManager": "pnpm@10.28.2",
   "devDependencies": {
     "@iconify-json/lucide": "^1.2.80",
+    "@iconify-json/ph": "^1.2.2",
     "@nuxt/eslint": "^1.11.0",
     "@nuxt/hints": "1.0.0-alpha.3",
     "@nuxt/scripts": "^0.13.0",
