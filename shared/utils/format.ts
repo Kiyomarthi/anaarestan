@@ -5,16 +5,16 @@ export async function urlToFile(url: string, filename: string) {
   return new File([blob], `${filename}.${ext}`, { type: blob.type });
 }
 
-export function formatPrice(number: number | string): string | null {
-  if (!number) return null;
-  const num = typeof number === "string" ? parseFloat(number) : number;
+// export function formatPrice(number: number | string): string | null {
+//   if (!number) return null;
+//   const num = typeof number === "string" ? parseFloat(number) : number;
 
-  if (isNaN(num)) return "0";
+//   if (isNaN(num)) return "0";
 
-  return num.toLocaleString("en-US");
-}
+//   return num.toLocaleString("en-US");
+// }
 
-export function formatNumber(number: number | string): string {
+export function formatPrice(number: number | string): string {
   if (number === null || number === undefined) return "0";
   const num = typeof number === "string" ? parseFloat(number) : number;
   if (isNaN(num)) return "0";
@@ -74,3 +74,19 @@ export const buildAbsoluteUrlArvan = (key: string) => {
 
   return `${config.public?.arvanBucketEndpoint}/${key}`;
 };
+
+export function calculatePrice(price: number, discountPrice?: number | null) {
+  const originalPrice = Number(price);
+  const finalPrice = discountPrice ? Number(discountPrice) : originalPrice;
+
+  const discountPercent = discountPrice
+    ? Math.round(((originalPrice - finalPrice) / originalPrice) * 100)
+    : 0;
+
+  return {
+    originalPrice,
+    finalPrice,
+    discountPercent,
+    hasDiscount: !!discountPrice,
+  };
+}

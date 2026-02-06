@@ -69,31 +69,34 @@ const handleInput = (event: Event) => {
 </script>
 
 <template>
-  <div class="flex items-center gap-2">
+  <div class="flex items-center border border-primary p-1 rounded-md gap-0.5">
     <UButton
       :disabled="!canDecrease"
       :size="size"
-      variant="outline"
-      icon="i-lucide-minus"
+      variant="ghost"
+      :icon="modelValue > 1 ? 'i-lucide-minus' : 'i-lucide-trash'"
+      :ui="{
+        base: 'size-8',
+      }"
       @click="decrease"
     />
-    <input
-      :value="modelValue"
-      :disabled="disabled"
-      type="number"
-      :min="min"
-      :max="max"
-      class="w-16 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-      :class="sizeClasses"
-      @input="handleInput"
-    />
+    <div
+      class="size-8 text-center rounded-md disabled:cursor-not-allowed flex items-center justify-center"
+    >
+      <span v-if="!disabled">
+        {{ modelValue }}
+      </span>
+      <BaseLoader v-else />
+    </div>
     <UButton
       :disabled="!canIncrease"
       :size="size"
-      variant="outline"
+      variant="ghost"
       icon="i-lucide-plus"
+      :ui="{
+        base: 'size-8',
+      }"
       @click="increase"
     />
   </div>
 </template>
-

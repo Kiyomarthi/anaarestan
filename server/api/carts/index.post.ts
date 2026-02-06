@@ -7,7 +7,7 @@ import { createError } from "h3";
 /**
  * POST /api/carts
  * Body: { user_id?, status?, items? }
- * items: [{ product_id, quantity, price }]
+ * items: [{ product_id, product_variant_id?, quantity, price }]
  * - auth optional; if logged in, user_id is set
  * - admin can set user_id and status
  */
@@ -54,6 +54,21 @@ export default defineEventHandler(async (event) => {
     } else if (Number(item?.price) < 0) {
       itemErrors[`items.${i}.price`] = "قیمت نامعتبر است";
     }
+
+    if (
+      item?.product_variant_id !== undefined &&
+      item?.product_variant_id !== null &&
+      item?.product_variant_id !== ""
+    ) {
+      const variantCheck = validate(item?.product_variant_id).run();
+      if (variantCheck !== true) {
+        itemErrors[`items.${i}.product_variant_id`] =
+          (variantCheck as string) || "شناسه تنوع نامعتبر است";
+      } else if (Number.isNaN(Number(item?.product_variant_id))) {
+        itemErrors[`items.${i}.product_variant_id`] =
+          "شناسه تنوع محصول نامعتبر است";
+      }
+    }
   });
 
   if (Object.keys(itemErrors).length > 0) {
@@ -79,7 +94,7 @@ export default defineEventHandler(async (event) => {
 
   if (items.length > 0) {
     const productIds = Array.from(
-      new Set(items.map((item: any) => Number(item.product_id)))
+      new Set(items.map((item: any) => Number(item.product_id))),
     ).filter((id) => !Number.isNaN(id));
 
     if (productIds.length > 0) {
@@ -100,13 +115,26 @@ export default defineEventHandler(async (event) => {
     }
 
     for (const item of items) {
+      const productVariantId =
+        item.product_variant_id === undefined ||
+        item.product_variant_id === null ||
+        item.product_variant_id === ""
+          ? null
+          : Number(item.product_variant_id);
+
       await db.query(
-        `INSERT INTO cart_items (cart_id, product_id, quantity, price, created_at)
-         VALUES (?, ?, ?, ?, NOW())
+        `INSERT INTO cart_items (cart_id, product_id, product_variant_id, quantity, price, created_at)
+         VALUES (?, ?, ?, ?, ?, NOW())
          ON DUPLICATE KEY UPDATE
            quantity = quantity + VALUES(quantity),
            price = VALUES(price)`,
-        [cartId, Number(item.product_id), Number(item.quantity), item.price]
+        [
+          cartId,
+          Number(item.product_id),
+          productVariantId,
+          Number(item.quantity),
+          item.price,
+        ],
       );
     }
   }

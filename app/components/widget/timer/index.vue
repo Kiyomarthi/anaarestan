@@ -48,7 +48,7 @@ onMounted(() => {
   });
 });
 
-const formatNumber = (num: number) => String(num).padStart(2, "0");
+const formatPrice = (num: number) => String(num).padStart(2, "0");
 </script>
 
 <template>
@@ -56,14 +56,14 @@ const formatNumber = (num: number) => String(num).padStart(2, "0");
     <div
       class="flex flex-col size-12 justify-center items-center bg-primary-500 text-white rounded aspect-square"
     >
-      <span class="text-sm font-bold">{{ formatNumber(timeLeft.days) }}</span>
+      <span class="text-sm font-bold">{{ formatPrice(timeLeft.days) }}</span>
       <span class="text-xs">روز</span>
     </div>
     <span class="text-primary-500 font-bold">:</span>
     <div
       class="flex flex-col size-12 justify-center items-center bg-primary-500 text-white rounded aspect-square"
     >
-      <span class="text-sm font-bold">{{ formatNumber(timeLeft.hours) }}</span>
+      <span class="text-sm font-bold">{{ formatPrice(timeLeft.hours) }}</span>
       <span class="text-xs">ساعت</span>
     </div>
     <span class="text-primary-500 font-bold">:</span>
@@ -71,7 +71,7 @@ const formatNumber = (num: number) => String(num).padStart(2, "0");
       class="flex flex-col size-12 justify-center items-center bg-primary-500 text-white rounded aspect-square"
     >
       <span class="text-sm font-bold">{{
-        formatNumber(timeLeft.minutes)
+        formatPrice(timeLeft.minutes)
       }}</span>
       <span class="text-xs">دقیقه</span>
     </div>
@@ -80,7 +80,7 @@ const formatNumber = (num: number) => String(num).padStart(2, "0");
       class="flex flex-col size-12 justify-center items-center bg-primary-500 text-white rounded aspect-square"
     >
       <span class="text-sm font-bold">{{
-        formatNumber(timeLeft.seconds)
+        formatPrice(timeLeft.seconds)
       }}</span>
       <span class="text-xs">ثانیه</span>
     </div>

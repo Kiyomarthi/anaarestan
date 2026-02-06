@@ -51,6 +51,7 @@ export default defineEventHandler(async (event) => {
   validateBody(body, {
     cart_id: (v) => validate(v).run(),
     product_id: (v) => validate(v).run(),
+    product_variant_id: (v) => validate(v).run(),
     quantity: (v) => validate(v).run(),
     price: (v) => validate(v).run(),
   });
@@ -91,6 +92,23 @@ export default defineEventHandler(async (event) => {
     }
     sets.push("product_id = ?");
     params.push(Number(body.product_id));
+  }
+
+  if (isAdmin && body.product_variant_id !== undefined) {
+    const productVariantId =
+      body.product_variant_id === null || body.product_variant_id === ""
+        ? null
+        : Number(body.product_variant_id);
+
+    if (productVariantId !== null && Number.isNaN(productVariantId)) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "شناسه تنوع محصول نامعتبر است",
+      });
+    }
+
+    sets.push("product_variant_id = ?");
+    params.push(productVariantId);
   }
 
   if (body.quantity !== undefined) {

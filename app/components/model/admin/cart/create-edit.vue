@@ -33,6 +33,7 @@ const items = ref<any[]>([]);
 
 const itemForm = reactive({
   product_id: null as number | null,
+  product_variant_id: null as number | null,
   quantity: 1,
   price: 0,
 });
@@ -203,6 +204,7 @@ const itemsTotal = computed(() =>
 
 const resetItemForm = () => {
   itemForm.product_id = null;
+  itemForm.product_variant_id = null;
   itemForm.quantity = 1;
   itemForm.price = 0;
 };
@@ -222,7 +224,10 @@ const addItemToList = () => {
   }
 
   const existing = items.value.find(
-    (i) => Number(i.product_id) === Number(itemForm.product_id),
+    (i) =>
+      Number(i.product_id) === Number(itemForm.product_id) &&
+      Number(i.product_variant_id || 0) ===
+        Number(itemForm.product_variant_id || 0),
   );
 
   if (existing) {
@@ -231,6 +236,9 @@ const addItemToList = () => {
   } else {
     items.value.push({
       product_id: Number(itemForm.product_id),
+      product_variant_id: itemForm.product_variant_id
+        ? Number(itemForm.product_variant_id)
+        : null,
       quantity: Number(itemForm.quantity),
       price: Number(itemForm.price),
     });
@@ -263,6 +271,9 @@ const addItemApi = async () => {
     body: {
       cart_id: cartId.value,
       product_id: Number(itemForm.product_id),
+      product_variant_id: itemForm.product_variant_id
+        ? Number(itemForm.product_variant_id)
+        : null,
       quantity: Number(itemForm.quantity),
       price: Number(itemForm.price),
     },
@@ -277,7 +288,10 @@ const addItemApi = async () => {
     items.value[existingIndex] = result.data;
   } else {
     const sameProductIndex = items.value.findIndex(
-      (i) => Number(i.product_id) === Number(result?.data?.product_id),
+      (i) =>
+        Number(i.product_id) === Number(result?.data?.product_id) &&
+        Number(i.product_variant_id || 0) ===
+          Number(result?.data?.product_variant_id || 0),
     );
     if (sameProductIndex >= 0) {
       items.value[sameProductIndex] = result.data;
@@ -352,6 +366,8 @@ const removeLocalItemByRow = (item: any) => {
   const index = items.value.findIndex(
     (i) =>
       Number(i.product_id) === Number(item.product_id) &&
+      Number(i.product_variant_id || 0) ===
+        Number(item.product_variant_id || 0) &&
       Number(i.quantity) === Number(item.quantity) &&
       Number(i.price) === Number(item.price),
   );
@@ -361,6 +377,7 @@ const removeLocalItemByRow = (item: any) => {
 const itemColumns = computed(() => [
   { accessorKey: "id", header: "ID" },
   { accessorKey: "product_id", header: "محصول" },
+  { accessorKey: "product_variant_id", header: "تنوع محصول" },
   { accessorKey: "quantity", header: "تعداد" },
   { accessorKey: "price", header: "قیمت" },
   { accessorKey: "created_at", header: "تاریخ" },
@@ -479,6 +496,15 @@ const statusOptions = [
                   </div>
                 </template>
               </USelectMenu>
+            </UFormField>
+
+            <UFormField label="شناسه تنوع محصول">
+              <UInput
+                v-model="itemForm.product_variant_id"
+                type="number"
+                min="1"
+                inputmode="numeric"
+              />
             </UFormField>
 
             <UFormField label="تعداد">

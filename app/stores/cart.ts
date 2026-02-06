@@ -4,6 +4,7 @@ export interface CartItem {
   id: number;
   cart_id: number;
   product_id: number;
+  product_variant_id?: number | null;
   quantity: number;
   price: string;
   created_at: string;
@@ -26,6 +27,7 @@ export const useCartStore = defineStore(
     const loading = ref(false);
     const userStore = useUserStore();
     const { fetch: apiFetch } = useApiRequest();
+    const toast = useToast();
 
     // Get or create cart ID from cookie
     const getCartId = (): number | null => {
@@ -37,8 +39,17 @@ export const useCartStore = defineStore(
       const cartIdCookie = useCookie<number | null>("cart_id", {
         maxAge: 60 * 60 * 24 * 2, // 2 days
       });
-      
+
       cartIdCookie.value = id;
+    };
+
+    const getCartItem = (variant_id: number, product_id: number) => {
+      if (!cart.value?.items?.length) return null;
+      return cart.value?.items?.find(
+        (item) =>
+          item?.product_variant_id == variant_id &&
+          item?.product_id == product_id,
+      );
     };
 
     // Initialize cart - fetch existing or create new
@@ -80,7 +91,6 @@ export const useCartStore = defineStore(
         }
 
         // Create new cart
-        await createCart();
       } catch (error) {
         console.error("Error initializing cart:", error);
       } finally {
@@ -110,7 +120,12 @@ export const useCartStore = defineStore(
 
     // Sync cart with user when user logs in
     const syncCartWithUser = async () => {
-      if (!userStore.isLoggedIn || !cart.value) return;
+      if (
+        !userStore.isLoggedIn ||
+        !cart.value ||
+        cart.value?.user_id == userStore.user?.id
+      )
+        return;
 
       try {
         await apiFetch<ApiResponse<Cart>>(`/api/carts/${cart.value.id}`, {
@@ -163,9 +178,14 @@ export const useCartStore = defineStore(
       productId: number,
       quantity: number,
       price: string,
+      productVariantId?: number | null,
     ) => {
       if (!cart.value) {
         await initializeCart();
+      }
+
+      if (!cart.value) {
+        await createCart();
       }
 
       if (!cart.value) {
@@ -173,6 +193,7 @@ export const useCartStore = defineStore(
       }
 
       loading.value = true;
+      quantity = quantity <= 0 ? 1 : quantity;
       try {
         const response = await apiFetch<ApiResponse<CartItem>>(
           "/api/cart-items",
@@ -181,6 +202,7 @@ export const useCartStore = defineStore(
             body: {
               cart_id: cart.value.id,
               product_id: productId,
+              product_variant_id: productVariantId ?? null,
               quantity,
               price,
             },
@@ -230,6 +252,12 @@ export const useCartStore = defineStore(
       try {
         await apiFetch(`/api/cart-items/${itemId}`, {
           method: "DELETE",
+        });
+
+        toast.add({
+          title: "موفق",
+          description: "محصول از سبد خرید شما حذف شد",
+          color: "success",
         });
 
         // Reload cart
@@ -291,6 +319,7 @@ export const useCartStore = defineStore(
       getProductQuantity,
       clearCart,
       syncCartWithUser,
+      getCartItem,
     };
   },
   {
@@ -302,4 +331,3 @@ export const useCartStore = defineStore(
     },
   },
 );
-

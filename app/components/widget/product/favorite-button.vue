@@ -14,6 +14,7 @@ const emit = defineEmits<{
 ///// refs /////
 const loading = ref(false);
 const isFavorite = ref(props.isFavorite || false);
+const toast = useToast();
 
 ///// composables/stores /////
 const userStore = useUserStore();
@@ -51,6 +52,11 @@ const toggleFavorite = async () => {
         });
         isFavorite.value = false;
         emit("update:isFavorite", false);
+
+        toast.add({
+          title: "محصول به از علاقه‌مندی‌های شما پاک شد",
+          color: "success",
+        });
       }
     } else {
       // Add to favorites
@@ -62,6 +68,11 @@ const toggleFavorite = async () => {
       });
       isFavorite.value = true;
       emit("update:isFavorite", true);
+
+      toast.add({
+        title: "محصول به علاقه‌مندی‌های شما اضافه شد",
+        color: "success",
+      });
     }
   } catch (error) {
     console.error("Error toggling favorite:", error);

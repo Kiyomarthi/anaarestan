@@ -37,9 +37,7 @@ export interface VariantGroup {
  * @param variants Array of variants with variant_attributes
  * @returns Array of variant groups, each containing variants with the same attribute_id
  */
-export function groupVariantsByAttribute(
-  variants: Variant[],
-): VariantGroup[] {
+export function groupVariantsByAttribute(variants: Variant[]): VariantGroup[] {
   if (!variants || variants.length === 0) {
     return [];
   }
@@ -48,7 +46,10 @@ export function groupVariantsByAttribute(
   const groupsMap = new Map<number, VariantGroup>();
 
   variants.forEach((variant) => {
-    if (!variant.variant_attributes || variant.variant_attributes.length === 0) {
+    if (
+      !variant.variant_attributes ||
+      variant.variant_attributes.length === 0
+    ) {
       return;
     }
 
@@ -100,7 +101,10 @@ export function findVariantByAttributes(
   }
 
   const found = variants.find((variant) => {
-    if (!variant.variant_attributes || variant.variant_attributes.length === 0) {
+    if (
+      !variant.variant_attributes ||
+      variant.variant_attributes.length === 0
+    ) {
       return false;
     }
 
@@ -118,6 +122,18 @@ export function findVariantByAttributes(
     return true;
   });
 
-  return found || null;
-}
+  if (found) return found || null;
 
+  const [firstAttributeId] = selectedAttributes.keys();
+  const [firstAttributeIdValue] = selectedAttributes.values();
+
+  const fallbackVariant = variants.find((variant) =>
+    variant.variant_attributes?.some(
+      (attr) =>
+        attr.attribute_id === firstAttributeId &&
+        attr.id === firstAttributeIdValue,
+    ),
+  );
+
+  return fallbackVariant || null;
+}

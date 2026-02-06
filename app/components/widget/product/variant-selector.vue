@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { VariantGroup, Variant } from "~~/shared/utils/variant";
-import { groupVariantsByAttribute, findVariantByAttributes } from "~~/shared/utils/variant";
+import {
+  groupVariantsByAttribute,
+  findVariantByAttributes,
+} from "~~/shared/utils/variant";
 
 ///// imports /////
 
@@ -48,8 +51,16 @@ const isVariantAvailable = (variant: Variant): boolean => {
 
 ///// functions /////
 const selectAttribute = (attributeId: number, valueId: number) => {
-  const newMap = new Map(selectedAttributes.value);
+  const newMap = new Map<number, number>();
+
   newMap.set(attributeId, valueId);
+
+  for (const [attrId, valId] of selectedAttributes.value.entries()) {
+    if (attrId !== attributeId) {
+      newMap.set(attrId, valId);
+    }
+  }
+
   selectedAttributes.value = newMap;
 
   const variant = findVariantByAttributes(props.variants, newMap);
@@ -124,6 +135,7 @@ onMounted(() => {
 
 <template>
   <div class="space-y-4">
+    <pre></pre>
     <div
       v-for="group in variantGroups"
       :key="group.attribute_id"
@@ -131,10 +143,7 @@ onMounted(() => {
     >
       <div class="flex items-center gap-2">
         <span class="font-medium text-gray-700">{{ group.name }}:</span>
-        <span
-          v-if="selectedVariant"
-          class="text-sm text-gray-600"
-        >
+        <span v-if="selectedVariant" class="text-sm text-gray-600">
           {{
             selectedVariant.variant_attributes.find(
               (a) => a.attribute_id === group.attribute_id,
@@ -146,11 +155,7 @@ onMounted(() => {
         <UButton
           v-for="value in group.values"
           :key="value.attribute.id"
-          :variant="
-            isAttributeSelected(group.attribute_id, value.attribute.id)
-              ? 'solid'
-              : 'outline'
-          "
+          variant="outline"
           :color="
             isAttributeSelected(group.attribute_id, value.attribute.id)
               ? 'primary'
@@ -158,6 +163,11 @@ onMounted(() => {
           "
           :disabled="!isVariantAvailable(value.variant)"
           size="sm"
+          :icon="
+            isAttributeSelected(group.attribute_id, value.attribute.id)
+              ? 'i-lucide-check'
+              : undefined
+          "
           @click="selectAttribute(group.attribute_id, value.attribute.id)"
         >
           {{ value.attribute.value }}
@@ -166,4 +176,3 @@ onMounted(() => {
     </div>
   </div>
 </template>
-

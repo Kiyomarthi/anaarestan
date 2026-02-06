@@ -35,7 +35,7 @@ const model = defineModel({
           از
           <div class="">
             <span class="font-bold text-2xl"
-              >{{ formatNumber(model.rangePrice?.[0]) }}
+              >{{ formatPrice(model.rangePrice?.[0]) }}
             </span>
             تومان
           </div>
@@ -44,7 +44,7 @@ const model = defineModel({
           تا
           <div>
             <span class="font-bold text-2xl">{{
-              formatNumber(model.rangePrice?.[1])
+              formatPrice(model.rangePrice?.[1])
             }}</span>
             تومان
           </div>

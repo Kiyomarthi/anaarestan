@@ -6,7 +6,7 @@ import { createError } from "h3";
 
 /**
  * POST /api/cart-items
- * Body: { cart_id, product_id, quantity, price }
+ * Body: { cart_id, product_id, product_variant_id?, quantity, price }
  * - auth optional; user can add to own cart
  * - if user logged in and cart has no user_id, attach it
  */
@@ -19,12 +19,17 @@ export default defineEventHandler(async (event) => {
   validateBody(body, {
     cart_id: (v) => validate(v).required().run(),
     product_id: (v) => validate(v).required().run(),
+    product_variant_id: (v) => validate(v).run(),
     quantity: (v) => validate(v).required().run(),
     price: (v) => validate(v).required().run(),
   });
 
   const cartId = Number(body.cart_id);
   const productId = Number(body.product_id);
+  const productVariantId =
+    body.product_variant_id === undefined || body.product_variant_id === null
+      ? null
+      : Number(body.product_variant_id);
   const quantity = Number(body.quantity);
   const price = Number(body.price);
 
@@ -32,7 +37,8 @@ export default defineEventHandler(async (event) => {
     Number.isNaN(cartId) ||
     Number.isNaN(productId) ||
     Number.isNaN(quantity) ||
-    Number.isNaN(price)
+    Number.isNaN(price) ||
+    (productVariantId !== null && Number.isNaN(productVariantId))
   ) {
     throw createError({
       statusCode: 400,
@@ -84,6 +90,21 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // Optional: validate product_variant_id belongs to this product
+  if (productVariantId !== null) {
+    const [variantRows] = (await db.query(
+      `SELECT id FROM product_variants WHERE id = ? AND product_id = ? LIMIT 1`,
+      [productVariantId, productId],
+    )) as any[];
+
+    if (!variantRows?.length) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: "تنوع محصول مورد نظر پیدا نشد",
+      });
+    }
+  }
+
   if (!isAdmin && auth?.id && !cart.user_id) {
     await db.query(`UPDATE carts SET user_id = ? WHERE id = ?`, [
       Number(auth.id),
@@ -92,17 +113,17 @@ export default defineEventHandler(async (event) => {
   }
 
   await db.query(
-    `INSERT INTO cart_items (cart_id, product_id, quantity, price, created_at)
-     VALUES (?, ?, ?, ?, NOW())
+    `INSERT INTO cart_items (cart_id, product_id, product_variant_id, quantity, price, created_at)
+     VALUES (?, ?, ?, ?, ?, NOW())
      ON DUPLICATE KEY UPDATE
-       quantity = quantity + VALUES(quantity),
+       quantity = VALUES(quantity),
        price = VALUES(price)`,
-    [cartId, productId, quantity, price]
+    [cartId, productId, productVariantId, quantity, price],
   );
 
   const [rows] = (await db.query(
-    `SELECT * FROM cart_items WHERE cart_id = ? AND product_id = ? LIMIT 1`,
-    [cartId, productId]
+    `SELECT * FROM cart_items WHERE cart_id = ? AND product_id = ? AND (product_variant_id <=> ?) LIMIT 1`,
+    [cartId, productId, productVariantId],
   )) as any[];
 
   return {

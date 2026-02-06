@@ -17,7 +17,7 @@ const router = useRouter();
 const route = useRoute();
 const selectedVariant = ref<Variant | null>(null);
 const selectedVariantId = ref<number | null>(null);
-const quantity = ref(1);
+const quantity = ref(0);
 const showCartModal = ref(false);
 
 ///// composables/stores /////
@@ -81,11 +81,11 @@ const breadCrumbs = computed(() => {
   return crumbs;
 });
 
-const currentPrice = computed(() => {
+const currentOriginalPrice = computed(() => {
   if (selectedVariant.value) {
-    return selectedVariant.value.discount_price || selectedVariant.value.price;
+    return selectedVariant.value.price;
   }
-  return data.value?.data?.discount_price || data.value?.data?.price || "0";
+  return data.value?.data?.price || "0";
 });
 
 const currentStock = computed(() => {
@@ -105,17 +105,15 @@ const handleVariantChange = (variant: Variant | null) => {
   selectedVariant.value = variant;
   if (variant) {
     selectedVariantId.value = variant.id;
+    quantity.value = cartStore.getCartItem(
+      selectedVariantId.value as number,
+      data.value?.data?.id,
+    )?.quantity;
     // Reset quantity if exceeds stock
-    if (quantity.value > variant.stock) {
-      quantity.value = Math.min(1, variant.stock);
-    }
+    // if (quantity.value > variant.stock) {
+    //   quantity.value = Math.min(1, variant.stock);
+    // }
   }
-};
-
-const openCartModal = () => {
-  // Allow opening cart modal even without variant selection
-  // The cart model will use product price/stock if no variant selected
-  showCartModal.value = true;
 };
 
 ///// watchers /////
@@ -137,6 +135,13 @@ watch(
 
 ///// lifecycle /////
 onMounted(() => {
+  quantity.value =
+    cartStore.cart?.items?.find(
+      (item) =>
+        item?.product_variant_id == selectedVariantId.value &&
+        item?.product_id == data.value?.data?.id,
+    )?.quantity ?? 0;
+
   // Sync cart when user logs in
   if (userStore.isLoggedIn) {
     cartStore.syncCartWithUser();
@@ -181,7 +186,6 @@ onMounted(() => {
             <div class="">
               <WidgetProductDetails
                 :title="data?.data?.title"
-                :price="currentPrice"
                 :discount-price="
                   selectedVariant?.discount_price ||
                   data?.data?.discount_price ||
@@ -191,7 +195,6 @@ onMounted(() => {
                 :rating="data?.data?.avg_rating"
                 :rating-count="data?.data?.rating_count"
                 :comments-count="data?.data?.comments_count"
-                :stock="currentStock"
                 :product-id="data?.data?.id"
                 :is-favorite="data?.data?.is_favorite"
               />
@@ -209,6 +212,23 @@ onMounted(() => {
                 @variant-change="handleVariantChange"
                 @update:selected-variant-id="selectedVariantId = $event"
               />
+            </div>
+            <!-- Key Attributes -->
+            <div
+              v-if="data?.data?.products_attribute?.length > 0"
+              class="grid grid-cols-2 gap-3 pt-4 border-t border-gray-200"
+            >
+              <div
+                v-for="attr in data?.data?.products_attribute?.slice(0, 4) ||
+                []"
+                :key="attr.id"
+                class="flex flex-col"
+              >
+                <span class="text-xs text-gray-500">{{ attr.name }}</span>
+                <span class="text-sm font-medium text-gray-900">
+                  {{ attr.value }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -246,17 +266,22 @@ onMounted(() => {
       <!-- Cart Sidebar (Desktop) -->
       <div v-if="lgAndUp" class="col-span-2">
         <ModelProductCart
-          v-model:open="showCartModal"
+          v-model:quantity="quantity"
           :product-id="data?.data?.id"
           :product-code="data?.data?.code"
           :selected-variant="selectedVariant"
-          :quantity="quantity"
-          :product-price="currentPrice"
+          :product-price="currentOriginalPrice"
+          :stock="currentStock"
           :product-stock="currentStock"
           class="sticky top-3 with-transition"
           :class="{
             'translate-y-16.75 lg:translate-y-28': !hidden && scrollY > 130,
           }"
+          :discount-price="
+            selectedVariant?.discount_price ||
+            data?.data?.discount_price ||
+            null
+          "
           @close="showCartModal = false"
         />
       </div>
@@ -274,13 +299,16 @@ onMounted(() => {
     <!-- Cart Modal (Mobile) -->
     <ModelProductCart
       v-if="!lgAndUp"
-      v-model:open="showCartModal"
+      v-model:quantity="quantity"
       :product-id="data?.data?.id"
       :product-code="data?.data?.code"
       :selected-variant="selectedVariant"
-      :quantity="quantity"
-      :product-price="currentPrice"
+      :stock="currentStock"
+      :product-price="currentOriginalPrice"
       :product-stock="currentStock"
+      :discount-price="
+        selectedVariant?.discount_price || data?.data?.discount_price || null
+      "
       @close="showCartModal = false"
     />
   </div>

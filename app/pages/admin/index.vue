@@ -2,7 +2,7 @@
 // @ts-nocheck
 import { computed } from "vue";
 import { useApiFetch } from "~/composables/useApiFetch";
-import { formatNumber } from "~~/shared/utils/format";
+import { formatPrice } from "~~/shared/utils/format";
 import StatsCard from "~/components/widget/admin/stats-card.vue";
 import QuickActions from "~/components/widget/admin/quick-actions.vue";
 import RecentActivity from "~/components/widget/admin/recent-activity.vue";
@@ -209,7 +209,7 @@ const recentActivities = computed(() => {
         >
           <StatsCard
             title="کل کاربران"
-            :value="formatNumber(stats.users.total)"
+            :value="formatPrice(stats.users.total)"
             icon="i-lucide-users"
             color="primary"
             :to="'/admin/users'"
@@ -223,7 +223,7 @@ const recentActivities = computed(() => {
 
           <StatsCard
             title="کل محصولات"
-            :value="formatNumber(stats.products.total)"
+            :value="formatPrice(stats.products.total)"
             icon="i-lucide-package"
             color="success"
             :to="'/admin/products'"
@@ -232,23 +232,23 @@ const recentActivities = computed(() => {
               label: 'محصول جدید',
               direction: 'up',
             }"
-            :description="`${formatNumber(
+            :description="`${formatPrice(
               stats.products.available
-            )} موجود، ${formatNumber(stats.products.unavailable)} ناموجود`"
+            )} موجود، ${formatPrice(stats.products.unavailable)} ناموجود`"
           />
 
           <StatsCard
             title="دسته‌بندی‌ها"
-            :value="formatNumber(stats.categories.total)"
+            :value="formatPrice(stats.categories.total)"
             icon="i-lucide-folder"
             color="info"
             :to="'/admin/categories'"
-            :description="`${formatNumber(stats.categories.active)} فعال`"
+            :description="`${formatPrice(stats.categories.active)} فعال`"
           />
 
           <StatsCard
             title="ویژگی‌ها"
-            :value="formatNumber(stats.attributes.total)"
+            :value="formatPrice(stats.attributes.total)"
             icon="i-lucide-tag"
             color="warning"
             :to="'/admin/attributes'"
@@ -257,7 +257,7 @@ const recentActivities = computed(() => {
 
           <StatsCard
             title="صفحات"
-            :value="formatNumber(stats.pages.total)"
+            :value="formatPrice(stats.pages.total)"
             icon="i-lucide-files"
             color="secondary"
             :to="'/admin/seo'"
@@ -266,7 +266,7 @@ const recentActivities = computed(() => {
               label: 'صفحه جدید',
               direction: 'up',
             }"
-            :description="`${formatNumber(stats.pages.active)} فعال`"
+            :description="`${formatPrice(stats.pages.active)} فعال`"
           />
         </div>
 
@@ -291,7 +291,7 @@ const recentActivities = computed(() => {
                   <span class="text-sm text-gray-700">مدیران</span>
                 </div>
                 <span class="text-lg font-semibold text-gray-900">
-                  {{ formatNumber(stats.users.admins) }}
+                  {{ formatPrice(stats.users.admins) }}
                 </span>
               </div>
               <div
@@ -302,7 +302,7 @@ const recentActivities = computed(() => {
                   <span class="text-sm text-gray-700">کاربران عادی</span>
                 </div>
                 <span class="text-lg font-semibold text-gray-900">
-                  {{ formatNumber(stats.users.regular) }}
+                  {{ formatPrice(stats.users.regular) }}
                 </span>
               </div>
               <div
@@ -315,7 +315,7 @@ const recentActivities = computed(() => {
                   >
                 </div>
                 <span class="text-lg font-semibold text-success-900">
-                  {{ formatNumber(stats.users.recent) }}
+                  {{ formatPrice(stats.users.recent) }}
                 </span>
               </div>
             </div>
@@ -346,7 +346,7 @@ const recentActivities = computed(() => {
                   <span class="text-sm text-success-700">موجود</span>
                 </div>
                 <span class="text-lg font-semibold text-success-900">
-                  {{ formatNumber(stats.products.available) }}
+                  {{ formatPrice(stats.products.available) }}
                 </span>
               </div>
               <div
@@ -357,7 +357,7 @@ const recentActivities = computed(() => {
                   <span class="text-sm text-warning-700">ناموجود</span>
                 </div>
                 <span class="text-lg font-semibold text-warning-900">
-                  {{ formatNumber(stats.products.unavailable) }}
+                  {{ formatPrice(stats.products.unavailable) }}
                 </span>
               </div>
               <div
@@ -373,7 +373,7 @@ const recentActivities = computed(() => {
                   >
                 </div>
                 <span class="text-lg font-semibold text-primary-900">
-                  {{ formatNumber(stats.products.recent) }}
+                  {{ formatPrice(stats.products.recent) }}
                 </span>
               </div>
             </div>
