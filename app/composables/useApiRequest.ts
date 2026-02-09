@@ -30,7 +30,6 @@ export function useApiRequest<TResponse = any>() {
   const response = ref<TResponse | null>(null);
   const error = ref<any>(null);
   const userStore = useUserStore();
-  const token = userStore.token;
 
   const fetch = async (
     url: string,
@@ -45,7 +44,9 @@ export function useApiRequest<TResponse = any>() {
         ...fetchOptions,
         headers: {
           ...fetchOptions.headers,
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(userStore.token
+            ? { Authorization: `Bearer ${userStore.token}` }
+            : {}),
         },
       } as any);
       response.value = result as TResponse;

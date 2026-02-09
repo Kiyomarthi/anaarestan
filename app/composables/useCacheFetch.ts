@@ -6,7 +6,6 @@ export function useCacheFetch<T>() {
   const data = ref<T | null>(null);
   const error = ref<any>(null);
   const userStore = useUserStore();
-  const token = userStore.token;
 
   const fetch = async (url: string, options: Options = {}): Promise<void> => {
     const key = JSON.stringify({ url, ...options });
@@ -32,7 +31,7 @@ export function useCacheFetch<T>() {
         ...options,
         headers: {
           ...(options.headers || {}),
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(userStore.token ? { Authorization: `Bearer ${userStore.token}` } : {}),
         },
         server: true,
       });

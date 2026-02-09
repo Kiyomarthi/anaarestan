@@ -19,7 +19,7 @@ const { hidden } = useHideScroll(5);
       class="w-full"
       :class="{
         'max-w-(--ui-container) mx-auto px-4': !noMargin,
-        'pt-16.75 lg:pt-30': !noHeader,
+        'pt-19.25 lg:pt-32.5': !noHeader,
       }"
     >
       <slot />

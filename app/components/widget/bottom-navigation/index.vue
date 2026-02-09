@@ -22,7 +22,7 @@ const navItems = [
   {
     label: "پروفایل",
     icon: "i-lucide-user",
-    href: user.isLoggedIn() ? "/panel" : "/login",
+    href: user.isLoggedIn ? "/panel" : "/login",
   },
 ];
 

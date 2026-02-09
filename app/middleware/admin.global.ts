@@ -20,7 +20,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // Fetch user data if logged in but user data is not available
-  if (userStore.isLoggedIn() && !userStore.user) {
+  if (userStore.isLoggedIn && !userStore.user) {
     try {
       await userStore.fetchCurrentUser();
     } catch {
@@ -34,7 +34,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // If accessing admin login page
   if (isAdminLogin) {
     // If logged in and is admin, redirect to admin dashboard
-    if (userStore.isLoggedIn() && isAdmin) {
+    if (userStore.isLoggedIn && isAdmin) {
       return navigateTo("/admin");
     }
     // Otherwise allow access to login page
@@ -44,11 +44,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // For /admin route specifically
   if (to.path === "/admin") {
     // If logged in but not admin, redirect to admin login
-    if (userStore.isLoggedIn() && !isAdmin) {
+    if (userStore.isLoggedIn && !isAdmin) {
       return navigateTo("/admin/login");
     }
     // If not logged in, redirect to admin login
-    if (!userStore.isLoggedIn()) {
+    if (!userStore.isLoggedIn) {
       return navigateTo("/admin/login");
     }
     // If logged in and is admin, allow access
@@ -56,7 +56,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // For other admin routes, require authentication and admin role
-  if (!userStore.isLoggedIn()) {
+  if (!userStore.isLoggedIn) {
     return navigateTo("/admin/login");
   }
 

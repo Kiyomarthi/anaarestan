@@ -204,7 +204,13 @@ watch(otpCode, (newValue) => {
         </div>
       </UFormField>
 
-      <UButton block size="lg" :loading="loading" @click="onSubmit">
+      <UButton
+        block
+        size="lg"
+        :loading="loading"
+        :ui="{ base: 'h-10' }"
+        @click="onSubmit"
+      >
         تایید کد
       </UButton>
     </div>

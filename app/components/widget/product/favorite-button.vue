@@ -24,9 +24,15 @@ const { fetch } = useApiRequest();
 
 ///// functions /////
 const toggleFavorite = async () => {
-  if (!userStore.isLoggedIn()) {
+  if (!userStore.isLoggedIn) {
     // Redirect to login or show modal
-    navigateTo("/login");
+    userStore.modal = true;
+    userStore.alert =
+      "برای اضافه به لیست علاقه‌مند‌ی‌ها ابتدا وارد حساب کاربری خود شود.";
+    userStore.doAfterLogin = async () => {
+      await toggleFavorite();
+    };
+
     return;
   }
 
@@ -49,12 +55,15 @@ const toggleFavorite = async () => {
       if (favoritesRes.data && favoritesRes.data.length > 0) {
         await fetch(`/api/favorites/${favoritesRes.data[0].id}`, {
           method: "DELETE",
+          headers: userStore.token
+            ? { Authorization: `Bearer ${userStore.token}` }
+            : {},
         });
         isFavorite.value = false;
         emit("update:isFavorite", false);
 
         toast.add({
-          title: "محصول به از علاقه‌مندی‌های شما پاک شد",
+          title: "محصول از علاقه‌مندی‌های شما پاک شد",
           color: "success",
         });
       }

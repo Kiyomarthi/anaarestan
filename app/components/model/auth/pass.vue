@@ -15,7 +15,7 @@ withDefaults(
   }>(),
   {
     noOtp: false,
-  }
+  },
 );
 
 const toast = useToast();
@@ -118,7 +118,13 @@ const switchToOtp = () => {
       </template>
     </UAuthForm>
     <div v-if="!noOtp" class="flex flex-col gap-2 mt-4">
-      <UButton variant="ghost" color="neutral" block @click="switchToOtp">
+      <UButton
+        variant="ghost"
+        color="neutral"
+        block
+        :ui="{ base: 'h-10' }"
+        @click="switchToOtp"
+      >
         ورود با کد تایید
       </UButton>
     </div>

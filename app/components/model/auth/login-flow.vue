@@ -56,8 +56,10 @@ const handleLogin = async () => {
     props.onLogin();
   }
 
+  userStore.modal = false;
   if (userStore.doAfterLogin) await userStore.doAfterLogin();
   userStore.doAfterLogin = null;
+  userStore.alert = null;
   if (route.query?.from) {
     await nextTick();
     router.replace({ path: route.query?.from as string });

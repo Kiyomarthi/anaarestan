@@ -51,7 +51,7 @@ const loadComments = async () => {
 };
 
 const submitComment = async () => {
-  if (!userStore.isLoggedIn()) {
+  if (!userStore.isLoggedIn) {
     navigateTo("/login");
     return;
   }
@@ -103,7 +103,7 @@ onMounted(() => {
         </span>
       </h2>
       <UButton
-        v-if="userStore.isLoggedIn() && !showCommentForm"
+        v-if="userStore.isLoggedIn && !showCommentForm"
         variant="outline"
         label="ثبت نظر"
         @click="showCommentForm = true"

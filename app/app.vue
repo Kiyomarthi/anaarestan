@@ -5,6 +5,22 @@
       <NuxtLoadingIndicator color="#cc2d33" :height="4" />
       <nuxt-layout>
         <nuxt-page />
+        <WidgetResponseModal
+          v-model:open="user.modal"
+          :header-class="!user.alert ? 'hidden!' : ''"
+        >
+          <template v-if="user.alert" #title>
+            <div class="pl-10">
+              <UAlert
+                :title="user.alert"
+                icon="i-lucide-info"
+                color="info"
+                variant="outline"
+              />
+            </div>
+          </template>
+          <ModelAuthLoginFlow />
+        </WidgetResponseModal>
       </nuxt-layout>
     </div>
   </u-app>
@@ -37,11 +53,6 @@ watch(
 watch(
   () => route.hash,
   (hash) => {
-    if (user.isLoggedIn()) {
-      user.modal = false;
-      router.replace({ hash: "", path: route.path, query: route.query });
-    }
-
     user.modal = hash === "#auth";
   },
   { immediate: true },

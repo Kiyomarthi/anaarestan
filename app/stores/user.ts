@@ -1,3 +1,5 @@
+import { useCartStore } from "./cart";
+
 type UserPayload = Record<string, any>;
 const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -6,42 +8,35 @@ export const useUserStore = defineStore(
   () => {
     const user = ref<UserPayload | null>(null);
     const createdAt = ref<number | null>(null);
+    const alert = ref<string>("");
     const modal = ref<boolean>(false);
     const doAfterLogin = ref<(() => void | Promise<void>) | null>(null);
+    const cartStore = useCartStore();
 
-    const token = computed<string | null>(() => {
-      const tokenCookie = useCookie<string | null>("auth_token");
-      return tokenCookie.value;
-    });
+    const tokenCookie = useCookie<string | null>("auth_token");
 
     const isExpired = computed(
       () => !!createdAt.value && Date.now() - createdAt.value > TTL_MS,
     );
 
     function logOut() {
-      const tokenCookie = useCookie<string | null>("auth_token");
       tokenCookie.value = null;
       user.value = null;
       createdAt.value = null;
-      useCartStore.clearCart();
+      cartStore?.clearCart();
     }
 
-    const isLoggedIn = () => {
-      if (createdAt.value && Date.now() - createdAt.value > TTL_MS) {
-        nextTick(() => {
-          logOut();
-        });
-        return false;
-      }
+    const isLoggedIn = computed(() => {
+      if (!tokenCookie.value) return false;
+      if (isExpired.value) return false;
+      return true;
+    });
 
-      const tokenCookie = useCookie<string | null>("auth_token");
+    const token = computed(() => {
+      return tokenCookie.value;
+    });
 
-      return Boolean(tokenCookie.value) && !isExpired.value;
-    };
-
-    const isAdmin = computed(
-      () => isLoggedIn() && user.value?.role === "admin",
-    );
+    const isAdmin = computed(() => isLoggedIn && user.value?.role === "admin");
 
     function setUser(userData: UserPayload | null) {
       user.value = userData;
@@ -49,7 +44,6 @@ export const useUserStore = defineStore(
     }
 
     function setAuth(newToken: string | null, userData?: UserPayload | null) {
-      const tokenCookie = useCookie<string | null>("auth_token");
       tokenCookie.value = newToken;
       if (userData !== undefined) {
         setUser(userData);
@@ -93,6 +87,7 @@ export const useUserStore = defineStore(
       logOut,
       modal,
       doAfterLogin,
+      alert,
     };
   },
   {

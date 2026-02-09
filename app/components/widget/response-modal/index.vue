@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useBreakpoints } from "~/composables/utils/useBreakpoints";
+
 ///// imports /////
 
 ///// page meta /////
@@ -9,14 +11,15 @@ const open = defineModel<boolean>({
 });
 
 defineProps<{
-  title: string;
+  title?: string;
   subtitle?: string;
+  headerClass?: string;
 }>();
 
 ///// refs /////
 
 ///// composables/stores /////
-const { isDesktop } = useDevice();
+const { lgAndUp } = useBreakpoints();
 
 ///// computed /////
 
@@ -29,16 +32,22 @@ const { isDesktop } = useDevice();
 
 <template>
   <u-modal
-    v-if="isDesktop"
+    v-if="lgAndUp"
     v-model:open="open"
     :title="title"
     :description="subtitle"
     :ui="{
-      content: 'w-150 max-w-none p-4',
+      content: 'w-112.5 max-w-none p-4',
       overlay: 'bg-black/35 backdrop-blur-xs',
-      header: 'p-3 min-h-max',
+      header: ['p-4 min-h-max', headerClass],
     }"
   >
+    <template #title>
+      <slot name="title">
+        {{ title }}
+      </slot>
+    </template>
+
     <template #body>
       <slot />
     </template>
@@ -54,6 +63,12 @@ const { isDesktop } = useDevice();
       content: 'rounded-t-[10px]',
     }"
   >
+    <template #title>
+      <slot name="title">
+        {{ title }}
+      </slot>
+    </template>
+
     <template #body>
       <slot />
     </template>

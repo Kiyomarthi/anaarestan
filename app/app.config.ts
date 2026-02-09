@@ -22,6 +22,7 @@ export default defineAppConfig({
     input: {
       slots: {
         root: "w-full",
+        base: "h-10",
       },
     },
 

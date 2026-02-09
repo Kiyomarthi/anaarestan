@@ -12,6 +12,8 @@ const emit = defineEmits<{
   "on:switch-to-password": [];
 }>();
 
+const authForm = useTemplateRef("authForm");
+
 const toast = useToast();
 const { loading, fetch } = useApiRequest<{
   success: boolean;
@@ -71,6 +73,7 @@ const switchToPassword = () => {
 <template>
   <div>
     <UAuthForm
+      ref="authForm"
       :validate="validateForm"
       title="ورود یا ثبت‌نام در انارستان"
       description="شماره تلفن خود را وارد کنید تا کد تایید برای شما ارسال شود."
@@ -103,7 +106,13 @@ const switchToPassword = () => {
       </template>
     </UAuthForm>
     <div class="flex flex-col gap-2 mt-4">
-      <UButton variant="ghost" color="neutral" block @click="switchToPassword">
+      <UButton
+        variant="ghost"
+        color="neutral"
+        block
+        :ui="{ base: 'h-10' }"
+        @click="switchToPassword"
+      >
         ورود با رمز عبور
       </UButton>
     </div>

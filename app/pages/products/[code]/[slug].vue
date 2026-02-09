@@ -34,7 +34,7 @@ await fetch(`/api/products/${route?.params?.code}`, {
 });
 
 // Initialize cart when user is logged in
-if (userStore.isLoggedIn()) {
+if (userStore.isLoggedIn) {
   await cartStore.initializeCart();
 }
 
@@ -137,7 +137,7 @@ watch(
 ///// lifecycle /////
 onMounted(async () => {
   // Sync cart when user logs in
-  if (userStore.isLoggedIn()) {
+  if (userStore.isLoggedIn) {
     cartStore.syncCartWithUser();
   }
 

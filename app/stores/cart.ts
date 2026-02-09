@@ -77,7 +77,7 @@ export const useCartStore = defineStore(
               setCartId(response.data.id);
 
               // If user is logged in and cart has no user_id, update it
-              if (userStore.isLoggedIn() && !response.data.user_id) {
+              if (userStore.isLoggedIn && !response.data.user_id) {
                 await syncCartWithUser();
               }
               return;
@@ -104,7 +104,7 @@ export const useCartStore = defineStore(
         const response = await apiFetch<ApiResponse<Cart>>("/api/carts", {
           method: "POST",
           body: {
-            user_id: userStore.isLoggedIn() ? userStore.user?.id : null,
+            user_id: userStore.isLoggedIn ? userStore.user?.id : null,
             status: "active",
           },
         });
@@ -121,7 +121,7 @@ export const useCartStore = defineStore(
     // Sync cart with user when user logs in
     const syncCartWithUser = async () => {
       if (
-        !userStore.isLoggedIn() ||
+        !userStore.isLoggedIn ||
         !cart.value ||
         cart.value?.user_id == userStore.user?.id
       )
