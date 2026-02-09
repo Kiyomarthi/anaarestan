@@ -99,7 +99,7 @@ const switchToOtp = () => {
       @submit="onSubmit"
     >
       <template #header>
-        <ULink to="/" class="w-fit">
+        <NuxtLink to="/" class="w-fit">
           <base-image
             src="/images/logo.avif"
             :width="70"
@@ -111,7 +111,7 @@ const switchToOtp = () => {
             fetchPriority="high"
             alt="انارستان"
           />
-        </ULink>
+        </NuxtLink>
         <div class="text-xl text-pretty font-semibold text-highlighted mt-2">
           ورود با رمز عبور به انارستان
         </div>

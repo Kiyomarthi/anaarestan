@@ -18,7 +18,7 @@ const router = useRouter();
 
 const price = computed(() => Number(props.product.price));
 const discountPrice = computed(() =>
-  props.product.discount_price ? Number(props.product.discount_price) : null
+  props.product.discount_price ? Number(props.product.discount_price) : null,
 );
 
 const finalPrice = computed(() => discountPrice.value || price.value);
@@ -34,9 +34,10 @@ const formattedPrice = (value: number) => {
 </script>
 
 <template>
-  <ULink
+  <NuxtLink
     class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
     :to="`/products/${props.product.code}/${props.product.slug}`"
+    target="_blank"
   >
     <div class="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden">
       <BaseImage
@@ -71,5 +72,5 @@ const formattedPrice = (value: number) => {
         </span>
       </div>
     </div>
-  </ULink>
+  </NuxtLink>
 </template>

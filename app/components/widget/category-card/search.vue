@@ -15,7 +15,7 @@ const router = useRouter();
 </script>
 
 <template>
-  <ULink
+  <NuxtLink
     class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
     :to="`/products/list/${props.category.id}/${props.category.slug}`"
   >
@@ -56,5 +56,5 @@ const router = useRouter();
         {{ category.name }}
       </h3>
     </div>
-  </ULink>
+  </NuxtLink>
 </template>

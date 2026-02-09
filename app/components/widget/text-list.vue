@@ -20,7 +20,7 @@ withDefaults(
 );
 
 ///// refs /////
-const uLink = resolveComponent("u-link");
+const NuxtLink = resolveComponent("NuxtLink");
 
 ///// composables/stores /////
 
@@ -45,7 +45,7 @@ const uLink = resolveComponent("u-link");
     <ul>
       <li v-for="(item, index) in items" :key="index" class="group">
         <component
-          :is="item.to ? uLink : 'span'"
+          :is="item.to ? NuxtLink : 'span'"
           :to="item?.to"
           class="text-gray-dark text-[15px]/[30px] with-transition"
           :class="{ 'group-hover:text-primary hover:text-primary': item?.to }"

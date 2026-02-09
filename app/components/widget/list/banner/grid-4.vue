@@ -39,7 +39,7 @@ defineProps<{
     <div
       class="grid grid-cols-2 lg:grid-cols-4 gap-2 items-stretch justify-stretch mb-2"
     >
-      <ULink
+      <NuxtLink
         v-for="(banner, index) in banners.slice(0, 4)"
         :key="index"
         :to="banner.link"
@@ -53,9 +53,9 @@ defineProps<{
           image-class="w-full"
           class="rounded-lg overflow-hidden"
         />
-      </ULink>
+      </NuxtLink>
     </div>
-    <ULink
+    <NuxtLink
       v-if="banners?.[5]"
       :aria-label="banners?.[5]?.title"
       :to="banners?.[5]?.link"
@@ -69,6 +69,6 @@ defineProps<{
         image-class="w-full w-full max-h-20"
         class="rounded-lg overflow-hidden"
       />
-    </ULink>
+    </NuxtLink>
   </section>
 </template>

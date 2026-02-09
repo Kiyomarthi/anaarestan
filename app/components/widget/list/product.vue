@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { CarouselItem } from "@nuxt/ui";
 import { twMerge } from "tailwind-merge";
 import { randomColor } from "~/constants/common";
 
@@ -28,7 +29,7 @@ const wrapperClasses = computed(() =>
         root: 'bg-white p-4 rounded-2xl w-full',
         item: 'basis-1/2 lg:basis-auto py-1',
       }"
-      :items="10"
+      :items="Array.from({ length: 10 }) as CarouselItem[]"
     >
       <USkeleton class="w-full lg:w-50 h-62.5 rounded-2xl" />
     </UCarousel>
@@ -58,7 +59,7 @@ const wrapperClasses = computed(() =>
             as="ul"
             :ui="{
               root: 'bg-white p-4 rounded-2xl w-full',
-              item: 'basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-auto py-1 h-fill',
+              item: 'basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6 xl:basis-1/7 py-1 h-fill',
               prev: 'lg:start-8 disabled:opacity-0 with-transition',
               next: 'lg:end-8 disabled:opacity-0 with-transition',
             }"

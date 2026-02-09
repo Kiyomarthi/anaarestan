@@ -26,7 +26,7 @@ export default defineNuxtConfig({
       nuxtLink: {
         trailingSlash: "remove",
         prefetchOn: {
-          visibility: false,
+          visibility: true,
           interaction: true,
         },
       },

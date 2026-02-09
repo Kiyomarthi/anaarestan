@@ -84,7 +84,7 @@ const switchToPassword = () => {
       @submit="onSubmit"
     >
       <template #header>
-        <ULink to="/" class="w-fit">
+        <NuxtLink to="/" class="w-fit">
           <base-image
             src="/images/logo.avif"
             :width="70"
@@ -96,7 +96,7 @@ const switchToPassword = () => {
             fetchPriority="high"
             alt="انارستان"
           />
-        </ULink>
+        </NuxtLink>
         <div class="text-xl text-pretty font-semibold text-highlighted mt-2">
           ورود یا ثبت‌نام در انارستان
         </div>

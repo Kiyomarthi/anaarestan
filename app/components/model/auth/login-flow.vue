@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { addSyntheticTrailingComment } from "typescript";
+
 type LoginMode = "otp" | "password" | "confirm-otp";
 
 const props = withDefaults(
@@ -10,7 +12,7 @@ const props = withDefaults(
   {
     initialMode: "otp",
     timerSeconds: 100,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -20,6 +22,9 @@ const emit = defineEmits<{
 const mode = ref<LoginMode>(props.initialMode);
 const phone = ref<string>("");
 const resendTrigger = ref(0);
+const userStore = useUserStore();
+const route = useRoute();
+const router = useRouter();
 
 const handleOtpSent = (phoneNumber: string) => {
   phone.value = phoneNumber;
@@ -46,10 +51,18 @@ const handleResend = () => {
   resendTrigger.value++;
 };
 
-const handleLogin = () => {
+const handleLogin = async () => {
   if (props.onLogin) {
     props.onLogin();
   }
+
+  if (userStore.doAfterLogin) await userStore.doAfterLogin();
+  userStore.doAfterLogin = null;
+  if (route.query?.from) {
+    await nextTick();
+    router.replace({ path: route.query?.from as string });
+  }
+
   emit("on:login");
 };
 
@@ -89,4 +102,3 @@ defineExpose({
     />
   </div>
 </template>
-

@@ -48,12 +48,17 @@ const discountPercent = computed(() => {
 const formattedPrice = (value: number) => {
   return new Intl.NumberFormat("fa-IR").format(value);
 };
+
+const classMerged = computed(() => {
+  return twMerge("group cursor-pointer", props.class);
+});
 </script>
 
 <template>
-  <ULink
-    :class="twMerge('group cursor-pointer', props.class)"
+  <NuxtLink
+    :class="classMerged"
     :to="`/products/${product?.code}/${product?.slug}`"
+    target="_blank"
   >
     <BaseCard
       class="h-full flex flex-col"
@@ -103,5 +108,5 @@ const formattedPrice = (value: number) => {
         </div>
       </div>
     </BaseCard>
-  </ULink>
+  </NuxtLink>
 </template>

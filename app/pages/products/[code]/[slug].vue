@@ -34,7 +34,7 @@ await fetch(`/api/products/${route?.params?.code}`, {
 });
 
 // Initialize cart when user is logged in
-if (userStore.isLoggedIn) {
+if (userStore.isLoggedIn()) {
   await cartStore.initializeCart();
 }
 
@@ -109,6 +109,7 @@ const handleVariantChange = (variant: Variant | null) => {
       selectedVariantId.value as number,
       data.value?.data?.id,
     )?.quantity;
+
     // Reset quantity if exceeds stock
     // if (quantity.value > variant.stock) {
     //   quantity.value = Math.min(1, variant.stock);
@@ -134,18 +135,24 @@ watch(
 );
 
 ///// lifecycle /////
-onMounted(() => {
-  quantity.value =
-    cartStore.cart?.items?.find(
-      (item) =>
-        item?.product_variant_id == selectedVariantId.value &&
-        item?.product_id == data.value?.data?.id,
-    )?.quantity ?? 0;
-
+onMounted(async () => {
   // Sync cart when user logs in
-  if (userStore.isLoggedIn) {
+  if (userStore.isLoggedIn()) {
     cartStore.syncCartWithUser();
   }
+
+  watch(
+    () => cartStore.cart?.items,
+    (val, old) => {
+      if (!old?.length)
+        quantity.value =
+          cartStore.cart?.items?.find(
+            (item) =>
+              item?.product_variant_id == selectedVariantId.value &&
+              item?.product_id == data.value?.data?.id,
+          )?.quantity ?? 0;
+    },
+  );
 });
 </script>
 
@@ -157,11 +164,11 @@ onMounted(() => {
       class="pb-3 pt-3 lg:pt-1"
     />
 
-    <div class="grid grid-cols-7 lg:mt-5 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-7 lg:mt-5 lg:gap-4">
       <!-- Main Content -->
       <!-- Product Images and Details -->
       <div class="col-span-5 gap-4 lg:gap-6">
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-3">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-y-3 lg:gap-3">
           <!-- Images -->
           <div class="col-span-2 -mx-4 lg:mx-0">
             <BaseCursorTooltip v-if="lgAndUp" class="sticky top-3">

@@ -135,7 +135,6 @@ onMounted(() => {
 
 <template>
   <div class="space-y-4">
-    <pre></pre>
     <div
       v-for="group in variantGroups"
       :key="group.attribute_id"

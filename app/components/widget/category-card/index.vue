@@ -18,7 +18,7 @@ const props = withDefaults(
 </script>
 
 <template>
-  <ULink
+  <NuxtLink
     :class="twMerge('group cursor-pointer', props.class)"
     :to="`/products/list/${id}/${slug}`"
   >
@@ -38,5 +38,5 @@ const props = withDefaults(
     >
       {{ name }}
     </h4>
-  </ULink>
+  </NuxtLink>
 </template>

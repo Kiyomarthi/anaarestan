@@ -18,13 +18,13 @@ const { smAndDown, lgAndUp } = useBreakpoints();
 
 const items = computed<NavigationMenuItem[]>(() =>
   [
-    !userStore.isLoggedIn && {
+    !userStore.isLoggedIn() && {
       label: "ورد یا ثبت نام",
       to: "/login",
       icon: "i-lucide-log-in",
       active: route.path.startsWith("/docs/getting-started"),
     },
-    userStore.isLoggedIn && {
+    userStore.isLoggedIn() && {
       label: "پنل کاربری",
       to: "/docs/getting-started",
       icon: "i-lucide-layout-dashboard",
@@ -96,7 +96,7 @@ await fetchCategory("/api/categories", {
 
       <template #right>
         <div v-if="lgAndUp" class="flex items-center gap-3">
-          <UPopover v-if="userStore.isLoggedIn" mode="hover">
+          <UPopover v-if="userStore.isLoggedIn()" mode="hover">
             <UButton
               color="neutral"
               variant="ghost"

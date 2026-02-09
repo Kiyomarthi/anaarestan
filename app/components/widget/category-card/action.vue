@@ -49,12 +49,12 @@ const props = withDefaults(
         :key="index"
         role="listitem"
       >
-        <ULink :to="`/products/list/${item.id}/${item.slug}`">
+        <NuxtLink :to="`/products/list/${item.id}/${item.slug}`">
           <h5 class="text-h5 flex items-center gap-1">
             <UIcon name="i-lucide-link" />
             {{ item?.name }}
           </h5>
-        </ULink>
+        </NuxtLink>
       </li>
     </ul>
   </UCard>

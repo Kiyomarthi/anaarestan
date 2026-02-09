@@ -38,7 +38,7 @@ defineProps<{
   </div>
   <section v-else-if="banners?.length >= 2">
     <div class="grid grid-cols-2 gap-2 items-stretch justify-stretch mb-2">
-      <ULink
+      <NuxtLink
         v-for="(banner, index) in banners"
         :key="index"
         :to="banner.link"
@@ -52,7 +52,7 @@ defineProps<{
           image-class="w-full max-h-50"
           class="rounded-lg overflow-hidden"
         />
-      </ULink>
+      </NuxtLink>
     </div>
   </section>
 </template>

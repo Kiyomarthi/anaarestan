@@ -22,7 +22,7 @@ fetch("/api/products", {
 <template>
   <WidgetListProduct
     :title="category?.name"
-    :items="data?.data"
+    :items="data?.data ?? []"
     :loading="loading"
     :moreLink="`/products/list/${category.id}/${category.slug}`"
   >

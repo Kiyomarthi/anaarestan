@@ -6,6 +6,8 @@ export const useUserStore = defineStore(
   () => {
     const user = ref<UserPayload | null>(null);
     const createdAt = ref<number | null>(null);
+    const modal = ref<boolean>(false);
+    const doAfterLogin = ref<(() => void | Promise<void>) | null>(null);
 
     const token = computed<string | null>(() => {
       const tokenCookie = useCookie<string | null>("auth_token");
@@ -21,9 +23,10 @@ export const useUserStore = defineStore(
       tokenCookie.value = null;
       user.value = null;
       createdAt.value = null;
+      useCartStore.clearCart();
     }
 
-    const isLoggedIn = computed(() => {
+    const isLoggedIn = () => {
       if (createdAt.value && Date.now() - createdAt.value > TTL_MS) {
         nextTick(() => {
           logOut();
@@ -34,10 +37,10 @@ export const useUserStore = defineStore(
       const tokenCookie = useCookie<string | null>("auth_token");
 
       return Boolean(tokenCookie.value) && !isExpired.value;
-    });
+    };
 
     const isAdmin = computed(
-      () => isLoggedIn.value && user.value?.role === "admin",
+      () => isLoggedIn() && user.value?.role === "admin",
     );
 
     function setUser(userData: UserPayload | null) {
@@ -88,6 +91,8 @@ export const useUserStore = defineStore(
       setAuth,
       fetchCurrentUser,
       logOut,
+      modal,
+      doAfterLogin,
     };
   },
   {

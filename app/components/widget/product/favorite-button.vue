@@ -24,7 +24,7 @@ const { fetch } = useApiRequest();
 
 ///// functions /////
 const toggleFavorite = async () => {
-  if (!userStore.isLoggedIn) {
+  if (!userStore.isLoggedIn()) {
     // Redirect to login or show modal
     navigateTo("/login");
     return;

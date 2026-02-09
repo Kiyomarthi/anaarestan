@@ -43,7 +43,7 @@ defineProps<{
           'lg:absolute lg:bottom-6 lg:w-5 lg:right-1/2 lg:translate-x-1/2',
       }"
     >
-      <ULink
+      <NuxtLink
         class="w-full"
         to="/"
         :aria-label="item?.alt"
@@ -63,7 +63,7 @@ defineProps<{
           :loading="index == 0 ? 'eager' : 'lazy'"
           :fetch-priority="index == 0 ? 'high' : 'low'"
         />
-      </ULink>
+      </NuxtLink>
     </UCarousel>
   </div>
 </template>

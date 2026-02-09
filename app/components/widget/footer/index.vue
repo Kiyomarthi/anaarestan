@@ -164,12 +164,12 @@ const handleCopy = () => {
           </div>
         </div>
       </div>
-      <ULink
+      <NuxtLink
         class="bg-neutral-100 flex justify-center items-center p-2 w-fit rounded-full text-xs"
         :to="`tel:${config.public?.phones?.mashhad}`"
       >
         تماس
-      </ULink>
+      </NuxtLink>
     </div>
 
     <div v-if="lgAndUp" class="grid grid-cols-4 my-5">
@@ -218,7 +218,7 @@ const handleCopy = () => {
       >
         <ClientOnly class="flex-1">
           <template #fallback>
-            <ULink
+            <NuxtLink
               to="/"
               class="p-1.5 lg:p-4 border border-neutral-200 rounded-md w-max block flex-1 max-w-30"
             >
@@ -230,7 +230,7 @@ const handleCopy = () => {
                 :height="75"
                 class="lg:size-18.75"
               />
-            </ULink>
+            </NuxtLink>
           </template>
           <a
             referrerpolicy="origin"
@@ -252,7 +252,7 @@ const handleCopy = () => {
           /></a>
         </ClientOnly>
 
-        <ULink
+        <NuxtLink
           to="/"
           v-for="i in 3"
           :key="i"
@@ -266,7 +266,7 @@ const handleCopy = () => {
             :height="75"
             class="lg:size-18.75"
           />
-        </ULink>
+        </NuxtLink>
       </div>
     </div>
 
