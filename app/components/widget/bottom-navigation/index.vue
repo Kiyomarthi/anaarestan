@@ -2,6 +2,7 @@
 const route = useRoute();
 
 const user = useUserStore();
+const model = ref<string>(route.path);
 
 const navItems = [
   {
@@ -29,6 +30,13 @@ const navItems = [
 const isActive = (href: string) => {
   return route.path === href;
 };
+
+watch(
+  () => route.path,
+  (val) => {
+    model.value = val;
+  },
+);
 </script>
 
 <template>
@@ -39,20 +47,40 @@ const isActive = (href: string) => {
     }"
   >
     <nav class="flex items-center gap-1 justify-around">
-      <NuxtLink
+      <UButton
         v-for="item in navItems"
         :key="item.href"
         :to="item.href"
-        :class="[
-          'flex flex-col flex-1 items-center justify-center gap-1 px-4 py-2 rounded-[30px] transition-colors',
-          isActive(item.href)
-            ? 'text-primary-500 bg-primary-100/50'
-            : 'text-black hover:text-primary-500',
-        ]"
+        variant="link"
+        :ui="{
+          base: [
+            'flex flex-col flex-1 items-center justify-center gap-1 px-4 py-2 rounded-[30px]',
+            'transition-all duration-300 ease-out relative z-2',
+            model === item.href
+              ? 'text-primary-500'
+              : 'text-black hover:text-primary-500 scale-95',
+          ],
+        }"
+        @click="model = item.href"
       >
-        <UIcon :name="item.icon" class="text-xl" />
-        <span class="text-xs font-medium text-center">{{ item.label }}</span>
-      </NuxtLink>
+        <UIcon
+          :name="item.icon"
+          class="text-xl transition-all relative z-2 duration-300"
+        />
+        <span
+          class="text-xs font-medium text-center transition-all relative z-2 duration-300"
+        >
+          {{ item.label }}
+        </span>
+        <div
+          :class="[
+            'absolute top-0 left-0 rounded-[30px] size-full transition-all duration-300 ease-out',
+            model === item.href
+              ? 'text-primary-500 bg-primary-100/50 scale-100 opacity-100'
+              : 'text-black hover:text-primary-500 scale-30 opacity-0',
+          ]"
+        />
+      </UButton>
     </nav>
   </WidgetGlass>
 </template>
