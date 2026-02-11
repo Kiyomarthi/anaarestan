@@ -1,14 +1,9 @@
-<template>
-  <div>
-    <UIcon v-for="(item, index) in icons" :key="index" name="square-activity" />
-  </div>
-</template>
-
 <script setup lang="ts">
 ///// imports /////
 
 ///// page meta /////
 definePageMeta({
+  pageTransition: { name: "fade", mode: "out-in" },
   middleware: "desktop-only-client",
 });
 
@@ -26,3 +21,7 @@ definePageMeta({
 
 ///// lifecycle /////
 </script>
+
+<template>
+  <div class="h-[1000px] bg-gray"></div>
+</template>

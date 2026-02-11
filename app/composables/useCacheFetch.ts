@@ -8,6 +8,7 @@ export function useCacheFetch<T>() {
   const userStore = useUserStore();
 
   const fetch = async (url: string, options: Options = {}): Promise<void> => {
+    // TODO: refactor this change JSON.stringify
     const key = JSON.stringify({ url, ...options });
     const state = useState<T | null>(`cache-${key}`, () => null);
 
@@ -31,7 +32,9 @@ export function useCacheFetch<T>() {
         ...options,
         headers: {
           ...(options.headers || {}),
-          ...(userStore.token ? { Authorization: `Bearer ${userStore.token}` } : {}),
+          ...(userStore.token
+            ? { Authorization: `Bearer ${userStore.token}` }
+            : {}),
         },
         server: true,
       });

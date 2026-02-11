@@ -26,7 +26,7 @@ const wrapperClasses = computed(() => twMerge("", props.class));
         root: 'bg-white p-4 rounded-2xl w-full',
         item: 'basis-1/2 sm:basis-1/3 lg:basis-auto py-1',
       }"
-      :items="10"
+      :items="Array.from({ length: 10 })"
     >
       <USkeleton class="w-full lg:w-50 h-62.5 rounded-2xl" />
     </UCarousel>
@@ -64,7 +64,7 @@ const wrapperClasses = computed(() => twMerge("", props.class));
             dots
             prev-icon="i-lucide-chevron-right"
             next-icon="i-lucide-chevron-left"
-            :items="items"
+            :items="items ?? []"
             v-slot="{ item, index }"
             role="list"
           >

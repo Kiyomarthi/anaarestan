@@ -13,6 +13,7 @@ import { toDeep2Length, toDeep3Length } from "~~/shared/utils/array";
 
 ///// page meta /////
 definePageMeta({
+  pageTransition: { name: "fade", mode: "out-in" },
   noMargin: true,
 });
 
@@ -98,7 +99,8 @@ const discountedProducts = computed(() => {
   if (!discountProductData.value?.data) return [];
   return discountProductData.value?.data
     ?.filter?.(
-      (p: any) => p.discount_price && Number(p.discount_price) < Number(p.price)
+      (p: any) =>
+        p.discount_price && Number(p.discount_price) < Number(p.price),
     )
     ?.slice(0, 10);
 });
@@ -124,7 +126,7 @@ const endTime = computed(() => {
 ///// functions /////
 
 const media = computed(() =>
-  getBannerAndSlider((data.value?.data?.media_blocks as MediaBlock[]) || [])
+  getBannerAndSlider((data.value?.data?.media_blocks as MediaBlock[]) || []),
 );
 
 ///// watchers /////
@@ -158,7 +160,7 @@ const media = computed(() =>
 
       <widgetListCategory
         title="خرید براساس دسته‌بندی"
-        :items="toDeep2Length(dataCategory?.data as Category[] ?? [])"
+        :items="toDeep2Length((dataCategory?.data as Category[]) ?? [])"
         :loading="loadingCategory"
         class="mt-4 lg:mt-8"
       >
@@ -298,4 +300,3 @@ const media = computed(() =>
     </div>
   </div>
 </template>
-`

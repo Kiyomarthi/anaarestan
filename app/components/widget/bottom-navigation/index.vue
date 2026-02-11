@@ -32,25 +32,27 @@ const isActive = (href: string) => {
 </script>
 
 <template>
-  <nav
-    class="fixed bottom-4 left-4 right-4 z-50 rounded-2xl border border-gray-300 lg:hidden"
-    style="backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.9)"
+  <WidgetGlass
+    :ui="{
+      container:
+        'fixed bottom-4 left-4 right-4 z-50 rounded-[30px] lg:hidden bg-white/50',
+    }"
   >
-    <div class="flex items-center justify-around shadow-lg rounded-2xl p-2">
+    <nav class="flex items-center gap-1 justify-around">
       <NuxtLink
         v-for="item in navItems"
         :key="item.href"
         :to="item.href"
         :class="[
-          'flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-xl transition-colors',
+          'flex flex-col flex-1 items-center justify-center gap-1 px-4 py-2 rounded-[30px] transition-colors',
           isActive(item.href)
-            ? 'text-primary-500 bg-primary-50'
-            : 'text-gray-600 hover:text-primary-500',
+            ? 'text-primary-500 bg-primary-100/50'
+            : 'text-black hover:text-primary-500',
         ]"
       >
         <UIcon :name="item.icon" class="text-xl" />
         <span class="text-xs font-medium text-center">{{ item.label }}</span>
       </NuxtLink>
-    </div>
-  </nav>
+    </nav>
+  </WidgetGlass>
 </template>

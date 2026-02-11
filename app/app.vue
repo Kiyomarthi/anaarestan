@@ -10,12 +10,12 @@
           :header-class="!user.alert ? 'hidden!' : ''"
         >
           <template v-if="user.alert" #title>
-            <div class="pl-10">
+            <div class="px-8">
               <UAlert
                 :title="user.alert"
                 icon="i-lucide-info"
                 color="info"
-                variant="outline"
+                variant="subtle"
               />
             </div>
           </template>

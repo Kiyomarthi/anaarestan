@@ -1,5 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
+  pageTransition: { name: "fade", mode: "out-in" },
   noHeader: true,
   noFooter: true,
   noBottomNavigation: true,
@@ -24,7 +25,7 @@ const handleLogin = () => {
           color="neutral"
           icon="i-lucide-arrow-right"
           :ui="{
-            base: 'absolute right-3 top-3'
+            base: 'absolute right-3 top-3',
           }"
           @click="$router.back()"
         />

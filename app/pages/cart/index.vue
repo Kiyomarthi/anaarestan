@@ -2,6 +2,9 @@
 ///// imports /////
 
 ///// page meta /////
+definePageMeta({
+  pageTransition: { name: "fade", mode: "out-in" },
+});
 
 ///// props/emits /////
 
@@ -19,7 +22,7 @@
 </script>
 
 <template>
-  <div>
+  <div class="h-[1000px] bg-error">
     <!--  -->
   </div>
 </template>
