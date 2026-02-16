@@ -11,6 +11,7 @@ const props = withDefaults(
   defineProps<{
     ui?: Ui;
     roundedClass?: string;
+    class?: string;
   }>(),
   {
     ui: () => ({
@@ -26,8 +27,9 @@ const baseClassMerged = computed(() =>
 );
 const containerClassMerged = computed(() =>
   twMerge(
-    "flex flex-col gap-[25px] bg-white/50 justify-center overflow-hidden shadow-[0_0_1px_1px_#d3d3d3]",
+    "flex flex-col gap-[25px] bg-white/20 justify-center overflow-hidden shadow-[0_0_10px_-2px_#dfdfdf]",
     props.roundedClass,
+    props.class,
     props.ui?.container,
   ),
 );
@@ -36,11 +38,11 @@ const containerClassMerged = computed(() =>
 <template>
   <div :class="containerClassMerged">
     <div
-      class="flex font-semibold overflow-hidden text-black cursor-pointer transition-all duration-[400ms] ease-[cubic-bezier(0.175,0.885,0.32,2.2)]"
+      class="flex font-semibold overflow-hidden text-black cursor-pointer transition-all duration-400 ease-[cubic-bezier(0.175,0.885,0.32,2.2)]"
       :class="roundedClass"
     >
       <div
-        class="absolute z-0 inset-0 backdrop-blur-[5px] [filter:url(#glass-distortion)] overflow-hidden isolate"
+        class="absolute z-0 inset-0 backdrop-blur-[5px] filter-[url(#glass-distortion)] overflow-hidden isolate"
         :class="roundedClass"
       ></div>
       <div

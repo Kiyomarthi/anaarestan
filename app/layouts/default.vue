@@ -3,6 +3,9 @@ const route = useRoute();
 const noHeader = computed(() => route.meta?.noHeader);
 const noFooter = computed(() => route.meta?.noFooter);
 const noBottomNavigation = computed(() => route.meta?.noBottomNavigation);
+const hideBottomNavigationByScroll = computed(
+  () => route.meta?.hideBottomNavigationByScroll,
+);
 const noMargin = computed(() => route.meta?.noMargin);
 
 const { hidden } = useHideScroll(5);
@@ -31,6 +34,11 @@ const { hidden } = useHideScroll(5);
       />
     </div>
 
-    <WidgetBottomNavigation v-if="!noBottomNavigation" />
+    {{ hidden && hideBottomNavigationByScroll }}
+    <WidgetBottomNavigation
+      v-if="!noBottomNavigation"
+      class="with-transition"
+      :class="{ 'translate-y-18.75': hidden && hideBottomNavigationByScroll }"
+    />
   </div>
 </template>

@@ -303,6 +303,7 @@ export const useCartStore = defineStore(
     const clearCart = () => {
       cart.value = null;
       setCartId(null);
+      console.log("cart: clear");
     };
 
     return {

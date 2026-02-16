@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 import { useCartStore } from "~/stores/cart";
 import { calculatePrice } from "~~/shared/utils/format";
 import type { Variant } from "~~/shared/utils/variant";
@@ -38,6 +39,7 @@ const router = useRouter();
 ///// composables/stores /////
 const cartStore = useCartStore();
 const toast = useToast();
+const { lgAndUp } = useBreakpoints();
 
 ///// computed /////
 const variantPrice = computed(() => {
@@ -154,6 +156,7 @@ const goToCheckout = () => {
   <UCard
     :ui="{
       body: 'p-4 sm:p-4',
+      root: 'bg-transparent lg:bg-white ring-0 lg:ring z-10',
     }"
   >
     <!-- <template #header>
@@ -163,10 +166,12 @@ const goToCheckout = () => {
         </div>
       </template> -->
 
-    <div class="space-y-4">
-      <div>
+    <div
+      class="flex gap-3 flex-row-reverse justify-between lg:block lg:space-y-4"
+    >
+      <div class="flex items-center lg:block">
         <!-- Stock Status -->
-        <div class="mb-4">
+        <div v-if="lgAndUp" class="mb-4">
           <div v-if="isInStock" class="flex items-end gap-1 text-green-600">
             <UIcon name="i-lucide-check-circle" class="size-5" />
             <span class="text-sm font-medium">موجود در انبار</span>
@@ -181,8 +186,10 @@ const goToCheckout = () => {
         </div>
         <!-- Price -->
         <div class="flex justify-between">
-          <div class="text-xs text-gray-600 mb-2">جزئیات قیمت:</div>
-          <div class="flex items-center gap-3 mb-4">
+          <div v-if="lgAndUp" class="text-xs text-gray-600 mb-2">
+            جزئیات قیمت:
+          </div>
+          <div class="lg:flex items-center gap-3 lg:mb-4">
             <div class="flex flex-col">
               <div
                 v-if="discountPrice"
@@ -205,7 +212,9 @@ const goToCheckout = () => {
         </div>
       </div>
 
-      <div class="flex gap-2 pt-4">
+      <div
+        class="flex flex-col lg:flex-row items-center lg:items-start flex-1 gap-2 lg:pt-4"
+      >
         <WidgetCounter
           v-if="quantity"
           v-model="quantity"
@@ -221,7 +230,7 @@ const goToCheckout = () => {
           icon="i-lucide-shopping-cart"
           class="flex-1"
           :ui="{
-            base: 'h-10 justify-center w-full',
+            base: 'py-3 justify-center w-full',
             label: 'text-[12px] whitespace-normal! text-start!',
             leadingIcon: 'size-4',
           }"

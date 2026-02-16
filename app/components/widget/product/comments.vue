@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useTimeout } from "~/composables/utils/useTimeout";
+
 ///// imports /////
 
 ///// props/emits /////
@@ -21,6 +23,7 @@ const { fetch: apiFetch } = useApiRequest();
 const userStore = useUserStore();
 
 ///// composables/stores /////
+const { start } = useTimeout();
 
 ///// computed /////
 
@@ -82,6 +85,23 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("fa-IR");
 };
 
+const handleShowCommentForm = () => {
+  if (!userStore.isLoggedIn) {
+    userStore.modal = true;
+    userStore.alert = "برای ثبت نظر ابتدا وارد حساب کاربری خود شود.";
+    userStore.doAfterLogin = async () => {
+      showCommentForm.value = true;
+      start(() => {
+        scrollToId("comments");
+      }, 200);
+    };
+
+    return;
+  }
+
+  showCommentForm.value = true;
+};
+
 ///// watchers /////
 
 ///// lifecycle /////
@@ -91,22 +111,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div id="comments" class="space-y-6">
     <div class="flex items-center justify-between">
       <h2 class="text-xl font-bold text-gray-900">
         نظرات و امتیازات
-        <span
-          v-if="commentsCount"
-          class="text-sm font-normal text-gray-500"
-        >
+        <span v-if="commentsCount" class="text-sm font-normal text-gray-500">
           ({{ commentsCount }})
         </span>
       </h2>
       <UButton
-        v-if="userStore.isLoggedIn && !showCommentForm"
+        v-if="!showCommentForm"
         variant="outline"
         label="ثبت نظر"
-        @click="showCommentForm = true"
+        @click="handleShowCommentForm"
       />
     </div>
 
@@ -116,7 +133,7 @@ onMounted(() => {
       class="border border-gray-200 rounded-lg p-4 space-y-4"
     >
       <div class="flex items-center justify-between">
-        <h3 class="font-medium">ثبت نظر جدید</h3>
+        <h3 class="font-bold text-lg">ثبت نظر جدید</h3>
         <UButton
           variant="ghost"
           icon="i-lucide-x"
@@ -126,15 +143,24 @@ onMounted(() => {
       </div>
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium mb-2">امتیاز</label>
+          <label class="block text-sm font-medium mb-2"
+            >امتیاز: {{ commentForm.rating }}</label
+          >
           <div class="flex gap-1">
             <UButton
               v-for="i in 5"
               :key="i"
-              :variant="commentForm.rating >= i ? 'solid' : 'outline'"
+              variant="link"
               :color="commentForm.rating >= i ? 'yellow' : 'gray'"
-              size="sm"
-              icon="i-lucide-star"
+              size="lg"
+              :icon="commentForm.rating >= i ? 'i-ph-star-fill' : 'i-ph-star'"
+              :ui="{
+                leadingIcon: [
+                  commentForm.rating >= i ? 'text-yellow-500' : 'text-gray-500',
+                  'size-7',
+                ],
+                base: 'p-1',
+              }"
               @click="commentForm.rating = i"
             />
           </div>
@@ -147,26 +173,23 @@ onMounted(() => {
             rows="4"
           />
         </div>
-        <div class="flex gap-2">
-          <UButton
-            :loading="submitting"
-            label="ثبت نظر"
-            @click="submitComment"
-          />
+        <div class="flex gap-2 justify-end">
           <UButton
             variant="ghost"
             label="انصراف"
             @click="showCommentForm = false"
+          />
+          <UButton
+            :loading="submitting"
+            label="ثبت نظر"
+            @click="submitComment"
           />
         </div>
       </div>
     </div>
 
     <!-- Comments List -->
-    <div
-      v-if="loading"
-      class="flex justify-center py-8"
-    >
+    <div v-if="loading" class="flex justify-center py-8">
       <BaseLoader variant="spinner" />
     </div>
     <div
@@ -175,10 +198,7 @@ onMounted(() => {
     >
       هنوز نظری ثبت نشده است
     </div>
-    <div
-      v-else
-      class="space-y-4"
-    >
+    <div v-else class="space-y-4">
       <div
         v-for="comment in comments"
         :key="comment.id"
@@ -187,22 +207,25 @@ onMounted(() => {
         <div class="flex items-start gap-3">
           <div class="flex-1">
             <div class="flex items-center gap-2 mb-2">
-              <span class="font-medium">{{ comment.user_full_name || "کاربر" }}</span>
+              <span class="font-medium">{{
+                comment.user_full_name || "کاربر"
+              }}</span>
               <div class="flex items-center gap-1">
                 <UIcon
                   v-for="i in 5"
                   :key="i"
-                  name="i-lucide-star"
-                  :class="i <= comment.rating ? 'text-yellow-500' : 'text-gray-300'"
+                  :name="i <= comment.rating ? 'i-ph-star-fill' : 'i-ph-star'"
+                  :class="
+                    i <= comment.rating ? 'text-yellow-500' : 'text-gray-300'
+                  "
                   class="size-4"
                 />
               </div>
-              <span class="text-xs text-gray-500">{{ formatDate(comment.created_at) }}</span>
+              <span class="text-xs text-gray-500">{{
+                formatDate(comment.created_at)
+              }}</span>
             </div>
-            <p
-              v-if="comment.comment"
-              class="text-gray-700"
-            >
+            <p v-if="comment.comment" class="text-gray-700">
               {{ comment.comment }}
             </p>
           </div>
@@ -211,4 +234,3 @@ onMounted(() => {
     </div>
   </div>
 </template>
-

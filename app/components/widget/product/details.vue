@@ -56,7 +56,7 @@ const share = async () => {
 <template>
   <div class="space-y-4">
     <div>
-      <h1 class="text-h4 font-bold mb-4">
+      <h1 class="text-h3 font-bold mb-4">
         {{ title }}
       </h1>
 
@@ -88,8 +88,6 @@ const share = async () => {
           :is-favorite
         />
       </div>
-
-     
     </div>
   </div>
 </template>

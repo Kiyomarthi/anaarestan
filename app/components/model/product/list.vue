@@ -53,7 +53,7 @@ const sortModel = ref<ItemType>(
     : {
         label: "جدیدترین",
         key: "newest",
-      }
+      },
 );
 
 const mobileFilterFields = [
@@ -97,7 +97,7 @@ await fetchCategory(
       noPaginate: "true",
       search: route.query?.search,
     },
-  }
+  },
 );
 
 // TODO: check this => 301, ...
@@ -108,7 +108,7 @@ if (categoryData.value?.data?.slug !== route.params?.slug && !props.noCategory)
     {
       redirectCode: 301,
       replace: true,
-    }
+    },
   );
 
 const {
@@ -118,7 +118,7 @@ const {
 } = useCacheFetch<ApiResponse<ProductRes[]>>();
 
 const pageURL = computed(() =>
-  !props.noCategory && route.params?.id ? route.params?.id : "list"
+  !props.noCategory && route.params?.id ? route.params?.id : "list",
 );
 
 await fetch(`/api/page/${pageURL.value}`, {
@@ -155,11 +155,11 @@ const {
     threshold: 0.1,
     rootMargin: "100px",
   },
-  fetchProductRes
+  fetchProductRes,
 );
 
 const media = computed(() =>
-  getBannerAndSlider((data.value?.data?.media_blocks as MediaBlock[]) || [])
+  getBannerAndSlider((data.value?.data?.media_blocks as MediaBlock[]) || []),
 );
 
 const hasFilter = computed(() => {
@@ -222,6 +222,11 @@ const clearSearch = () => {
   router.push({ path: route.path, query: {} });
 };
 
+const showModal = (val: string) => {
+  filterField.value = val;
+  mobileFilterModal.value = true;
+};
+
 ///// watchers /////
 
 ///// lifecycle /////
@@ -231,7 +236,7 @@ watch(
     debouncedFetch();
     router.push({ path: route.path, query: { sort: sortModel.value?.key } });
   },
-  { deep: true }
+  { deep: true },
 );
 watch(
   () => route.query?.search,
@@ -249,13 +254,11 @@ watch(
           noPaginate: "true",
           search: route.query?.search,
         },
-      }
+      },
     );
     items.value = await fetchProductRes().then((res) => res.data);
-  }
+  },
 );
-
-
 </script>
 
 <template>
@@ -313,7 +316,7 @@ watch(
     </WidgetListCategory>
     <div class="lg:grid grid-cols-4 mt-2 lg:mt-6 gap-3">
       <aside
-        class="col-span-1 sticky bg-default/75 backdrop-blur z-1 lg:z-1 top-0 lg:top-3 border-b -mx-4 lg:mx-0 lg:border border-default lg:rounded-2xl py-3 lg:p-4 h-fit with-transition mb-2 lg:mb-0"
+        class="col-span-1 lg:w-full sticky lg:bg-default/75 z-1 lg:z-1 top-1 lg:top-3 lg:border-b -mx-4 lg:mx-0 lg:border border-default lg:rounded-2xl py-3 px-8 lg:p-4 lg:px-4 h-fit with-transition mb-2 lg:mb-0"
         :class="{
           'translate-y-16.75 lg:translate-y-28': !hidden && scrollY > 520,
         }"
@@ -338,13 +341,18 @@ watch(
           v-model:open="mobileFilterModal"
           side="bottom"
           :ui="{
-            overlay: 'bg-black/35 backdrop-blur-xs',
+            overlay: 'bg-black/35 backdrop-blur',
             header: 'hidden!',
             body: 'relative',
             content: 'rounded-t-[10px]',
           }"
         >
-          <div class="px-4 flex gap-2 overflow-auto scroll-hidden w-fit">
+          <WidgetGlass
+            :ui="{
+              base: 'p-2 flex gap-2 overflow-auto scroll-hidden w-fit relative!',
+              container: 'bg-white/25 relative!',
+            }"
+          >
             <u-button
               v-for="(filed, index) in mobileFilterFields"
               :key="index"
@@ -369,10 +377,17 @@ watch(
               "
               :ui="{
                 label: 'text-[12px]',
+                base: [
+                  'active:bg-white/20 hover:bg-white/20 rounded-[30px]',
+                  (hasFilter && filed.value === 'all') ||
+                  (sortModel.key !== 'newest' && filed.value === 'sort')
+                    ? ''
+                    : 'bg-white/30',
+                ],
               }"
-              @click="filterField = filed.value"
+              @click="showModal(filed.value)"
             />
-          </div>
+          </WidgetGlass>
           <template #body>
             <template v-if="filterField === 'all'">
               <div class="text-sm lg:text-lg font-bold mb-5">فیلترها</div>

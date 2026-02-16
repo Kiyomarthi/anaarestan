@@ -7,7 +7,7 @@ import { useCartStore } from "~/stores/cart";
 
 ///// page meta /////
 definePageMeta({
-  noBottomNavigation: true,
+  hideBottomNavigationByScroll: true,
 });
 
 ///// props/emits /////
@@ -54,7 +54,7 @@ const breadCrumbs = computed(() => {
     {
       id: 47,
       page_id: 7,
-      label: "فروشگاه انارستان",
+      label: "انارستان",
       to: "/",
       position: 1,
       is_active: 1,
@@ -65,15 +65,15 @@ const breadCrumbs = computed(() => {
 
   if (data.value?.data?.breadcrumbs) {
     data.value.data.breadcrumbs.forEach((crumb: any, index: number) => {
-      crumbs.push({
+      return crumbs.push({
         id: 48 + index,
         page_id: 7,
         label: crumb.title,
         to: `/categories/${data.value?.data?.code}/${crumb.slug}`,
         position: index + 2,
         is_active: 1,
-        created_at: "2026-01-16T08:55:40.000Z",
-        updated_at: "2026-01-16T08:55:40.000Z",
+        created_at: "",
+        updated_at: "",
       });
     });
   }
@@ -223,13 +223,13 @@ onMounted(async () => {
             <!-- Key Attributes -->
             <div
               v-if="data?.data?.products_attribute?.length > 0"
-              class="grid grid-cols-2 gap-3 pt-4 border-t border-gray-200"
+              class="grid grid-cols-2 lg:grid-cols-3 gap-3 py-4 border-t border-gray-200"
             >
               <div
-                v-for="attr in data?.data?.products_attribute?.slice(0, 4) ||
+                v-for="attr in data?.data?.products_attribute?.slice(0, 6) ||
                 []"
                 :key="attr.id"
-                class="flex flex-col"
+                class="flex flex-col bg-neutral-200 rounded-md p-2"
               >
                 <span class="text-xs text-gray-500">{{ attr.name }}</span>
                 <span class="text-sm font-medium text-gray-900">
@@ -243,18 +243,20 @@ onMounted(async () => {
         <!-- Product Description -->
         <div
           v-if="data?.data?.description"
-          class="border-t border-gray-200 pt-6"
+          class="border-t border-gray-200 pt-6 lg:mt-3"
         >
-          <WidgetProductDescription
-            :description="data?.data?.description"
-            :short-description="data?.data?.short_description"
+          <h2 class="text-xl font-bold text-gray-900">توضیحات محصول</h2>
+          <WidgetTextMore
+            :loading="loading"
+            :content="data?.data?.description"
+            :max-lines="5"
           />
         </div>
 
         <!-- Product Attributes -->
         <div
           v-if="data?.data?.products_attribute?.length > 0"
-          class="border-t border-gray-200 pt-6"
+          class="border-t border-gray-200 mt-6 py-6"
         >
           <WidgetProductAttributes
             :attributes="data?.data?.products_attribute"
@@ -304,19 +306,27 @@ onMounted(async () => {
     </div>
 
     <!-- Cart Modal (Mobile) -->
-    <ModelProductCart
+    <WidgetGlass
       v-if="!lgAndUp"
-      v-model:quantity="quantity"
-      :product-id="data?.data?.id"
-      :product-code="data?.data?.code"
-      :selected-variant="selectedVariant"
-      :stock="currentStock"
-      :product-price="currentOriginalPrice"
-      :product-stock="currentStock"
-      :discount-price="
-        selectedVariant?.discount_price || data?.data?.discount_price || null
-      "
-      @close="showCartModal = false"
-    />
+      :ui="{
+        base: 'p-0',
+        container: `
+          fixed bottom-22.5 left-4 right-4 z-100 with-transition ${hidden ? 'translate-y-18.75' : ''}`,
+      }"
+    >
+      <ModelProductCart
+        v-model:quantity="quantity"
+        :product-id="data?.data?.id"
+        :product-code="data?.data?.code"
+        :selected-variant="selectedVariant"
+        :stock="currentStock"
+        :product-price="currentOriginalPrice"
+        :product-stock="currentStock"
+        :discount-price="
+          selectedVariant?.discount_price || data?.data?.discount_price || null
+        "
+        @close="showCartModal = false"
+      />
+    </WidgetGlass>
   </div>
 </template>
