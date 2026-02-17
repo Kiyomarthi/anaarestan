@@ -30,7 +30,7 @@ const props = withDefaults(
     fetchPriority: "low",
     showLoadingOverlay: true,
     class: "",
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -53,18 +53,18 @@ function handleImageError(e?: Event) {
 }
 
 const wrapperClasses = computed(() =>
-  twMerge(props.wrapperClass, props.aspect, props.class)
+  twMerge(props.wrapperClass, props.aspect, props.class),
 );
 
 const imageClasses = computed(() =>
-  twMerge("w-full h-full object-cover", props.imageClass)
+  twMerge("w-full h-full object-cover", props.imageClass),
 );
 
 watch(
   () => props.src,
   () => {
     isLoading.value = true;
-  }
+  },
 );
 
 if (props.preload)

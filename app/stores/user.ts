@@ -24,7 +24,6 @@ export const useUserStore = defineStore(
       user.value = null;
       createdAt.value = null;
       cartStore?.clearCart();
-      console.log("user: logout");
     }
 
     const isLoggedIn = computed(() => {

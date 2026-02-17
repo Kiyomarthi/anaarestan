@@ -246,7 +246,8 @@
   font-size: 15px;
 }
 .text-container table {
-  display: table;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid #ccc !important;
   border-collapse: separate;
   border-radius: 12px;
@@ -254,7 +255,6 @@
   margin: 25px 0;
   overflow: hidden;
   text-align: center;
-  width: 100%;
   overflow-x: auto;
   min-width: 0 !important;
 }
@@ -279,6 +279,8 @@
   border-width: 1px;
   border-style: solid;
   border-color: #d1d5db;
+  /* white-space: nowrap;
+  min-width: max-content; */
 }
 
 .text-container thead th {
@@ -330,14 +332,6 @@
 
 /* Make tables responsive: keep table layout on desktop/tablet, switch to block on mobile */
 @media (max-width: 768px) {
-  .text-container table {
-    display: block;
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Prevent cells from wrapping too aggressively when scrolling */
   .text-container th,
   .text-container td {
     white-space: no-wrap;

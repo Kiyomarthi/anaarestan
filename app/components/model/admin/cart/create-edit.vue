@@ -58,6 +58,7 @@ const {
 const { loading: itemLoading, fetch: sendItemRequest } = useApiRequest<any>();
 
 const userSearch = ref("");
+const user = useUserStore();
 const productSearch = ref("");
 
 const loadUsers = async () => {
@@ -182,8 +183,6 @@ const onSubmit = (e: FormSubmitEvent<FormState>) => {
     }));
   }
 
-  
-
   emit("submit", payload);
 };
 
@@ -269,7 +268,7 @@ const addItemApi = async () => {
   const result = await sendItemRequest("/api/cart-items", {
     method: "POST",
     body: {
-      cart_id: cartId.value,
+      cart_id: user.isLoggedIn ? cartId.value : null,
       product_id: Number(itemForm.product_id),
       product_variant_id: itemForm.product_variant_id
         ? Number(itemForm.product_variant_id)

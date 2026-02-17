@@ -11,7 +11,6 @@ const props = defineProps<{
 
 ///// refs /////
 const comments = ref<any[]>([]);
-const loading = ref(false);
 const submitting = ref(false);
 const showCommentForm = ref(false);
 const commentForm = reactive({
@@ -24,32 +23,30 @@ const userStore = useUserStore();
 
 ///// composables/stores /////
 const { start } = useTimeout();
+const {
+  fetch: fetchComments,
+  loading,
+  data: commentsResponse,
+} = useCacheFetch<{
+  success: boolean;
+  data: any[];
+  meta?: any;
+}>();
 
 ///// computed /////
 
 ///// functions /////
 const loadComments = async () => {
-  loading.value = true;
-  try {
-    const response = await $fetch<{
-      success: boolean;
-      data: any[];
-      meta?: any;
-    }>(`/api/comments`, {
-      params: {
-        product_id: props.productId,
-        status: "approved",
-        limit: 10,
-      },
-    });
+  await fetchComments(`/api/comments`, {
+    params: {
+      product_id: props.productId,
+      status: "approved",
+      limit: 10,
+    },
+  });
 
-    if (response.success) {
-      comments.value = response.data || [];
-    }
-  } catch (error) {
-    console.error("Error loading comments:", error);
-  } finally {
-    loading.value = false;
+  if (commentsResponse.value?.success) {
+    comments.value = commentsResponse.value.data || [];
   }
 };
 
@@ -105,9 +102,7 @@ const handleShowCommentForm = () => {
 ///// watchers /////
 
 ///// lifecycle /////
-onMounted(() => {
-  loadComments();
-});
+loadComments();
 </script>
 
 <template>
