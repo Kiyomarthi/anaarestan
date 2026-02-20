@@ -52,6 +52,9 @@ const loadComments = async () => {
       page: page.value,
       perPage: perPage.value,
     },
+    headers: {
+      cache: "true",
+    },
   });
 
   if (commentsResponse.value?.success) {
@@ -122,7 +125,7 @@ watch(
       return;
     }
     loadComments();
-  }
+  },
 );
 
 watch([page, perPage], () => {

@@ -16,6 +16,9 @@ fetch("/api/products", {
     stock_status: "available",
     limit: "15",
   },
+  headers: {
+    cache: "true",
+  },
 });
 </script>
 

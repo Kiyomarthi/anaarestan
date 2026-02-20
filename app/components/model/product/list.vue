@@ -173,6 +173,9 @@ const hasFilter = computed(() => {
 ///// functions /////
 async function fetchProductRes() {
   await fetchProduct("/api/products", {
+    headers: {
+      cache: true,
+    },
     params: {
       limit: "30",
       sort: sortModel.value?.key,

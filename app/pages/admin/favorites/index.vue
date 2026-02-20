@@ -78,6 +78,9 @@ const loadProducts = async () => {
       page: 1,
       limit: 20,
     },
+    headers: {
+    cache: "true",
+  },
   });
 };
 

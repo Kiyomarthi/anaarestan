@@ -59,10 +59,10 @@ const products = computed(() => productsData.value?.data || []);
 const categories = computed(() => categoriesData.value?.data || []);
 
 const hasResults = computed(
-  () => products.value.length > 0 || categories.value.length > 0
+  () => products.value.length > 0 || categories.value.length > 0,
 );
 const isLoading = computed(
-  () => productsLoading.value || categoriesLoading.value
+  () => productsLoading.value || categoriesLoading.value,
 );
 
 const performSearch = async (query: string) => {
@@ -107,6 +107,9 @@ fetchDiscountProduct("/api/products", {
     stock_status: "available",
     limit: "3",
   },
+  headers: {
+      cache: "true",
+    },
 });
 
 const handleSearch = () => {
@@ -184,7 +187,7 @@ watch(
   (val) => {
     searchQuery.value = val as string;
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
