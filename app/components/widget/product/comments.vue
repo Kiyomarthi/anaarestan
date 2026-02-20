@@ -11,6 +11,14 @@ const props = defineProps<{
 
 ///// refs /////
 const comments = ref<any[]>([]);
+const page = ref(1);
+const perPage = ref(10);
+const commentsMeta = ref<{
+  page?: number;
+  limit?: number;
+  total?: number;
+  totalPages?: number;
+} | null>(null);
 const submitting = ref(false);
 const showCommentForm = ref(false);
 const commentForm = reactive({
@@ -41,13 +49,19 @@ const loadComments = async () => {
     params: {
       product_id: props.productId,
       status: "approved",
-      limit: 10,
+      page: page.value,
+      perPage: perPage.value,
     },
   });
 
   if (commentsResponse.value?.success) {
     comments.value = commentsResponse.value.data || [];
+    commentsMeta.value = commentsResponse.value.meta || null;
+    return;
   }
+
+  comments.value = [];
+  commentsMeta.value = null;
 };
 
 const submitComment = async () => {
@@ -100,6 +114,20 @@ const handleShowCommentForm = () => {
 };
 
 ///// watchers /////
+watch(
+  () => props.productId,
+  () => {
+    if (page.value !== 1) {
+      page.value = 1;
+      return;
+    }
+    loadComments();
+  }
+);
+
+watch([page, perPage], () => {
+  loadComments();
+});
 
 ///// lifecycle /////
 loadComments();
@@ -226,6 +254,18 @@ loadComments();
           </div>
         </div>
       </div>
+    </div>
+
+    <div
+      v-if="commentsMeta?.total && commentsMeta.total > 0"
+      class="mt-6 flex items-center justify-center"
+    >
+      <UPagination
+        v-model:page="page"
+        :items-per-page="perPage"
+        :total="commentsMeta.total"
+        :disabled="loading"
+      />
     </div>
   </div>
 </template>

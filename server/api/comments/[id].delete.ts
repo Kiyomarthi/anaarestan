@@ -14,7 +14,7 @@ import { removeCacheByPattern } from "~~/server/utils/cache";
 export default defineEventHandler(async (event) => {
   const db = await getDB();
   await removeCacheByPattern(`${CACHE_KEY.comment}:`);
-  await removeCacheByPattern(`${CACHE_KEY.product}:`);
+  // await removeCacheByPattern(`${CACHE_KEY.product}:`);
   const id = getRouterParam(event, "id");
 
   if (!id) {
