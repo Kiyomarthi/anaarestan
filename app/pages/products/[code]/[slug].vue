@@ -10,7 +10,7 @@ import { useConfigSeo } from "~/composables/utils/useConfigSeo";
 definePageMeta({
   hideBottomNavigationByScroll: true,
   noMargin: true,
-  navHideTopScroll: 400,
+  navHideTopScrollMobile: 400,
 });
 
 ///// props/emits /////

@@ -1,13 +1,19 @@
 <script setup lang="ts">
+import { useBreakpoints } from "~/composables/utils/useBreakpoints";
+
 const route = useRoute();
 const noHeader = computed(() => route.meta?.noHeader);
 const noFooter = computed(() => route.meta?.noFooter);
 const navHideTopScroll = computed(() => route.meta?.navHideTopScroll);
+const navHideTopScrollMobile = computed(
+  () => route.meta?.navHideTopScrollMobile,
+);
 const noBottomNavigation = computed(() => route.meta?.noBottomNavigation);
 const hideBottomNavigationByScroll = computed(
   () => route.meta?.hideBottomNavigationByScroll,
 );
 const noMargin = computed(() => route.meta?.noMargin);
+const { mdAndDown } = useBreakpoints();
 
 const { hidden, scrollY } = useHideScroll(5);
 </script>
@@ -20,7 +26,10 @@ const { hidden, scrollY } = useHideScroll(5);
       :class="{
         '-translate-y-full':
           hidden &&
-          (navHideTopScroll ? scrollY > (navHideTopScroll as number) : true),
+          (navHideTopScroll ? scrollY > (navHideTopScroll as number) : true) &&
+          (navHideTopScrollMobile && mdAndDown
+            ? scrollY > (navHideTopScrollMobile as number)
+            : true),
       }"
     />
     <main
