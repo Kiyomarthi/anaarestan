@@ -1,5 +1,8 @@
 import { getDB } from "~~/server/db";
 import { getOptionalAuth } from "~~/server/utils/auth";
+import { buildCacheKey } from "~~/server/utils/common";
+import { getCachedData, setCacheData } from "~~/server/utils/cache";
+import { CACHE_KEY } from "~~/shared/utils/cache";
 
 /**
  * GET /api/comments
@@ -10,10 +13,13 @@ import { getOptionalAuth } from "~~/server/utils/auth";
  * - page, limit/per/perPage, noPaginate
  */
 export default defineEventHandler(async (event) => {
-  const db = await getDB();
   const query = getQuery(event);
   const auth = getOptionalAuth(event) as any | null;
   const isAdmin = auth?.role === "admin";
+  const isCache = getHeader(event, "cache");
+  const cacheScope = isAdmin ? "admin" : "public";
+  const cacheKey =
+    buildCacheKey(event, `${CACHE_KEY.comment}:${cacheScope}`) || null;
 
   const noPaginate = query.noPaginate === "true" || query.noPaginate === true;
   const page = parseInt(query.page as string) || 1;
@@ -30,52 +36,55 @@ export default defineEventHandler(async (event) => {
   const userIdFilter =
     isAdmin && query.user_id ? Number(query.user_id) : null;
 
-  // Resolve product_id if code/slug provided
-  let productId: number | null = null;
-  if (productIdRaw && !Number.isNaN(productIdRaw)) productId = productIdRaw;
-  if (!productId && (productCode || productSlug)) {
-    const [pRows] = (await db.query(
-      `SELECT id FROM products WHERE ${productCode ? "code" : "slug"} = ? LIMIT 1`,
-      [productCode ?? productSlug]
-    )) as any[];
-    productId = pRows?.[0]?.id ?? null;
-  }
+  async function fetchComments() {
+    const db = await getDB();
 
-  let whereClause = "1=1";
-  const params: unknown[] = [];
-
-  if (productId) {
-    whereClause += " AND c.product_id = ?";
-    params.push(productId);
-  }
-
-  if (userIdFilter && !Number.isNaN(userIdFilter)) {
-    whereClause += " AND c.user_id = ?";
-    params.push(userIdFilter);
-  }
-
-  // Status filter
-  const statusQuery = String(query.status || "").toLowerCase();
-  if (!isAdmin) {
-    // non-admin: only approved
-    whereClause += " AND c.status = 1";
-  } else {
-    // admin default: approved, unless explicitly asked
-    if (!statusQuery || statusQuery === "approved") {
-      whereClause += " AND c.status = 1";
-    } else if (statusQuery === "pending") {
-      whereClause += " AND c.status = 0";
-    } else if (statusQuery === "rejected") {
-      whereClause += " AND c.status = 2";
-    } else if (statusQuery === "all") {
-      // no filter
-    } else {
-      // unknown -> default approved
-      whereClause += " AND c.status = 1";
+    // Resolve product_id if code/slug provided
+    let productId: number | null = null;
+    if (productIdRaw && !Number.isNaN(productIdRaw)) productId = productIdRaw;
+    if (!productId && (productCode || productSlug)) {
+      const [pRows] = (await db.query(
+        `SELECT id FROM products WHERE ${productCode ? "code" : "slug"} = ? LIMIT 1`,
+        [productCode ?? productSlug]
+      )) as any[];
+      productId = pRows?.[0]?.id ?? null;
     }
-  }
 
-  const selectSqlBase = `
+    let whereClause = "1=1";
+    const params: unknown[] = [];
+
+    if (productId) {
+      whereClause += " AND c.product_id = ?";
+      params.push(productId);
+    }
+
+    if (userIdFilter && !Number.isNaN(userIdFilter)) {
+      whereClause += " AND c.user_id = ?";
+      params.push(userIdFilter);
+    }
+
+    // Status filter
+    const statusQuery = String(query.status || "").toLowerCase();
+    if (!isAdmin) {
+      // non-admin: only approved
+      whereClause += " AND c.status = 1";
+    } else {
+      // admin default: approved, unless explicitly asked
+      if (!statusQuery || statusQuery === "approved") {
+        whereClause += " AND c.status = 1";
+      } else if (statusQuery === "pending") {
+        whereClause += " AND c.status = 0";
+      } else if (statusQuery === "rejected") {
+        whereClause += " AND c.status = 2";
+      } else if (statusQuery === "all") {
+        // no filter
+      } else {
+        // unknown -> default approved
+        whereClause += " AND c.status = 1";
+      }
+    }
+
+    const selectSqlBase = `
     SELECT
       c.*,
       u.full_name AS user_full_name,
@@ -90,28 +99,51 @@ export default defineEventHandler(async (event) => {
     ORDER BY c.created_at DESC
   `;
 
-  let selectSql = selectSqlBase;
-  if (!noPaginate) selectSql += ` LIMIT ${limit} OFFSET ${offset}`;
+    let selectSql = selectSqlBase;
+    if (!noPaginate) selectSql += ` LIMIT ${limit} OFFSET ${offset}`;
 
-  const [rows] = (await db.query(selectSql, params)) as any[];
+    const [rows] = (await db.query(selectSql, params)) as any[];
 
-  let total = 0;
-  let totalPages = 0;
-  if (!noPaginate) {
-    const [countRows] = (await db.query(
-      `SELECT COUNT(*) as total FROM comments c WHERE ${whereClause}`,
-      params
-    )) as any[];
-    total = countRows?.[0]?.total || 0;
-    totalPages = Math.ceil(total / limit);
-  } else {
-    total = rows?.length || 0;
+    let total = 0;
+    let totalPages = 0;
+    if (!noPaginate) {
+      const [countRows] = (await db.query(
+        `SELECT COUNT(*) as total FROM comments c WHERE ${whereClause}`,
+        params
+      )) as any[];
+      total = countRows?.[0]?.total || 0;
+      totalPages = Math.ceil(total / limit);
+    } else {
+      total = rows?.length || 0;
+    }
+
+    const response: any = { success: true, data: rows || [] };
+    response.meta = noPaginate
+      ? { total }
+      : { page, limit, total, totalPages };
+
+    return response;
   }
 
-  const response: any = { success: true, data: rows || [] };
-  response.meta = noPaginate
-    ? { total }
-    : { page, limit, total, totalPages };
+  if (isCache === "true" && cacheKey) {
+    const cached = await getCachedData(
+      event,
+      cacheKey,
+      60 * 60 * 24 * 60,
+      fetchComments
+    );
+
+    return {
+      cache: true,
+      ...cached,
+    };
+  }
+
+  const response = await fetchComments();
+
+  if (cacheKey) {
+    await setCacheData(cacheKey, response);
+  }
 
   return response;
 });

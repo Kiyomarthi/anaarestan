@@ -1,13 +1,16 @@
 import { getDB } from "~~/server/db";
-import { buildAbsoluteUrl } from "~~/server/utils/common";
+import { buildAbsoluteUrl, buildCacheKey } from "~~/server/utils/common";
+import { getCachedData, setCacheData } from "~~/server/utils/cache";
+import { CACHE_KEY } from "~~/shared/utils/cache";
 import { ApiResponse, Category } from "~~/shared/types/api";
 
 export default defineEventHandler(async (event) => {
-  const db = await getDB();
   const {
     public: { siteUrl },
   } = useRuntimeConfig();
   const query = getQuery(event);
+  const isCache = getHeader(event, "cache");
+  const cacheKey = buildCacheKey(event, CACHE_KEY.product) || null;
 
   // Pagination parameters
   const noPaginate = query.noPaginate === "true" || query.noPaginate === true;
@@ -30,151 +33,177 @@ export default defineEventHandler(async (event) => {
     : null;
   const sort = query.sort as string; // 'best-selling', 'cheapest', 'newest', 'most-expensive'
 
-  // Build WHERE clause
-  let whereClause = "1=1";
-  const params: unknown[] = [];
+  async function fetchProducts() {
+    const db = await getDB();
 
-  // Category filter
-  if (categoryId !== null && !isNaN(categoryId)) {
-    const categories = await $fetch<ApiResponse<Category>>(
-      `/api/categories/${categoryId}`,
-      {
-        method: "GET",
-        headers: {
-          cache: "true",
+    // Build WHERE clause
+    let whereClause = "1=1";
+    const params: unknown[] = [];
+
+    // Category filter
+    if (categoryId !== null && !isNaN(categoryId)) {
+      const categories = await $fetch<ApiResponse<Category>>(
+        `/api/categories/${categoryId}`,
+        {
+          method: "GET",
+          headers: {
+            cache: "true",
+          },
         },
-      }
+      );
+
+      params.push(categoryId);
+
+      whereClause += " AND ";
+      let ids: string = "";
+
+      const pushId = (categories: Category[]) => {
+        categories.forEach((category) => {
+          ids += " or category_id = ?";
+          params.push(category?.id);
+          if (category.children?.length) pushId(category.children);
+        });
+      };
+
+      pushId(categories?.data?.children as Category[]);
+
+      whereClause += `(category_id = ?${ids})`;
+    }
+
+    // Stock status filter
+    if (stockStatus === "available") {
+      whereClause += " AND stock > 0";
+    } else if (stockStatus === "unavailable") {
+      whereClause += " AND stock = 0";
+    }
+
+    // Price filters
+    if (minPrice !== null && !isNaN(minPrice)) {
+      whereClause += " AND COALESCE(discount_price, price) >= ?";
+      params.push(minPrice);
+    }
+
+    if (maxPrice !== null && !isNaN(maxPrice)) {
+      whereClause += " AND COALESCE(discount_price, price) <= ?";
+      params.push(maxPrice);
+    }
+
+    if (search) {
+      whereClause += " AND title LIKE ?";
+      params.push(`%${search}%`);
+    }
+
+    // Build ORDER BY clause
+    let orderBy = "ORDER BY created_at DESC"; // Default: newest
+
+    switch (sort) {
+      case "cheapest":
+        orderBy = "ORDER BY COALESCE(discount_price, price) ASC";
+        break;
+      case "most-expensive":
+        orderBy = "ORDER BY COALESCE(discount_price, price) DESC";
+        break;
+      case "newest":
+        orderBy = "ORDER BY created_at DESC";
+        break;
+      case "best-selling":
+        // Since we don't have sales data, we'll use stock as a proxy or keep default
+        // You can modify this later when you have sales tracking
+        orderBy = "ORDER BY stock DESC, created_at DESC";
+        break;
+      default:
+        orderBy = "ORDER BY created_at DESC";
+    }
+
+    // Select fields (excluding description)
+    const selectFields = [
+      "id",
+      "title",
+      "slug",
+      "short_description",
+      "price",
+      "discount_price",
+      "image",
+      "code",
+      "stock",
+      "status",
+      "category_id",
+      "created_at",
+      "updated_at",
+    ].join(", ");
+
+    // Build query
+    let selectSql = `SELECT ${selectFields} FROM products WHERE ${whereClause} ${orderBy}`;
+
+    // Add pagination if needed
+    if (!noPaginate) {
+      selectSql += ` LIMIT ${limit} OFFSET ${offset}`;
+    }
+
+    // Execute query
+    const [rows] = (await db.query(selectSql, params)) as any[];
+
+    // Get total count for pagination
+    let total = 0;
+    let totalPages = 0;
+
+    if (!noPaginate) {
+      const [countRows] = (await db.query(
+        `SELECT COUNT(*) as total FROM products WHERE ${whereClause}`,
+        params,
+      )) as any[];
+
+      total = (countRows as { total: number }[])[0]?.total || 0;
+      totalPages = Math.ceil(total / limit);
+    } else {
+      total = rows?.length || 0;
+    }
+
+    const dataWithAbsoluteImage = (rows || []).map((row: any) => ({
+      ...row,
+      image: buildAbsoluteUrlArvan(row.image),
+    }));
+
+    // Format response
+    const response: any = {
+      success: true,
+      data: dataWithAbsoluteImage,
+    };
+
+    if (!noPaginate) {
+      response.meta = {
+        page,
+        limit,
+        total,
+        totalPages,
+      };
+    } else {
+      response.meta = {
+        total,
+      };
+    }
+
+    return response;
+  }
+
+  if (isCache === "true" && cacheKey) {
+    const cached = await getCachedData(
+      event,
+      cacheKey,
+      60 * 60 * 24 * 60,
+      fetchProducts,
     );
 
-    params.push(categoryId);
-
-    whereClause += " AND ";
-    let ids: string = "";
-
-    const pushId = (categories: Category[]) => {
-      categories.forEach((category) => {
-        ids += " or category_id = ?";
-        params.push(category?.id);
-        if (category.children?.length) pushId(category.children);
-      });
+    return {
+      cache: true,
+      ...cached,
     };
-
-    pushId(categories?.data?.children as Category[]);
-
-    whereClause += `(category_id = ?${ids})`;
   }
 
-  // Stock status filter
-  if (stockStatus === "available") {
-    whereClause += " AND stock > 0";
-  } else if (stockStatus === "unavailable") {
-    whereClause += " AND stock = 0";
-  }
+  const response = await fetchProducts();
 
-  // Price filters
-  if (minPrice !== null && !isNaN(minPrice)) {
-    whereClause += " AND COALESCE(discount_price, price) >= ?";
-    params.push(minPrice);
-  }
-
-  if (maxPrice !== null && !isNaN(maxPrice)) {
-    whereClause += " AND COALESCE(discount_price, price) <= ?";
-    params.push(maxPrice);
-  }
-
-  if (search) {
-    whereClause += " AND title LIKE ?";
-    params.push(`%${search}%`);
-  }
-
-  // Build ORDER BY clause
-  let orderBy = "ORDER BY created_at DESC"; // Default: newest
-
-  switch (sort) {
-    case "cheapest":
-      orderBy = "ORDER BY COALESCE(discount_price, price) ASC";
-      break;
-    case "most-expensive":
-      orderBy = "ORDER BY COALESCE(discount_price, price) DESC";
-      break;
-    case "newest":
-      orderBy = "ORDER BY created_at DESC";
-      break;
-    case "best-selling":
-      // Since we don't have sales data, we'll use stock as a proxy or keep default
-      // You can modify this later when you have sales tracking
-      orderBy = "ORDER BY stock DESC, created_at DESC";
-      break;
-    default:
-      orderBy = "ORDER BY created_at DESC";
-  }
-
-  // Select fields (excluding description)
-  const selectFields = [
-    "id",
-    "title",
-    "slug",
-    "short_description",
-    "price",
-    "discount_price",
-    "image",
-    "code",
-    "stock",
-    "status",
-    "category_id",
-    "created_at",
-    "updated_at",
-  ].join(", ");
-
-  // Build query
-  let selectSql = `SELECT ${selectFields} FROM products WHERE ${whereClause} ${orderBy}`;
-
-  // Add pagination if needed
-  if (!noPaginate) {
-    selectSql += ` LIMIT ${limit} OFFSET ${offset}`;
-  }
-
-  // Execute query
-  const [rows] = (await db.query(selectSql, params)) as any[];
-
-  // Get total count for pagination
-  let total = 0;
-  let totalPages = 0;
-
-  if (!noPaginate) {
-    const [countRows] = (await db.query(
-      `SELECT COUNT(*) as total FROM products WHERE ${whereClause}`,
-      params
-    )) as any[];
-
-    total = (countRows as { total: number }[])[0]?.total || 0;
-    totalPages = Math.ceil(total / limit);
-  } else {
-    total = rows?.length || 0;
-  }
-
-  const dataWithAbsoluteImage = (rows || []).map((row: any) => ({
-    ...row,
-    image: buildAbsoluteUrlArvan(row.image),
-  }));
-
-  // Format response
-  const response: any = {
-    success: true,
-    data: dataWithAbsoluteImage,
-  };
-
-  if (!noPaginate) {
-    response.meta = {
-      page,
-      limit,
-      total,
-      totalPages,
-    };
-  } else {
-    response.meta = {
-      total,
-    };
+  if (cacheKey) {
+    await setCacheData(cacheKey, response);
   }
 
   return response;

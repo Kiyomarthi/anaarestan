@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
   const cacheKey =
     cacheKeyHeader && !search
       ? CACHE_KEY.attribute(
-          `${cacheKeyHeader}-p${page}-pp${limit}-s${search || "all"}`
+          `${cacheKeyHeader}-p${page}-pp${limit}-s${search || "all"}`,
         )
       : null;
 
@@ -37,14 +37,14 @@ export default defineEventHandler(async (event) => {
     // total count
     const [countRows] = (await db.query(
       `SELECT COUNT(*) as total FROM attributes WHERE ${whereClause}`,
-      params
+      params,
     )) as any[];
     const total = countRows?.[0]?.total || 0;
 
     // Paged attributes
     const [attributesRows] = (await db.query(
       `SELECT * FROM attributes WHERE ${whereClause} ORDER BY id ASC LIMIT ? OFFSET ?`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     )) as any[];
 
     const attributeIds = attributesRows.map((a: any) => a.id);
@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
       const placeholders = attributeIds.map(() => "?").join(",");
       [valuesRows] = (await db.query(
         `SELECT id, attribute_id, value FROM attribute_values WHERE attribute_id IN (${placeholders}) ORDER BY attribute_id ASC, id ASC`,
-        attributeIds
+        attributeIds,
       )) as any[];
     }
 
@@ -89,13 +89,12 @@ export default defineEventHandler(async (event) => {
       event,
       cacheKey,
       60 * 60 * 24 * 60, // 60 days TTL
-      fetchAttributes
+      fetchAttributes,
     );
 
     return {
-      success: true,
-      ...cached,
       cache: true,
+      ...cached,
     };
   }
 

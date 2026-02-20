@@ -28,7 +28,7 @@ const props = defineProps<{
 
 <template>
   <div class="space-y-4">
-    <h2 class="text-xl font-bold text-gray-900">ویژگی‌های محصول</h2>
+    <h2 class="text-xl font-bold text-gray-900">مشخصات</h2>
     <div class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <div

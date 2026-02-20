@@ -3,6 +3,8 @@ import { requireRole } from "~~/server/utils/permissions";
 import { validate } from "~~/shared/validation";
 import { validateBody } from "~~/server/utils/validate";
 import { buildAbsoluteUrl } from "~~/server/utils/common";
+import { CACHE_KEY } from "~~/shared/utils/cache";
+import { removeCacheByPattern } from "~~/server/utils/cache";
 
 export default defineEventHandler(async (event) => {
   const db = await getDB();
@@ -10,6 +12,8 @@ export default defineEventHandler(async (event) => {
     public: { siteUrl },
   } = useRuntimeConfig();
   const user = requireRole(event, "admin");
+
+  await removeCacheByPattern(`${CACHE_KEY.product}:`);
 
   const code = getRouterParam(event, "code");
 

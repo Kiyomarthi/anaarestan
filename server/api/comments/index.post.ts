@@ -2,6 +2,8 @@ import { getDB } from "~~/server/db";
 import { requireAuth } from "~~/server/utils/auth";
 import { validate } from "~~/shared/validation";
 import { validateBody } from "~~/server/utils/validate";
+import { CACHE_KEY } from "~~/shared/utils/cache";
+import { removeCacheByPattern } from "~~/server/utils/cache";
 
 /**
  * POST /api/comments
@@ -15,6 +17,9 @@ export default defineEventHandler(async (event) => {
   const user = requireAuth(event) as any;
   const db = await getDB();
   const body = await readBody(event);
+
+  await removeCacheByPattern(`${CACHE_KEY.comment}:`);
+  await removeCacheByPattern(`${CACHE_KEY.product}:`);
 
   validateBody(body, {
     product_id: (v) => validate(v).required().run(),

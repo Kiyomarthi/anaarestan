@@ -1,8 +1,12 @@
 import { getDB } from "~~/server/db";
 import { requireRole } from "~~/server/utils/permissions";
+import { CACHE_KEY } from "~~/shared/utils/cache";
+import { removeCacheByPattern } from "~~/server/utils/cache";
 
 export default defineEventHandler(async (event) => {
   const user = requireRole(event, "admin");
+
+  await removeCacheByPattern(`${CACHE_KEY.product}:`);
 
   const code = getRouterParam(event, "code");
 

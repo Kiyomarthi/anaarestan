@@ -277,7 +277,7 @@ webpageSchema(seoMeta.value as unknown as PageResponse);
               v-if="data?.data?.description"
               class="border-t border-gray-200 pt-6 lg:mt-3"
             >
-              <h2 class="text-xl font-bold text-gray-900">توضیحات محصول</h2>
+              <h2 class="text-xl font-bold text-gray-900">معرفی</h2>
               <WidgetTextMore
                 :loading="loading"
                 :content="data?.data?.description"

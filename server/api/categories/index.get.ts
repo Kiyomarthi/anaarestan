@@ -114,8 +114,8 @@ export default defineEventHandler(async (event) => {
     );
 
     return {
-      ...cached,
       cache: true,
+      ...cached,
     };
   }
 

@@ -1,6 +1,8 @@
 import { getDB } from "~~/server/db";
-import { buildAbsoluteUrl } from "~~/server/utils/common";
+import { buildAbsoluteUrl, buildCacheKey } from "~~/server/utils/common";
 import { getOptionalAuth } from "~~/server/utils/auth";
+import { getCachedData, setCacheData } from "~~/server/utils/cache";
+import { CACHE_KEY } from "~~/shared/utils/cache";
 
 export default defineEventHandler(async (event) => {
   const {
@@ -9,6 +11,7 @@ export default defineEventHandler(async (event) => {
 
   const code = getRouterParam(event, "code");
   const auth = getOptionalAuth(event) as any | null;
+  const isCache = getHeader(event, "cache");
 
   if (!code) {
     throw createError({
@@ -17,12 +20,14 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const db = await getDB();
+  const cacheKey = buildCacheKey(event, `${CACHE_KEY.product}:${code}`) || null;
 
-  try {
-    // Fetch product with category info
-    const [productRows] = (await db.query(
-      `SELECT 
+  async function fetchProduct() {
+    const db = await getDB();
+    try {
+      // Fetch product with category info
+      const [productRows] = (await db.query(
+        `SELECT 
          p.*,
          c.id AS category_id_full,
          c.name AS category_name,
@@ -30,8 +35,8 @@ export default defineEventHandler(async (event) => {
        FROM products p
        LEFT JOIN categories c ON c.id = p.category_id
        WHERE p.code = ?`,
-      [code],
-    )) as any[];
+        [code],
+      )) as any[];
 
     if (!productRows || productRows.length === 0) {
       throw createError({
@@ -169,39 +174,62 @@ export default defineEventHandler(async (event) => {
       is_favorite = !!favRows?.length;
     }
 
-    return {
-      success: true,
-      data: {
-        ...product,
-        category: category,
-        breadcrumbs,
-        products_attribute: productAttrRows.map((row: any) => ({
-          id: row.id,
-          attribute_id: row.attribute_id,
-          name: row.name,
-          value: row.value,
-        })),
-        variant_attribute: variantsWithAttrs,
-        // image: buildAbsoluteUrl(product.image, siteUrl),
-        image: product.image,
-        gallery: mappedGallery,
-        avg_rating: Number(ratingInfo.avg_rating || 0),
-        rating_count: Number(ratingInfo.rating_count || 0),
-        comments_count,
-        is_favorite,
-      },
-    };
-  } catch (error: any) {
-    // If it's already a createError, re-throw it
-    if (error.statusCode) {
-      throw error;
-    }
+      return {
+        success: true,
+        data: {
+          ...product,
+          category: category,
+          breadcrumbs,
+          products_attribute: productAttrRows.map((row: any) => ({
+            id: row.id,
+            attribute_id: row.attribute_id,
+            name: row.name,
+            value: row.value,
+          })),
+          variant_attribute: variantsWithAttrs,
+          // image: buildAbsoluteUrl(product.image, siteUrl),
+          image: product.image,
+          gallery: mappedGallery,
+          avg_rating: Number(ratingInfo.avg_rating || 0),
+          rating_count: Number(ratingInfo.rating_count || 0),
+          comments_count,
+          is_favorite,
+        },
+      };
+    } catch (error: any) {
+      // If it's already a createError, re-throw it
+      if (error.statusCode) {
+        throw error;
+      }
 
-    throw createError({
-      statusCode: 500,
-      statusMessage: error.message || "خطا در دریافت اطلاعات محصول",
-    });
+      throw createError({
+        statusCode: 500,
+        statusMessage: error.message || "خطا در دریافت اطلاعات محصول",
+      });
+    }
   }
+
+  if (isCache === "true" && !auth?.id && cacheKey) {
+    const cached = await getCachedData(
+      event,
+      cacheKey,
+      60 * 60 * 24 * 60,
+      fetchProduct
+    );
+
+    return {
+      cache: true,
+      ...cached,
+    };
+  }
+
+  const response = await fetchProduct();
+
+  if (!auth?.id && cacheKey) {
+    await setCacheData(cacheKey, response);
+  }
+
+  return response;
 });
 
 /*

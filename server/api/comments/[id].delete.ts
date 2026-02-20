@@ -2,6 +2,8 @@ import { getDB } from "~~/server/db";
 import { getOptionalAuth, requireAuth } from "~~/server/utils/auth";
 import { createError } from "h3";
 import { recalculateProductRatings } from "~~/server/utils/ratings";
+import { CACHE_KEY } from "~~/shared/utils/cache";
+import { removeCacheByPattern } from "~~/server/utils/cache";
 
 /**
  * DELETE /api/comments/:id
@@ -11,6 +13,8 @@ import { recalculateProductRatings } from "~~/server/utils/ratings";
  */
 export default defineEventHandler(async (event) => {
   const db = await getDB();
+  await removeCacheByPattern(`${CACHE_KEY.comment}:`);
+  await removeCacheByPattern(`${CACHE_KEY.product}:`);
   const id = getRouterParam(event, "id");
 
   if (!id) {
