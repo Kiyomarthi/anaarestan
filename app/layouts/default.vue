@@ -2,13 +2,14 @@
 const route = useRoute();
 const noHeader = computed(() => route.meta?.noHeader);
 const noFooter = computed(() => route.meta?.noFooter);
+const navHideTopScroll = computed(() => route.meta?.navHideTopScroll);
 const noBottomNavigation = computed(() => route.meta?.noBottomNavigation);
 const hideBottomNavigationByScroll = computed(
   () => route.meta?.hideBottomNavigationByScroll,
 );
 const noMargin = computed(() => route.meta?.noMargin);
 
-const { hidden } = useHideScroll(5);
+const { hidden, scrollY } = useHideScroll(5);
 </script>
 
 <template>
@@ -16,7 +17,11 @@ const { hidden } = useHideScroll(5);
     <WidgetHeader
       v-if="!noHeader"
       class="with-transition fixed top-0 w-full lg:bg-white z-100"
-      :class="{ '-translate-y-full': hidden }"
+      :class="{
+        '-translate-y-full':
+          hidden &&
+          (navHideTopScroll ? scrollY > (navHideTopScroll as number) : true),
+      }"
     />
     <main
       class="w-full"
@@ -27,14 +32,14 @@ const { hidden } = useHideScroll(5);
     >
       <slot />
     </main>
-    <div v-if="!noFooter" class="border-t border-neutral-300 mt-10">
-      <WidgetFooter
-        class="max-w-(--ui-container) mx-auto px-4 pt-4"
-        :class="{ 'mb-32 lg:mb-2': !noBottomNavigation }"
-      />
+    <div v-if="!noFooter" class="pt-10 z-10 bg-white">
+      <div class="border-t border-neutral-300">
+        <WidgetFooter
+          class="max-w-(--ui-container) mx-auto px-4 pt-4"
+          :class="{ 'mb-32 lg:mb-2': !noBottomNavigation }"
+        />
+      </div>
     </div>
-
-    {{ hidden && hideBottomNavigationByScroll }}
     <WidgetBottomNavigation
       v-if="!noBottomNavigation"
       class="with-transition"

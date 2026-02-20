@@ -43,7 +43,9 @@ export const useConfigSeo = () => {
       // ogImage:
       //   seo?.page?.seo_image ||
       //   `${siteConfig.value.public.siteUrl}/images/logo-og.png`,
-      ogImage: `${siteConfig.value.public.siteUrl}/images/logo-og.png`,
+      ogImage:
+        seo?.page?.seo_image ||
+        `${siteConfig.value.public.siteUrl}/images/logo-og.png`,
       ogImageAlt: seo?.page?.title || "فروشگاه آنلاین خرید کالاهای متنوع",
       ogImageHeight: "630",
       ogImageWidth: "1200",

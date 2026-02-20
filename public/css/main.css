@@ -246,8 +246,7 @@
   font-size: 15px;
 }
 .text-container table {
-  width: 100%;
-  -webkit-overflow-scrolling: touch;
+  display: table;
   border: 1px solid #ccc !important;
   border-collapse: separate;
   border-radius: 12px;
@@ -255,8 +254,52 @@
   margin: 25px 0;
   overflow: hidden;
   text-align: center;
+  width: 100%;
   overflow-x: auto;
   min-width: 0 !important;
+}
+
+.text-container tbody {
+  border-radius: 5px;
+  margin: 25px 0;
+}
+
+.text-container table tr:first-child {
+  background: #e6e6e6;
+  border-bottom: 3px solid #666;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .text-container table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent cells from wrapping too aggressively when scrolling */
+  .text-container th,
+  .text-container td {
+    white-space: nowrap;
+  }
+}
+
+.text-container th,
+.text-container td {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #d1d5db;
+}
+
+.text-container thead th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  font-size: 15px;
 }
 
 .text-container tbody {
@@ -279,8 +322,6 @@
   border-width: 1px;
   border-style: solid;
   border-color: #d1d5db;
-  /* white-space: nowrap;
-  min-width: max-content; */
 }
 
 .text-container thead th {

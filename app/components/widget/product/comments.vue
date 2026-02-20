@@ -108,12 +108,12 @@ loadComments();
 <template>
   <div id="comments" class="space-y-6">
     <div class="flex items-center justify-between">
-      <h2 class="text-xl font-bold text-gray-900">
+      <div class="text-xl font-bold text-gray-900">
         نظرات و امتیازات
         <span v-if="commentsCount" class="text-sm font-normal text-gray-500">
           ({{ commentsCount }})
         </span>
-      </h2>
+      </div>
       <UButton
         v-if="!showCommentForm"
         variant="outline"
@@ -128,7 +128,7 @@ loadComments();
       class="border border-gray-200 rounded-lg p-4 space-y-4"
     >
       <div class="flex items-center justify-between">
-        <h3 class="font-bold text-lg">ثبت نظر جدید</h3>
+        <div class="font-bold text-lg">ثبت نظر جدید</div>
         <UButton
           variant="ghost"
           icon="i-lucide-x"

@@ -2,12 +2,15 @@
 import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 import type { Variant } from "~~/shared/utils/variant";
 import { useCartStore } from "~/stores/cart";
+import { useConfigSeo } from "~/composables/utils/useConfigSeo";
 
 ///// imports /////
 
 ///// page meta /////
 definePageMeta({
   hideBottomNavigationByScroll: true,
+  noMargin: true,
+  navHideTopScroll: 400,
 });
 
 ///// props/emits /////
@@ -26,6 +29,8 @@ const { lgAndUp } = useBreakpoints();
 const cartStore = useCartStore();
 const userStore = useUserStore();
 const { hidden, scrollY } = useHideScroll(5);
+const { buildMeta, organizationSchema, websiteSchema, webpageSchema } =
+  useConfigSeo();
 
 await fetch(`/api/products/${route?.params?.code}`, {
   headers: {
@@ -88,6 +93,18 @@ const currentOriginalPrice = computed(() => {
   return data.value?.data?.price || "0";
 });
 
+const seoMeta = computed(() => {
+  return {
+    page: {
+      seo_title: data.value?.data?.title,
+      seo_description: data.value?.data?.short_description,
+      seo_index: true,
+      seo_image: data.value?.data?.gallery?.[0]?.url,
+      seo_canonical: `/products/${data?.value?.data?.code}/${data?.value?.data?.slug}`,
+    },
+  };
+});
+
 const currentStock = computed(() => {
   if (selectedVariant.value) {
     return selectedVariant.value.stock;
@@ -98,6 +115,8 @@ const currentStock = computed(() => {
 const maxQuantity = computed(() => {
   return currentStock.value;
 });
+
+const isPageLoading = computed(() => loading.value && !data.value?.data);
 
 ///// functions /////
 
@@ -154,138 +173,190 @@ onMounted(async () => {
     },
   );
 });
+
+buildMeta(seoMeta.value as unknown as PageResponse);
+organizationSchema();
+websiteSchema();
+webpageSchema(seoMeta.value as unknown as PageResponse);
 </script>
 
 <template>
-  <div>
-    <UBreadcrumb
-      v-if="breadCrumbs?.length"
-      :items="breadCrumbs"
-      class="pb-3 pt-3 lg:pt-1"
-    />
+  <div class="max-w-(--ui-container) mx-auto lg:px-4 lg:pt-0">
+    <WidgetSkeletonLoaderProductSingle v-if="isPageLoading" />
 
-    <div class="grid grid-cols-1 lg:grid-cols-7 lg:mt-5 lg:gap-4">
-      <!-- Main Content -->
-      <!-- Product Images and Details -->
-      <div class="col-span-5 gap-4 lg:gap-6">
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-y-3 lg:gap-3">
-          <!-- Images -->
-          <div class="col-span-2 -mx-4 lg:mx-0">
-            <BaseCursorTooltip v-if="lgAndUp" class="sticky top-3">
-              <WidgetSliderProduct
-                :items="data?.data?.gallery || []"
-                class="max-h-100 lg:max-h-none"
-              />
-              <template #content>
-                <span> برای مشاهده کلیک کنید </span>
-              </template>
-            </BaseCursorTooltip>
-            <WidgetSliderProduct
-              v-else
-              no-timeline
-              :items="data?.data?.gallery || []"
-              class="max-h-100 lg:max-h-none"
-            />
-          </div>
+    <template v-else>
+      <div class="fixed top-17 left-0 lg:block lg:static">
+        <UBreadcrumb
+          v-if="breadCrumbs?.length"
+          :items="breadCrumbs"
+          class="pt-3 lg:pt-1 px-4"
+        />
+        <WidgetSliderProduct
+          v-if="!lgAndUp"
+          no-timeline
+          :items="data?.data?.gallery || []"
+          class="max-h-100 lg:max-h-none mt-3"
+        />
+      </div>
 
-          <!-- Product Details -->
-          <div class="col-span-3 space-y-4">
-            <div class="">
-              <WidgetProductDetails
-                :title="data?.data?.title"
-                :discount-price="
-                  selectedVariant?.discount_price ||
-                  data?.data?.discount_price ||
-                  null
-                "
-                :attributes="data?.data?.products_attribute || []"
-                :rating="data?.data?.avg_rating"
-                :rating-count="data?.data?.rating_count"
-                :comments-count="data?.data?.comments_count"
-                :product-id="data?.data?.id"
-                :is-favorite="data?.data?.is_favorite"
-              />
+      <div class="grid grid-cols-1 lg:grid-cols-7 lg:mt-5 lg:gap-4">
+        <!-- Main Content -->
+        <!-- Product Images and Details -->
+        <div class="col-span-5 gap-4 lg:gap-6">
+          <div class="grid grid-cols-1 lg:grid-cols-5 gap-y-3 lg:gap-3">
+            <!-- Images -->
+            <div class="col-span-2 -mx-4 lg:mx-0">
+              <BaseCursorTooltip v-if="lgAndUp" class="sticky top-3">
+                <WidgetSliderProduct
+                  :items="data?.data?.gallery || []"
+                  class="max-h-100 lg:max-h-none"
+                />
+                <template #content>
+                  <span> برای مشاهده کلیک کنید </span>
+                </template>
+              </BaseCursorTooltip>
             </div>
 
-            <!-- Variant Selector -->
+            <!-- Product Details -->
             <div
-              v-if="data?.data?.variant_attribute?.length > 0"
-              class="border-t border-gray-200 pt-4"
+              class="col-span-3 space-y-4 mt-82.5 lg:mt-0 bg-white px-4 lg:px-0 pt-3 lg:pt-0 rounded-t-lg border-t-4 border-primary z-10 lg:rounded-none lg:border-0"
             >
-              <WidgetProductVariantSelector
-                :variants="data?.data?.variant_attribute"
-                :selected-variant-id="selectedVariantId"
-                :main-variant-id="data?.data?.main_variant_id"
-                @variant-change="handleVariantChange"
-                @update:selected-variant-id="selectedVariantId = $event"
-              />
-            </div>
-            <!-- Key Attributes -->
-            <div
-              v-if="data?.data?.products_attribute?.length > 0"
-              class="grid grid-cols-2 lg:grid-cols-3 gap-3 py-4 border-t border-gray-200"
-            >
+              <div>
+                <WidgetProductDetails
+                  :title="data?.data?.title"
+                  :discount-price="
+                    selectedVariant?.discount_price ||
+                    data?.data?.discount_price ||
+                    null
+                  "
+                  :attributes="data?.data?.products_attribute || []"
+                  :rating="data?.data?.avg_rating"
+                  :rating-count="data?.data?.rating_count"
+                  :comments-count="data?.data?.comments_count"
+                  :product-id="data?.data?.id"
+                  :is-favorite="data?.data?.is_favorite"
+                />
+              </div>
+
+              <!-- Variant Selector -->
               <div
-                v-for="attr in data?.data?.products_attribute?.slice(0, 6) ||
-                []"
-                :key="attr.id"
-                class="flex flex-col bg-neutral-200 rounded-md p-2"
+                v-if="data?.data?.variant_attribute?.length > 0"
+                class="border-t border-gray-200 pt-4"
               >
-                <span class="text-xs text-gray-500">{{ attr.name }}</span>
-                <span class="text-sm font-medium text-gray-900">
-                  {{ attr.value }}
-                </span>
+                <WidgetProductVariantSelector
+                  :variants="data?.data?.variant_attribute"
+                  :selected-variant-id="selectedVariantId"
+                  :main-variant-id="data?.data?.main_variant_id"
+                  @variant-change="handleVariantChange"
+                  @update:selected-variant-id="selectedVariantId = $event"
+                />
+              </div>
+              <!-- Key Attributes -->
+              <div
+                v-if="data?.data?.products_attribute?.length > 0"
+                class="grid grid-cols-2 lg:grid-cols-3 gap-3 py-4 border-t border-gray-200"
+              >
+                <div
+                  v-for="attr in data?.data?.products_attribute?.slice(0, 6) ||
+                  []"
+                  :key="attr.id"
+                  class="flex flex-col bg-neutral-200 rounded-md p-2"
+                >
+                  <span class="text-xs text-gray-500">{{ attr.name }}</span>
+                  <span class="text-sm font-medium text-gray-900">
+                    {{ attr.value }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
+
+          <div class="px-4 bg-white z-10 relative">
+            <!-- Product Description -->
+            <div
+              v-if="data?.data?.description"
+              class="border-t border-gray-200 pt-6 lg:mt-3"
+            >
+              <h2 class="text-xl font-bold text-gray-900">توضیحات محصول</h2>
+              <WidgetTextMore
+                :loading="loading"
+                :content="data?.data?.description"
+                :max-lines="5"
+              />
+            </div>
+
+            <!-- Product Attributes -->
+            <div
+              v-if="data?.data?.products_attribute?.length > 0"
+              class="border-t border-gray-200 mt-6 py-6"
+            >
+              <WidgetProductAttributes
+                :attributes="data?.data?.products_attribute"
+              />
+            </div>
+
+            <!-- Comments -->
+            <div v-if="data?.data?.id" class="border-t border-gray-200 pt-6">
+              <WidgetProductComments
+                :product-id="data?.data?.id"
+                :comments-count="data?.data?.comments_count"
+              />
+            </div>
+          </div>
         </div>
 
-        <!-- Product Description -->
-        <div
-          v-if="data?.data?.description"
-          class="border-t border-gray-200 pt-6 lg:mt-3"
-        >
-          <h2 class="text-xl font-bold text-gray-900">توضیحات محصول</h2>
-          <WidgetTextMore
-            :loading="loading"
-            :content="data?.data?.description"
-            :max-lines="5"
-          />
-        </div>
-
-        <!-- Product Attributes -->
-        <div
-          v-if="data?.data?.products_attribute?.length > 0"
-          class="border-t border-gray-200 mt-6 py-6"
-        >
-          <WidgetProductAttributes
-            :attributes="data?.data?.products_attribute"
-          />
-        </div>
-
-        <!-- Comments -->
-        <div v-if="data?.data?.id" class="border-t border-gray-200 pt-6">
-          <WidgetProductComments
+        <!-- Cart Sidebar (Desktop) -->
+        <div v-if="lgAndUp" class="col-span-2">
+          <ModelProductCart
+            v-model:quantity="quantity"
             :product-id="data?.data?.id"
-            :comments-count="data?.data?.comments_count"
+            :product-code="data?.data?.code"
+            :selected-variant="selectedVariant"
+            :product-price="currentOriginalPrice"
+            :stock="currentStock"
+            :product-stock="currentStock"
+            class="sticky top-3 with-transition"
+            :class="{
+              'translate-y-16.75 lg:translate-y-28': !hidden && scrollY > 130,
+            }"
+            :discount-price="
+              selectedVariant?.discount_price ||
+              data?.data?.discount_price ||
+              null
+            "
+            @close="showCartModal = false"
           />
         </div>
       </div>
+      <!-- Similar Products -->
+      <div
+        v-if="data?.data?.category?.id"
+        class="border-t border-gray-200 pt-6 px-4 bg-white z-10 relative lg:block"
+      >
+        <WidgetProductSimilarProducts
+          :category-id="data?.data?.category?.id"
+          :product-id="data?.data?.id"
+          :limit="8"
+        />
+      </div>
 
-      <!-- Cart Sidebar (Desktop) -->
-      <div v-if="lgAndUp" class="col-span-2">
+      <!-- Cart Modal (Mobile) -->
+      <WidgetGlass
+        v-if="!lgAndUp"
+        :ui="{
+          base: 'p-0',
+          container: `
+          fixed bottom-22.5 left-4 right-4 z-100 with-transition ${hidden ? 'translate-y-18.75' : ''}`,
+        }"
+      >
         <ModelProductCart
           v-model:quantity="quantity"
           :product-id="data?.data?.id"
           :product-code="data?.data?.code"
           :selected-variant="selectedVariant"
-          :product-price="currentOriginalPrice"
           :stock="currentStock"
+          :product-price="currentOriginalPrice"
           :product-stock="currentStock"
-          class="sticky top-3 with-transition"
-          :class="{
-            'translate-y-16.75 lg:translate-y-28': !hidden && scrollY > 130,
-          }"
           :discount-price="
             selectedVariant?.discount_price ||
             data?.data?.discount_price ||
@@ -293,40 +364,7 @@ onMounted(async () => {
           "
           @close="showCartModal = false"
         />
-      </div>
-    </div>
-
-    <!-- Similar Products -->
-    <div v-if="data?.data?.category?.id" class="border-t border-gray-200 pt-6">
-      <WidgetProductSimilarProducts
-        :category-id="data?.data?.category?.id"
-        :product-id="data?.data?.id"
-        :limit="8"
-      />
-    </div>
-
-    <!-- Cart Modal (Mobile) -->
-    <WidgetGlass
-      v-if="!lgAndUp"
-      :ui="{
-        base: 'p-0',
-        container: `
-          fixed bottom-22.5 left-4 right-4 z-100 with-transition ${hidden ? 'translate-y-18.75' : ''}`,
-      }"
-    >
-      <ModelProductCart
-        v-model:quantity="quantity"
-        :product-id="data?.data?.id"
-        :product-code="data?.data?.code"
-        :selected-variant="selectedVariant"
-        :stock="currentStock"
-        :product-price="currentOriginalPrice"
-        :product-stock="currentStock"
-        :discount-price="
-          selectedVariant?.discount_price || data?.data?.discount_price || null
-        "
-        @close="showCartModal = false"
-      />
-    </WidgetGlass>
+      </WidgetGlass>
+    </template>
   </div>
 </template>
