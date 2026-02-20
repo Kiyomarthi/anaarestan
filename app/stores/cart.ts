@@ -9,6 +9,16 @@ export interface CartItem {
   price: string;
   created_at: string;
   updated_at: string;
+  // داده‌های تکمیلی محصول و وریانت که از API سبد برمی‌گردد
+  product_code?: string;
+  product_title?: string;
+  product_image?: string;
+  variant_attributes?: {
+    id: number;
+    attribute_id: number;
+    name: string;
+    value: string;
+  }[];
 }
 
 export interface Cart {

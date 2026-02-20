@@ -331,7 +331,7 @@ webpageSchema(seoMeta.value as unknown as PageResponse);
       <!-- Similar Products -->
       <div
         v-if="data?.data?.category?.id"
-        class="border-t border-gray-200 pt-6 px-4 bg-white z-10 relative lg:block"
+        class="border-t mt-6 border-gray-200 pt-6 px-4 bg-white z-10 relative lg:block"
       >
         <WidgetProductSimilarProducts
           :category-id="data?.data?.category?.id"

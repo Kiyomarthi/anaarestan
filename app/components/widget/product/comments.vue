@@ -260,7 +260,7 @@ loadComments();
     </div>
 
     <div
-      v-if="commentsMeta?.total && commentsMeta.total > 0"
+      v-if="commentsMeta?.total && commentsMeta.total > 10"
       class="mt-6 flex items-center justify-center"
     >
       <UPagination

@@ -3,6 +3,7 @@
 
 ///// page meta /////
 definePageMeta({
+  ssr: false,
   pageTransition: { name: "fade", mode: "out-in" },
 });
 
@@ -15,9 +16,6 @@ definePageMeta({
 ///// computed /////
 
 ///// functions /////
-onMounted(() => {
-  navigateTo("/checkout/cart", { replace: true });
-});
 
 ///// watchers /////
 
@@ -25,5 +23,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div />
+  <div class="max-w-(--ui-container) mx-auto px-4 py-4 lg:py-6">
+    <h1 class="text-h1 mb-4 lg:mb-6">سبد خرید</h1>
+    <ModelCheckoutCart />
+  </div>
 </template>

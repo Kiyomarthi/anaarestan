@@ -102,16 +102,6 @@ const {
   data: discountProductData,
 } = useCacheFetch<ApiResponse<PageResponse>>();
 
-fetchDiscountProduct("/api/products", {
-  params: {
-    stock_status: "available",
-    limit: "3",
-  },
-  headers: {
-      cache: "true",
-    },
-});
-
 const handleSearch = () => {
   const trimmedQuery = searchQuery.value.trim();
   open.value = false;
@@ -188,6 +178,18 @@ watch(
     searchQuery.value = val as string;
   },
   { immediate: true },
+);
+
+onMounted(() =>
+  fetchDiscountProduct("/api/products", {
+    params: {
+      stock_status: "available",
+      limit: "3",
+    },
+    headers: {
+      cache: "true",
+    },
+  }),
 );
 </script>
 

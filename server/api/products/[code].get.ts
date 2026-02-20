@@ -38,63 +38,63 @@ export default defineEventHandler(async (event) => {
         [code],
       )) as any[];
 
-    if (!productRows || productRows.length === 0) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: "محصول مورد نظر پیدا نشد",
-      });
-    }
-
-    const product = productRows[0];
-    const productId = product.id;
-
-    // Extract category info
-    const category = product.category_id_full
-      ? {
-          id: product.category_id_full,
-          name: product.category_name,
-          slug: product.category_slug,
-        }
-      : null;
-
-    // Build full breadcrumbs path based on category hierarchy
-    let breadcrumbs: { title: string; slug: string; code: string }[] = [];
-
-    if (category?.id) {
-      const [categoryRows] = (await db.query(
-        `SELECT id, name, slug, parent_id FROM categories`,
-      )) as any[];
-
-      const categoryMap = new Map<number, any>();
-      categoryRows.forEach((row: any) => {
-        categoryMap.set(row.id, row);
-      });
-
-      const chain: { title: string; slug: string; code: string }[] = [];
-      let currentId: number | null = category.id;
-
-      while (currentId && categoryMap.has(currentId)) {
-        const cat = categoryMap.get(currentId);
-        chain.push({
-          title: cat.name,
-          slug: cat.slug,
-          code: product.code,
+      if (!productRows || productRows.length === 0) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: "محصول مورد نظر پیدا نشد",
         });
-        currentId = cat.parent_id ?? null;
       }
 
-      breadcrumbs = chain.reverse();
-    }
+      const product = productRows[0];
+      const productId = product.id;
 
-    // Remove category fields from product object
-    delete product.category_id_full;
-    delete product.category_name;
-    delete product.category_slug;
-    delete product.category_id;
+      // Extract category info
+      const category = product.category_id_full
+        ? {
+            id: product.category_id_full,
+            name: product.category_name,
+            slug: product.category_slug,
+          }
+        : null;
 
-    // Fetch product attributes
-    const [productAttrRows] = (await db.query(
-      `SELECT 
+      // Build full breadcrumbs path based on category hierarchy
+      let breadcrumbs: { title: string; slug: string; code: string }[] = [];
+
+      if (category?.id) {
+        const [categoryRows] = (await db.query(
+          `SELECT id, name, slug, parent_id FROM categories`,
+        )) as any[];
+
+        const categoryMap = new Map<number, any>();
+        categoryRows.forEach((row: any) => {
+          categoryMap.set(row.id, row);
+        });
+
+        const chain: { title: string; slug: string; code: string }[] = [];
+        let currentId: number | null = category.id;
+
+        while (currentId && categoryMap.has(currentId)) {
+          const cat = categoryMap.get(currentId);
+          chain.push({
+            title: cat.name,
+            slug: cat.slug,
+            code: product.code,
+          });
+          currentId = cat.parent_id ?? null;
+        }
+
+        breadcrumbs = chain.reverse();
+      }
+
+      // Remove category fields from product object
+      delete product.category_id_full;
+      delete product.category_name;
+      delete product.category_slug;
+      delete product.category_id;
+
+      // Fetch product attributes
+      const [productAttrRows] = (await db.query(
+        `SELECT 
          pav.attribute_value_id AS id,
          av.attribute_id,
          a.name,
@@ -103,19 +103,19 @@ export default defineEventHandler(async (event) => {
        JOIN attribute_values av ON av.id = pav.attribute_value_id
        JOIN attributes a ON a.id = av.attribute_id
        WHERE pav.product_id = ?`,
-      [productId],
-    )) as any[];
+        [productId],
+      )) as any[];
 
-    // Fetch variants with their attributes
-    const [variantRows] = (await db.query(
-      `SELECT * FROM product_variants WHERE product_id = ? ORDER BY id ASC`,
-      [productId],
-    )) as any[];
+      // Fetch variants with their attributes
+      const [variantRows] = (await db.query(
+        `SELECT * FROM product_variants WHERE product_id = ? ORDER BY id ASC`,
+        [productId],
+      )) as any[];
 
-    const variantsWithAttrs = await Promise.all(
-      variantRows.map(async (variant: any) => {
-        const [variantAttrRows] = (await db.query(
-          `SELECT 
+      const variantsWithAttrs = await Promise.all(
+        variantRows.map(async (variant: any) => {
+          const [variantAttrRows] = (await db.query(
+            `SELECT 
              vav.attribute_value_id AS id,
              av.attribute_id,
              a.name,
@@ -124,55 +124,58 @@ export default defineEventHandler(async (event) => {
            JOIN attribute_values av ON av.id = vav.attribute_value_id
            JOIN attributes a ON a.id = av.attribute_id
            WHERE vav.variant_id = ?`,
-          [variant.id],
-        )) as any[];
+            [variant.id],
+          )) as any[];
 
-        return {
-          ...variant,
-          variant_attributes: variantAttrRows.map((row: any) => ({
-            id: row.id,
-            attribute_id: row.attribute_id,
-            name: row.name,
-            value: row.value,
-          })),
-        };
-      }),
-    );
+          return {
+            ...variant,
+            variant_attributes: variantAttrRows.map((row: any) => ({
+              id: row.id,
+              attribute_id: row.attribute_id,
+              name: row.name,
+              value: row.value,
+            })),
+          };
+        }),
+      );
 
-    // Fetch images
-    const [imageRows] = (await db.query(
-      `SELECT * FROM product_images WHERE product_id = ? ORDER BY position ASC`,
-      [productId],
-    )) as any[];
-
-    const mappedGallery = imageRows.map((img: any) => ({
-      ...img,
-      url: buildAbsoluteUrlArvan(img.url),
-      key: img.url,
-    }));
-
-    // Ratings + comments count (approved only)
-    const [ratingRows] = (await db.query(
-      `SELECT avg_rating, rating_count FROM product_ratings WHERE product_id = ? LIMIT 1`,
-      [productId],
-    )) as any[];
-    const ratingInfo = ratingRows?.[0] || { avg_rating: 0.0, rating_count: 0 };
-
-    const [countRows] = (await db.query(
-      `SELECT COUNT(*) AS comments_count FROM comments WHERE product_id = ? AND status = 1`,
-      [productId],
-    )) as any[];
-    const comments_count = Number(countRows?.[0]?.comments_count || 0);
-
-    // is_favorite (only if authenticated)
-    let is_favorite = false;
-    if (auth?.id) {
-      const [favRows] = (await db.query(
-        `SELECT id FROM favorites WHERE user_id = ? AND product_id = ? LIMIT 1`,
-        [auth.id, productId],
+      // Fetch images
+      const [imageRows] = (await db.query(
+        `SELECT * FROM product_images WHERE product_id = ? ORDER BY position ASC`,
+        [productId],
       )) as any[];
-      is_favorite = !!favRows?.length;
-    }
+
+      const mappedGallery = imageRows.map((img: any) => ({
+        ...img,
+        url: buildAbsoluteUrlArvan(img.url),
+        key: img.url,
+      }));
+
+      // Ratings + comments count (approved only)
+      const [ratingRows] = (await db.query(
+        `SELECT avg_rating, rating_count FROM product_ratings WHERE product_id = ? LIMIT 1`,
+        [productId],
+      )) as any[];
+      const ratingInfo = ratingRows?.[0] || {
+        avg_rating: 0.0,
+        rating_count: 0,
+      };
+
+      const [countRows] = (await db.query(
+        `SELECT COUNT(*) AS comments_count FROM comments WHERE product_id = ? AND status = 1`,
+        [productId],
+      )) as any[];
+      const comments_count = Number(countRows?.[0]?.comments_count || 0);
+
+      // is_favorite (only if authenticated)
+      let is_favorite = false;
+      if (auth?.id) {
+        const [favRows] = (await db.query(
+          `SELECT id FROM favorites WHERE user_id = ? AND product_id = ? LIMIT 1`,
+          [auth.id, productId],
+        )) as any[];
+        is_favorite = !!favRows?.length;
+      }
 
       return {
         success: true,
@@ -187,8 +190,8 @@ export default defineEventHandler(async (event) => {
             value: row.value,
           })),
           variant_attribute: variantsWithAttrs,
-          // image: buildAbsoluteUrl(product.image, siteUrl),
-          image: product.image,
+          image: buildAbsoluteUrlArvan(product.image, siteUrl),
+          // image: product.image,
           gallery: mappedGallery,
           avg_rating: Number(ratingInfo.avg_rating || 0),
           rating_count: Number(ratingInfo.rating_count || 0),
@@ -214,7 +217,7 @@ export default defineEventHandler(async (event) => {
       event,
       cacheKey,
       60 * 60 * 24 * 60,
-      fetchProduct
+      fetchProduct,
     );
 
     return {

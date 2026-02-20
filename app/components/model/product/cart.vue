@@ -144,7 +144,7 @@ const updateCartItem = async (val: number) => {
 };
 
 const goToCheckout = () => {
-  router.push("/checkout");
+  router.push("/checkout/cart");
 };
 
 ///// watchers /////

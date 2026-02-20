@@ -19,6 +19,7 @@ export default defineNuxtConfig({
   routeRules: {
     "/admin/**": { ssr: false },
     "/login": { ssr: false },
+    "/checkout/**": { ssr: false },
   },
 
   experimental: {
@@ -339,6 +340,11 @@ export default defineNuxtConfig({
       headers: { "Cache-Control": "no-store" },
     },
     "/login": {
+      ssr: false,
+      delayHydration: false,
+      headers: { "Cache-Control": "no-store" },
+    },
+    "/checkout/**": {
       ssr: false,
       delayHydration: false,
       headers: { "Cache-Control": "no-store" },

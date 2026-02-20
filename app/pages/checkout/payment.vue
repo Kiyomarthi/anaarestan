@@ -3,6 +3,7 @@
 
 ///// page meta /////
 definePageMeta({
+  ssr: false,
   pageTransition: { name: "fade", mode: "out-in" },
 });
 
@@ -15,9 +16,6 @@ definePageMeta({
 ///// computed /////
 
 ///// functions /////
-onMounted(() => {
-  navigateTo("/checkout/cart", { replace: true });
-});
 
 ///// watchers /////
 
@@ -25,5 +23,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div />
+  <div>
+    <!-- صفحه پرداخت (CSR) -->
+  </div>
 </template>
