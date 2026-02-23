@@ -22,6 +22,7 @@ export type ApiRequestOptions<TBody = any> = Omit<
   body?: TBody;
   errorTitle?: string;
   errorDescription?: string;
+  key?: string;
 };
 
 export function useApiRequest<TResponse = any>() {
@@ -36,6 +37,15 @@ export function useApiRequest<TResponse = any>() {
     options: ApiRequestOptions = {},
   ): Promise<TResponse> => {
     const { errorTitle, errorDescription, ...fetchOptions } = options;
+
+    const key = options.key;
+    const state = useState<TResponse | null>(`cache-${key}`, () => null);
+
+    if (import.meta.client && state.value && key) {
+      response.value = state.value;
+      return response.value;
+    }
+
     loading.value = true;
     error.value = null;
 
@@ -50,6 +60,7 @@ export function useApiRequest<TResponse = any>() {
         },
       } as any);
       response.value = result as TResponse;
+      state.value = response.value as TResponse;
       return result as TResponse;
     } catch (err: any) {
       error.value = err;

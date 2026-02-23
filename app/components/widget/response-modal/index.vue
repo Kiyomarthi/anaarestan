@@ -14,6 +14,7 @@ defineProps<{
   title?: string;
   subtitle?: string;
   headerClass?: string;
+  noClose?: boolean;
 }>();
 
 ///// refs /////
@@ -35,6 +36,8 @@ const { lgAndUp } = useBreakpoints();
     v-if="lgAndUp"
     v-model:open="open"
     :title="title"
+    :close="!noClose"
+    :dismissible="!noClose"
     :description="subtitle"
     :ui="{
       content: 'w-112.5 max-w-none p-4',
@@ -55,6 +58,8 @@ const { lgAndUp } = useBreakpoints();
   <u-slideover
     v-else
     v-model:open="open"
+    :dismissible="!noClose"
+    :close="!noClose"
     side="bottom"
     :title="title"
     :description="subtitle"

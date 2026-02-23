@@ -41,7 +41,7 @@ const formattedPrice = (value: number) => {
   >
     <div class="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden">
       <BaseImage
-        src="/tmp/product.jpg"
+        :src="product.image"
         :alt="product.title"
         image-class="size-16"
         class="size-16"

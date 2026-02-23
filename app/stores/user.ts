@@ -9,9 +9,36 @@ export const useUserStore = defineStore(
     const user = ref<UserPayload | null>(null);
     const createdAt = ref<number | null>(null);
     const alert = ref<string>("");
-    const modal = ref<boolean>(false);
+    const route = useRoute();
+    const router = useRouter();
+    const isRequired = ref<boolean>(false);
     const doAfterLogin = ref<(() => void | Promise<void>) | null>(null);
     const cartStore = useCartStore();
+
+    const modal = computed<boolean>({
+      get() {
+        return route.hash === "#auth";
+      },
+      set(value) {
+        if (value) {
+          if (route.hash !== "#auth") {
+            router.push({
+              path: route.path,
+              query: route.query,
+              hash: "#auth",
+            });
+          }
+        } else {
+          if (route.hash === "#auth") {
+            router.replace({
+              path: route.path,
+              query: route.query,
+              hash: "",
+            });
+          }
+        }
+      },
+    });
 
     const tokenCookie = useCookie<string | null>("auth_token");
 
@@ -48,6 +75,7 @@ export const useUserStore = defineStore(
       if (userData !== undefined) {
         setUser(userData);
       }
+      isRequired.value = false;
     }
 
     async function fetchCurrentUser() {
@@ -88,6 +116,7 @@ export const useUserStore = defineStore(
       modal,
       doAfterLogin,
       alert,
+      isRequired,
     };
   },
   {

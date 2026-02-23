@@ -90,7 +90,7 @@ if (props.preload)
     <nuxt-img
       v-bind="$attrs"
       :sr="props.src"
-      :src="props.src ?? '/tmp/category.png'"
+      :src="props.src"
       :alt="props.alt"
       :format="props.format"
       :width="props.width"

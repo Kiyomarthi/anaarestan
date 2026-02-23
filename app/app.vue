@@ -8,6 +8,7 @@
         <WidgetResponseModal
           v-model:open="user.modal"
           :header-class="!user.alert ? 'hidden!' : ''"
+          :noClose="user.isRequired"
         >
           <template v-if="user.alert" #title>
             <div class="px-8">
@@ -37,24 +38,4 @@ const { lgAndUp } = useBreakpoints();
 const toaster = {
   position: lgAndUp.value ? "bottom-right" : "top-center",
 };
-
-watch(
-  () => user.modal,
-  (open) => {
-    if (!open && route.hash === "#auth") {
-      router.replace({ hash: "", path: route.path, query: route.query });
-    }
-    if (open && route.hash !== "#auth") {
-      router.push({ hash: "#auth", path: route.path, query: route.query });
-    }
-  },
-);
-
-watch(
-  () => route.hash,
-  (hash) => {
-    user.modal = hash === "#auth";
-  },
-  { immediate: true },
-);
 </script>
