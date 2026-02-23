@@ -1,7 +1,6 @@
 <script setup lang="ts">
 ///// imports /////
 import { useCartStore } from "~/stores/cart";
-import { formatPrice } from "~~/shared/utils/format";
 
 ///// props/emits /////
 
@@ -199,6 +198,22 @@ const updateWalletUsage = (amount: number) => {
   walletAmountUsed.value = Math.max(0, Math.min(amount, maxWalletUsage.value));
 };
 
+const onWalletAmountUsedChange = (amount: number) => {
+  updateWalletUsage(amount);
+};
+
+const onCartItemQuantityChange = async (payload: {
+  itemId: number;
+  quantity: number;
+}) => {
+  if (payload.quantity === 0) {
+    await cartStore.removeItem(payload.itemId);
+    return;
+  }
+
+  await cartStore.updateItemQuantity(payload.itemId, payload.quantity);
+};
+
 const validateBeforePayment = async () => {
   if (!cart.value || !selectedAddressId.value) return false;
 
@@ -331,334 +346,60 @@ onMounted(async () => {
   <div>
     <div class="lg:grid grid-cols-1 lg:grid-cols-7 gap-6">
       <section class="col-span-5 space-y-6">
-        <UCard>
-          <template #header>
-            <h2 class="text-lg font-semibold">انتخاب آدرس</h2>
-          </template>
+        <WidgetCheckoutShippingAddress
+          :addresses-loading="addressesLoading"
+          :addresses="addresses"
+          :selected-address-id="selectedAddressId"
+          @update:selected-address-id="selectedAddressId = $event"
+          @add-address="showAddressModal = true"
+        />
 
-          <template v-if="addressesLoading">
-            <USkeleton class="w-full h-32 rounded-xl" />
-          </template>
-
-          <template v-else-if="addresses.length > 0">
-            <div class="space-y-3">
-              <URadioGroup
-                v-model="selectedAddressId"
-                :items="
-                  addresses.map((addr) => ({
-                    value: addr.id,
-                    label: `${addr.province_name}، ${addr.city_name} - ${addr.full_address}`,
-                    description: `کدپستی: ${addr.postal_code}`,
-                  }))
-                "
-                value-key="value"
-                :ui="{
-                  fieldset: 'space-y-3',
-                }"
-              />
-
-              <UButton
-                variant="outline"
-                color="primary"
-                block
-                @click="showAddressModal = true"
-              >
-                افزودن آدرس جدید
-              </UButton>
-            </div>
-          </template>
-
-          <template v-else>
-            <UEmpty
-              title="آدرسی ثبت نشده است"
-              description="لطفا آدرس خود را اضافه کنید"
-              icon="i-lucide-map-pin"
-            >
-              <template #actions>
-                <UButton color="primary" @click="showAddressModal = true">
-                  افزودن آدرس
-                </UButton>
-              </template>
-            </UEmpty>
-          </template>
-        </UCard>
-
-        <UCard>
-          <template #header>
-            <h2 class="text-lg font-semibold">سبد خرید</h2>
-          </template>
-
-          <template v-if="isInitialLoading">
-            <USkeleton
-              v-for="i in 3"
-              :key="i"
-              class="w-full h-28 rounded-xl mb-3"
-            />
-          </template>
-
-          <template v-else-if="hasItems">
-            <div class="space-y-3">
-              <div
-                v-for="item in cart?.items"
-                :key="item.id"
-                class="flex gap-3 p-3 rounded-xl border border-gray-100 bg-white"
-              >
-                <div
-                  class="w-20 h-20 rounded-lg overflow-hidden bg-neutral-100"
-                >
-                  <NuxtImg
-                    v-if="item.product_image"
-                    :src="item.product_image"
-                    alt=""
-                    class="w-full h-full object-cover"
-                  />
-                </div>
-                <div class="flex-1 flex flex-col justify-between gap-2">
-                  <div class="space-y-1">
-                    <p class="text-sm font-semibold line-clamp-2">
-                      {{ item.product_title || `محصول ${item.product_id}` }}
-                    </p>
-
-                    <p
-                      v-if="item.variant_attributes?.length"
-                      class="text-xs text-gray-500 flex flex-wrap gap-1"
-                    >
-                      <template
-                        v-for="attr in item.variant_attributes"
-                        :key="attr.id"
-                      >
-                        <span class="inline-flex items-center gap-0.5">
-                          <span class="font-medium">{{ attr.name }}:</span>
-                          <span>{{ attr.value }}</span>
-                        </span>
-                      </template>
-                    </p>
-
-                    <p class="text-xs text-gray-500">
-                      قیمت واحد:
-                      <span class="font-medium">
-                        {{ formatPrice(Number(item.price)) }} تومان
-                      </span>
-                    </p>
-                  </div>
-                  <div class="flex items-center justify-between gap-3">
-                    <p class="text-xs text-gray-500">
-                      مجموع:
-                      <span class="font-semibold text-primary">
-                        {{
-                          formatPrice(
-                            Number(item.price) * Number(item.quantity),
-                          )
-                        }}
-                        تومان
-                      </span>
-                    </p>
-                    <WidgetCounter
-                      :model-value="item.quantity"
-                      :min="0"
-                      :max="99"
-                      :disabled="cartStore.loading"
-                      size="sm"
-                      @update:model-value="
-                        async (val) => {
-                          if (val === 0) {
-                            await cartStore.removeItem(item.id);
-                          } else {
-                            await cartStore.updateItemQuantity(item.id, val);
-                          }
-                        }
-                      "
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <template v-else>
-            <UEmpty
-              title="سبد خرید شما خالی است"
-              description="برای شروع خرید، به فروشگاه برگردید."
-              icon="i-lucide-shopping-bag"
-            >
-              <template #actions>
-                <UButton color="primary" @click="goBack">
-                  بازگشت به سبد خرید
-                </UButton>
-              </template>
-            </UEmpty>
-          </template>
-        </UCard>
+        <WidgetCheckoutCartItems
+          :is-initial-loading="isInitialLoading"
+          :has-items="hasItems"
+          :items="cart?.items || []"
+          :loading="cartStore.loading"
+          @update-quantity="onCartItemQuantityChange"
+          @go-back="goBack"
+        />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <UCard>
-            <template #header>
-              <h3 class="text-base font-semibold">کد تخفیف</h3>
-            </template>
+          <WidgetCheckoutCouponCard
+            :coupon-code="couponCode"
+            :coupon-valid="couponValid"
+            :coupon-discount="couponDiscount"
+            :disabled="validating || creatingOrder"
+            @update:coupon-code="couponCode = $event"
+            @apply="applyCoupon"
+            @remove="removeCoupon"
+          />
 
-            <div class="space-y-3">
-              <div
-                v-if="couponValid"
-                class="flex items-center justify-between p-3 rounded-lg bg-emerald-50 border border-emerald-200"
-              >
-                <div>
-                  <p class="text-sm font-medium text-emerald-800">
-                    {{ couponCode }}
-                  </p>
-                  <p class="text-xs text-emerald-600">
-                    تخفیف: {{ formatPrice(couponDiscount) }} تومان
-                  </p>
-                </div>
-                <UButton
-                  icon="i-lucide-x"
-                  color="emerald"
-                  variant="ghost"
-                  size="sm"
-                  @click="removeCoupon"
-                />
-              </div>
-
-              <UInput
-                v-else
-                v-model="couponCode"
-                placeholder="کد تخفیف را وارد کنید"
-                :disabled="validating || creatingOrder"
-              />
-
-              <UButton
-                v-if="!couponValid"
-                block
-                variant="outline"
-                :disabled="!couponCode.trim() || validating || creatingOrder"
-                @click="applyCoupon"
-              >
-                اعمال کوپن
-              </UButton>
-            </div>
-          </UCard>
-
-          <UCard v-if="walletBalance > 0">
-            <template #header>
-              <h3 class="text-base font-semibold">کیف پول</h3>
-            </template>
-
-            <div class="space-y-3">
-              <div
-                class="flex items-center justify-between p-3 rounded-lg bg-blue-50 border border-blue-200"
-              >
-                <div>
-                  <p class="text-sm font-medium text-blue-800">
-                    موجودی کیف پول
-                  </p>
-                  <p class="text-xs text-blue-600">
-                    {{ formatPrice(walletBalance) }} تومان
-                  </p>
-                </div>
-              </div>
-
-              <UInput
-                v-model.number="walletAmountUsed"
-                type="number"
-                :min="0"
-                :max="maxWalletUsage"
-                placeholder="مبلغ استفاده از کیف پول"
-                :disabled="validating || creatingOrder"
-              />
-
-              <UButton
-                block
-                variant="outline"
-                size="sm"
-                :disabled="validating || creatingOrder"
-                @click="updateWalletUsage(maxWalletUsage)"
-              >
-                استفاده از کل موجودی
-              </UButton>
-            </div>
-          </UCard>
+          <WidgetCheckoutWalletCard
+            :wallet-balance="walletBalance"
+            :wallet-amount-used="walletAmountUsed"
+            :max-wallet-usage="maxWalletUsage"
+            :disabled="validating || creatingOrder"
+            @update:wallet-amount-used="onWalletAmountUsedChange"
+            @use-max="updateWalletUsage(maxWalletUsage)"
+          />
         </div>
       </section>
 
-      <div class="lg:sticky lg:top-6 self-start col-span-2">
-        <aside>
-          <UCard>
-            <template #header>
-              <h2 class="text-lg font-semibold">خلاصه سفارش</h2>
-            </template>
-
-            <div class="space-y-3">
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-gray-500">مجموع سبد</span>
-                <span class="font-medium">
-                  {{ formatPrice(subtotalAmount) }} تومان
-                </span>
-              </div>
-
-              <div
-                v-if="discountAmount > 0"
-                class="flex items-center justify-between text-sm"
-              >
-                <span class="text-gray-500">تخفیف</span>
-                <span class="font-medium text-emerald-600">
-                  -{{ formatPrice(discountAmount) }} تومان
-                </span>
-              </div>
-
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-gray-500">هزینه ارسال</span>
-                <span class="font-medium">
-                  {{ formatPrice(shippingAmount) }} تومان
-                </span>
-              </div>
-
-              <div
-                v-if="walletAmount > 0"
-                class="flex items-center justify-between text-sm"
-              >
-                <span class="text-gray-500">استفاده از کیف پول</span>
-                <span class="font-medium text-blue-600">
-                  -{{ formatPrice(walletAmount) }} تومان
-                </span>
-              </div>
-
-              <UDivider />
-
-              <div class="flex items-center justify-between text-base">
-                <span class="font-semibold">مبلغ قابل پرداخت</span>
-                <span class="font-bold text-primary">
-                  {{ formatPrice(payableAmount) }} تومان
-                </span>
-              </div>
-
-              <div class="flex gap-3 pt-2">
-                <UButton
-                  variant="outline"
-                  block
-                  :disabled="creatingOrder"
-                  @click="goBack"
-                >
-                  بازگشت
-                </UButton>
-
-                <UButton
-                  block
-                  size="lg"
-                  color="primary"
-                  :disabled="!canProceed"
-                  :loading="creatingOrder"
-                  @click="createOrder"
-                >
-                  ادامه به پرداخت
-                </UButton>
-              </div>
-            </div>
-          </UCard>
-        </aside>
-      </div>
+      <WidgetCheckoutOrderSummary
+        :subtotal-amount="subtotalAmount"
+        :discount-amount="discountAmount"
+        :shipping-amount="shippingAmount"
+        :wallet-amount="walletAmount"
+        :payable-amount="payableAmount"
+        :can-proceed="canProceed"
+        :creating-order="creatingOrder"
+        @confirm="createOrder"
+      />
     </div>
     <WidgetResponseModal
       v-model:open="showAddressModal"
       title="افزودن آدرس جدید"
+      content-class="w-[600px]"
     >
       <ModelAddreessCreateForm
         :open="showAddressModal"

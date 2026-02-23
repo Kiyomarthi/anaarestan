@@ -3,6 +3,8 @@ import { requireRole } from "~~/server/utils/permissions";
 import { validate } from "~~/shared/validation";
 import { validateBody } from "~~/server/utils/validate";
 import { createError } from "h3";
+import { CACHE_KEY } from "~~/shared/utils/cache";
+import { removeCacheByPattern } from "~~/server/utils/cache";
 
 /**
  * PATCH /api/cities/:id
@@ -19,6 +21,8 @@ export default defineEventHandler(async (event) => {
       statusMessage: "شناسه شهر ارسال نشده است",
     });
   }
+
+  await removeCacheByPattern(`${CACHE_KEY.city}:`);
 
   const [existingRows] = (await db.query(
     `SELECT * FROM cities WHERE id = ?`,

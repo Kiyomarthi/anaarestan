@@ -3,6 +3,8 @@ import { requireRole } from "~~/server/utils/permissions";
 import { validate } from "~~/shared/validation";
 import { validateBody } from "~~/server/utils/validate";
 import { createError } from "h3";
+import { CACHE_KEY } from "~~/shared/utils/cache";
+import { removeCacheByPattern } from "~~/server/utils/cache";
 
 /**
  * POST /api/cities
@@ -11,6 +13,7 @@ import { createError } from "h3";
 export default defineEventHandler(async (event) => {
   requireRole(event, "admin");
   const db = await getDB();
+  await removeCacheByPattern(`${CACHE_KEY.city}:`);
   const body = await readBody(event);
 
   validateBody(body, {

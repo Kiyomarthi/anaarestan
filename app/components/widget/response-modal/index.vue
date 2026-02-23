@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { twMerge } from "tailwind-merge";
 import { useBreakpoints } from "~/composables/utils/useBreakpoints";
 
 ///// imports /////
@@ -10,11 +11,12 @@ const open = defineModel<boolean>({
   default: false,
 });
 
-defineProps<{
+const props = defineProps<{
   title?: string;
   subtitle?: string;
   headerClass?: string;
   noClose?: boolean;
+  contentClass?: string;
 }>();
 
 ///// refs /////
@@ -23,6 +25,9 @@ defineProps<{
 const { lgAndUp } = useBreakpoints();
 
 ///// computed /////
+const contentMergedClass = computed(() =>
+  twMerge("w-112.5 max-w-none p-4", props.contentClass),
+);
 
 ///// functions /////
 
@@ -40,7 +45,7 @@ const { lgAndUp } = useBreakpoints();
     :dismissible="!noClose"
     :description="subtitle"
     :ui="{
-      content: 'w-112.5 max-w-none p-4',
+      content: contentMergedClass,
       overlay: 'bg-black/35 backdrop-blur-xs',
       header: ['p-4 min-h-max', headerClass],
     }"

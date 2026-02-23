@@ -76,6 +76,7 @@ export const useUserStore = defineStore(
         setUser(userData);
       }
       isRequired.value = false;
+      cartStore.syncCartWithUser();
     }
 
     async function fetchCurrentUser() {

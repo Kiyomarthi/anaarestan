@@ -4,6 +4,8 @@ const BASE = runtime.public?.siteNameEn || "anarestan";
 export const CACHE_KEY = {
   page: `${BASE}:page`,
   category: `${BASE}:category`,
+  city: `${BASE}:city`,
+  province: `${BASE}:province`,
   product: `${BASE}:product`,
   comment: `${BASE}:comment`,
   attribute: (key: string) => `${BASE}:attribute:${key}`,

@@ -126,6 +126,9 @@ const loadProvinces = async () => {
       method: "GET",
       errorTitle: "خطا در دریافت استان‌ها",
       key: "provinces",
+      headers: {
+        cache: true,
+      },
     });
   } catch {
     provincesResponse.value = { success: true, data: [] };
@@ -145,6 +148,9 @@ const loadCities = async () => {
       query: { province_id: provinceId },
       errorTitle: "خطا در دریافت شهرها",
       key: "cities",
+      headers: {
+        cache: true,
+      },
     });
   } catch {
     citiesResponse.value = { success: true, data: [] };
