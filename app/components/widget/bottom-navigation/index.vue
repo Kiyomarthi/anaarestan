@@ -18,7 +18,7 @@ const navItems = [
   {
     label: "سبد خرید",
     icon: "i-lucide-shopping-cart",
-    href: "/cart",
+    href: "/checkout/cart",
   },
   {
     label: "پروفایل",
